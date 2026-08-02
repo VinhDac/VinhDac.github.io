@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dac Vinh Nguyen — Quant &amp; Risk Portfolio</title>
+<meta name="description" content="Interactive walkthroughs of quantitative research, risk management and deep learning work.">
+<style>
+  :root{
+    --bg:#0a0e14; --bg2:#0d1219; --panel:#121826; --panel2:#161d2b; --border:#26324a; --line:#1c2537;
+    --ink:#eaf0f7; --muted:#93a1b4; --muted2:#6b7688;
+    --teal:#35c9bd; --blue:#4b9fe0; --green:#5bd07a; --amber:#e0aa53; --purple:#9a82d8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; line-height:1.6;}
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px;}
+  header{padding:96px 0 56px; text-align:center;}
+  .badge{display:inline-block; margin-bottom:20px; padding:6px 14px; border:1px solid var(--border);
+    border-radius:999px; font-size:12.5px; letter-spacing:1.5px; color:var(--teal); text-transform:uppercase; font-weight:700;}
+  h1{font-size:clamp(28px,5vw,44px); line-height:1.15; font-weight:800; letter-spacing:-.5px;}
+  header p{margin:18px auto 0; max-width:58ch; color:var(--muted); font-size:clamp(15px,1.6vw,18px);}
+  .links{margin-top:26px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+  .links a{border:1px solid var(--border); background:var(--panel); padding:10px 18px; border-radius:10px;
+    color:var(--ink); font-weight:600; font-size:14.5px; text-decoration:none; transition:.15s;}
+  .links a:hover{border-color:var(--teal); color:#fff;}
+  main{padding:20px 0 90px;}
+  .grid{display:grid; grid-template-columns:1fr; gap:18px;}
+  .card{display:block; background:var(--panel); border:1px solid var(--border); border-radius:16px;
+    padding:26px 28px; text-decoration:none; color:var(--ink); transition:.15s;}
+  .card:hover{border-color:var(--c,var(--teal)); background:var(--panel2);}
+  .card .kicker{font-size:12px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:var(--c,var(--teal));}
+  .card h2{font-size:clamp(19px,2.4vw,24px); font-weight:800; margin:8px 0 8px; letter-spacing:-.2px;}
+  .card p{color:var(--muted); font-size:15px; max-width:62ch;}
+  .card .go{display:inline-block; margin-top:14px; font-size:13.5px; font-weight:700; color:var(--c,var(--teal));}
+  footer{color:var(--muted2); font-size:13px; text-align:center; padding:0 0 60px;}
+  @media (max-width:600px){ header{padding:64px 0 40px;} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="badge">Quant &middot; Risk &middot; Machine Learning</div>
+    <h1>Dac Vinh Nguyen</h1>
+    <p>MSc Computational Finance (Royal Holloway) &middot; CFA Level I &middot; ex-WorldQuant. Three interactive walkthroughs below — play them, don't just read about them.</p>
+    <div class="links">
+      <a href="https://www.linkedin.com/in/vinhdac/">LinkedIn</a>
+      <a href="https://github.com/VinhDac">GitHub</a>
+      <a href="mailto:dacvinh268@gmail.com">Email</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+
+      <a class="card" style="--c:#35c9bd" href="quant-trading-studio.html">
+        <div class="kicker">Startup &middot; Risk &amp; Validation</div>
+        <h2>Quant Trading Studio — play the 4 tests we built</h2>
+        <p>An interactive tour of the risk framework behind a live algo-trading startup: telling edge from luck, naming a market regime, escaping the overfit trap, and spending a risk budget with the Efficient Frontier.</p>
+        <span class="go">Play it &rarr;</span>
+      </a>
+
+      <a class="card" style="--c:#4b9fe0" href="compress-ea.html">
+        <div class="kicker">MQL5 &middot; Volatility Strategy</div>
+        <h2>Compress EA — an interactive walkthrough</h2>
+        <p>How one volatility-squeeze strategy is normalised into the market's own language (ATR in basis points) so a single setting holds across gold, forex, crypto and indices — instead of silently overfitting to one symbol.</p>
+        <span class="go">Play it &rarr;</span>
+      </a>
+
+      <a class="card" style="--c:#9a82d8" href="data-snooping.html">
+        <div class="kicker">MSc Dissertation &middot; Royal Holloway</div>
+        <h2>The Number That Lied</h2>
+        <p>Data snooping in deep learning: a walked demonstration of how keeping the best of many models inflates performance — even on pure noise — and what it takes to trust a number honestly.</p>
+        <span class="go">Play it &rarr;</span>
+      </a>
+
+    </div>
+  </main>
+
+  <footer>Built to be played, not just read.</footer>
+</div>
+
+</body>
+</html>

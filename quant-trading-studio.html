@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quant Trading Studio — Play the 4 tests we built</title>
+<style>
+  :root{
+    --bg:#0a0e14; --bg2:#0d1219; --panel:#121826; --panel2:#161d2b; --border:#26324a; --line:#1c2537;
+    --ink:#eaf0f7; --muted:#93a1b4; --muted2:#6b7688;
+    --teal:#35c9bd; --blue:#4b9fe0; --green:#5bd07a; --amber:#e0aa53; --purple:#9a82d8; --red:#e0645d; --clean:#48d17a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg); color:var(--ink);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; line-height:1.6; overflow-x:hidden;}
+  a{color:var(--teal);}
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px;}
+
+  /* progress bar */
+  .progress{position:fixed; top:0; left:0; right:0; height:3px; background:rgba(255,255,255,.05); z-index:100;}
+  .progress__bar{height:100%; width:0; background:linear-gradient(90deg,var(--teal),var(--green));}
+
+  section{padding:74px 0; border-top:1px solid var(--line);}
+  section:first-of-type{border-top:0;}
+  .kicker{font-size:12.5px; font-weight:800; letter-spacing:2.5px; text-transform:uppercase; color:var(--accent,var(--teal));}
+  h1{font-size:clamp(30px,5.6vw,52px); line-height:1.08; font-weight:800; letter-spacing:-.5px;}
+  h2{font-size:clamp(24px,3.8vw,38px); line-height:1.12; font-weight:800; letter-spacing:-.3px; margin:14px 0 12px;}
+  p.big{font-size:clamp(16px,1.7vw,19px); color:var(--muted); max-width:60ch;}
+  .lead{color:var(--muted); font-size:16.5px; max-width:64ch;}
+
+  /* hero */
+  .hero{padding:96px 0 64px; text-align:center;}
+  .hero .badge{display:inline-block; margin-bottom:20px; padding:6px 14px; border:1px solid var(--border);
+    border-radius:999px; font-size:12.5px; letter-spacing:1.5px; color:var(--teal); text-transform:uppercase; font-weight:700;}
+  .hero p{margin:20px auto 0; max-width:62ch; color:var(--muted); font-size:clamp(16px,1.8vw,20px);}
+  .scrollcue{margin-top:34px; color:var(--muted2); font-size:14px;}
+  .scrollcue span{display:inline-block; animation:bob 2s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+  /* generic interactive card */
+  .play{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px; margin-top:26px;}
+  .play canvas{display:block; width:100%; border-radius:10px; background:#080b11;}
+  .prompt{font-weight:700; font-size:17px; margin:2px 0 14px;}
+  .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
+  .btn{appearance:none; border:1px solid var(--border); background:var(--panel2); color:var(--ink);
+    padding:11px 18px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; transition:.15s;}
+  .btn:hover{border-color:var(--teal); color:#fff;}
+  .btn.sel{border-color:var(--teal); background:rgba(53,201,189,.14); color:#fff;}
+  .btn.primary{background:linear-gradient(90deg,#1c6f66,#248a5f); border-color:transparent; color:#fff;}
+  .btn.primary:hover{filter:brightness(1.1);}
+  .btn:disabled{opacity:.45; cursor:default;}
+  .label{font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted2); font-weight:700; margin:4px 0 8px;}
+
+  /* verdict / takeaway */
+  .verdict{margin-top:16px; padding:15px 17px; border-radius:12px; border:1px solid var(--border);
+    background:var(--bg2); font-size:15.5px; color:#cfd8e4; display:none;}
+  .verdict.show{display:block;}
+  .verdict.good{border-color:rgba(91,208,122,.5); background:rgba(91,208,122,.08);}
+  .verdict.bad{border-color:rgba(224,100,93,.5); background:rgba(224,100,93,.08);}
+  .verdict b.k{color:var(--ink);}
+  .takeaway{margin-top:22px; border-left:3px solid var(--accent,var(--teal)); padding:6px 0 6px 16px; color:#cbd5e2; font-size:16px;}
+  .takeaway b{color:var(--ink);}
+
+  /* regime grid mini */
+  .rg{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:14px;}
+  .rg .cell{border:1px solid var(--line); border-radius:9px; padding:9px 11px; background:var(--bg2); opacity:.4; transition:.3s;}
+  .rg .cell.lit{opacity:1; border-color:var(--c);}
+  .rg .cell b{color:var(--c); font-size:15px;} .rg .cell span{color:var(--muted); font-size:12.5px;}
+
+  /* stats */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:26px;}
+  .stat{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px 16px; text-align:center;}
+  .stat .num{font-size:clamp(26px,3.4vw,38px); font-weight:800; color:var(--teal); letter-spacing:-.5px;}
+  .stat .cap{font-size:13px; color:var(--muted); margin-top:4px;}
+
+  /* evidence thumbs */
+  .thumbs{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:24px;}
+  .thumb{position:relative; border:1px solid var(--border); border-radius:12px; overflow:hidden; cursor:zoom-in; background:#080b11;}
+  .thumb img{display:block; width:100%; height:170px; object-fit:cover; object-position:top left; opacity:.92; transition:.2s;}
+  .thumb:hover img{opacity:1; transform:scale(1.02);}
+  .thumb .cap{position:absolute; left:0; right:0; bottom:0; padding:9px 12px; font-size:13px;
+    background:linear-gradient(transparent,rgba(6,9,14,.92)); color:#e6edf3;}
+  .thumb .zoom{position:absolute; top:9px; right:9px; background:rgba(10,14,20,.8); border:1px solid var(--border);
+    border-radius:7px; padding:3px 8px; font-size:11px; color:var(--muted);}
+
+  /* lightbox */
+  .lb{position:fixed; inset:0; background:rgba(4,6,10,.94); z-index:200; display:none; align-items:center; justify-content:center; padding:24px; cursor:zoom-out;}
+  .lb.open{display:flex;}
+  .lb figure{max-width:100%; max-height:100%; text-align:center;}
+  .lb img{max-width:100%; max-height:82vh; border:1px solid var(--border); border-radius:10px;}
+  .lb figcaption{color:var(--muted); font-size:14px; margin-top:12px;}
+  .lb .x{position:fixed; top:16px; right:20px; color:#fff; font-size:30px; cursor:pointer; opacity:.8;}
+
+  /* ending */
+  .ending{text-align:center;}
+  .punch{margin:22px auto 0; max-width:20ch; font-size:clamp(22px,3.2vw,34px); font-weight:800; line-height:1.25;}
+  .punch b{color:var(--clean);}
+  .links{margin-top:28px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+  .links a{border:1px solid var(--border); background:var(--panel); padding:12px 20px; border-radius:10px; color:var(--ink); font-weight:600; text-decoration:none;}
+  .links a:hover{border-color:var(--teal);}
+
+  .foot{color:var(--muted2); font-size:13px; text-align:center; padding:30px 0 60px;}
+
+  @media (max-width:720px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .thumbs{grid-template-columns:1fr;}
+    .rg{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="progress"><div class="progress__bar" id="pbar"></div></div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">Quant Trading Studio</span>
+    <h1>A real edge, or just luck?</h1>
+    <p>Every trading tool finds something that <em>looks</em> profitable. This one is built to answer the harder question. Don't just read about it — <b style="color:var(--ink)">play the four tests</b> the system runs, and feel why they're hard.</p>
+    <div class="scrollcue"><span>&#8595;</span>&nbsp; scroll to begin</div>
+  </div>
+</header>
+
+<!-- HOOK: luck vs skill -->
+<section id="hook" style="--accent:var(--red)">
+  <div class="wrap">
+    <span class="kicker">Warm-up &middot; the core problem</span>
+    <h2>Which trader actually has an edge?</h2>
+    <p class="big">Both finished the year up the same amount. Only one did it with a repeatable method. Look at the <b style="color:var(--ink)">shape</b>, then choose.</p>
+    <div class="play">
+      <canvas id="cv-hook" height="300"></canvas>
+      <div class="btnrow">
+        <button class="btn" id="hook-a">Trader&nbsp;A</button>
+        <button class="btn" id="hook-b">Trader&nbsp;B</button>
+        <button class="btn" id="hook-reset" style="margin-left:auto; display:none;">Try again</button>
+      </div>
+      <div class="verdict" id="hook-v"></div>
+    </div>
+    <p class="takeaway"><b>Luck</b> hides in the shape: profit from one lucky move looks identical to skill on a scorecard. The whole studio exists to tell them apart.</p>
+  </div>
+</section>
+
+<!-- TEST 1: regimes -->
+<section id="regime" style="--accent:var(--blue)">
+  <div class="wrap">
+    <span class="kicker">Test 1 &middot; read the market</span>
+    <h2>Name the market's mood</h2>
+    <p class="big">Before optimizing anything, the system describes the market with two honest axes: <b style="color:var(--ink)">memory</b> and <b style="color:var(--ink)">volatility</b>. Together they make six regimes, R1&ndash;R6. Try it on a real-looking sample.</p>
+    <div class="play">
+      <canvas id="cv-reg" height="260"></canvas>
+      <div class="label" style="margin-top:16px;">Memory &mdash; how does it move?</div>
+      <div class="btnrow" id="reg-mem">
+        <button class="btn" data-v="trend">Trending</button>
+        <button class="btn" data-v="revert">Mean-reverting</button>
+        <button class="btn" data-v="random">Random</button>
+      </div>
+      <div class="label" style="margin-top:14px;">Volatility &mdash; how wild?</div>
+      <div class="btnrow" id="reg-vol">
+        <button class="btn" data-v="low">Calm (low)</button>
+        <button class="btn" data-v="high">Wild (high)</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary" id="reg-check" disabled>Check</button>
+        <button class="btn" id="reg-next" style="display:none;">Next sample &#8594;</button>
+        <span id="reg-score" style="margin-left:auto; align-self:center; color:var(--muted); font-size:14px;">Score 0 / 0</span>
+      </div>
+      <div class="verdict" id="reg-v"></div>
+      <div class="rg" id="reg-grid"></div>
+    </div>
+    <p class="takeaway">Six regimes let you <b>split time honestly</b> &mdash; build a strategy in one regime, prove it on a <b>different occurrence of the same one</b>. Never a random date split (neighbouring days move together, so random leaks the future into the past).</p>
+  </div>
+</section>
+
+<!-- TEST 2: overfit -->
+<section id="overfit" style="--accent:var(--green)">
+  <div class="wrap">
+    <span class="kicker">Test 2 &middot; the overfit trap</span>
+    <h2>One idea becomes thousands of settings</h2>
+    <p class="big">A single strategy has hundreds of parameter combinations. Below are 160 of them, plotted by profit on the data we optimized on. <b style="color:var(--ink)">Click the one you'd trade</b> &mdash; then test it on data it has never seen.</p>
+    <div class="play">
+      <canvas id="cv-of" height="330" style="cursor:crosshair;"></canvas>
+      <div class="btnrow">
+        <button class="btn primary" id="of-validate" disabled>Validate on unseen data</button>
+        <button class="btn" id="of-reset" style="display:none;">Reset</button>
+        <span id="of-hint" style="margin-left:auto; align-self:center; color:var(--muted); font-size:14px;">Pick a dot &#8593;</span>
+      </div>
+      <div class="verdict" id="of-v"></div>
+    </div>
+    <p class="takeaway">The tallest peaks are usually <b>overfit</b> &mdash; they win once and collapse. So the system never picks max profit: it clusters the settings, keeps a few genuinely different survivors, and re-tests each on unseen regimes (<b>PASS / DEGRADE / FAIL</b>).</p>
+  </div>
+</section>
+
+<!-- TEST 3: efficient frontier -->
+<section id="frontier" style="--accent:var(--purple)">
+  <div class="wrap">
+    <span class="kicker">Test 3 &middot; size the risk</span>
+    <h2>Spend a risk budget, not a hope</h2>
+    <p class="big">With a few proven strategies, the last question is how to combine them for the money you actually have. Drag your <b style="color:var(--ink)">max drawdown budget</b> and watch the best portfolio move along the efficient frontier.</p>
+    <div class="play">
+      <canvas id="cv-ef" height="300"></canvas>
+      <div style="margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; font-size:14px; color:var(--muted);">
+          <span>Max drawdown budget</span><span id="ef-budget" style="color:var(--ink); font-weight:700;">$1,000</span>
+        </div>
+        <input type="range" id="ef-range" min="150" max="1000" value="1000" step="10" style="width:100%; margin-top:8px; accent-color:#9a82d8;">
+      </div>
+      <div class="btnrow" style="gap:22px; margin-top:14px;">
+        <div><div class="label" style="margin:0;">Return / month</div><div id="ef-ret" style="font-size:20px; font-weight:800; color:var(--green);">&mdash;</div></div>
+        <div><div class="label" style="margin:0;">Return / risk</div><div id="ef-rr" style="font-size:20px; font-weight:800; color:var(--ink);">&mdash;</div></div>
+        <div><div class="label" style="margin:0;">Strategies used</div><div id="ef-mix" style="font-size:20px; font-weight:800; color:var(--purple);">&mdash;</div></div>
+      </div>
+    </div>
+    <p class="takeaway">The output isn't a promise &mdash; it's an <b>owner's manual</b>: how many lots of each strategy, the expected monthly return and risk, and how much of your budget it burns. Bigger budget buys more return, but never for free.</p>
+  </div>
+</section>
+
+<!-- EVIDENCE / DEPTH -->
+<section id="evidence" style="--accent:var(--teal)">
+  <div class="wrap">
+    <span class="kicker">This is not a mockup</span>
+    <h2>How deep it actually goes</h2>
+    <p class="big">Those four tests run inside a real desktop app (C# + Python + MetaTrader 5). A single portfolio search evaluates numbers like these:</p>
+    <div class="stats">
+      <div class="stat"><div class="num" data-to="17">0</div><div class="cap">symbols scanned</div></div>
+      <div class="stat"><div class="num" data-to="5343">0</div><div class="cap">configs from one idea</div></div>
+      <div class="stat"><div class="num" data-to="86300">0</div><div class="cap">portfolio cases evaluated</div></div>
+      <div class="stat"><div class="num" data-to="269">0</div><div class="cap">portfolios on the frontier</div></div>
+    </div>
+    <p class="lead" style="margin-top:26px;">The screenshots below are the real tool &mdash; <b style="color:var(--ink)">click any to see it full-size</b>.</p>
+    <div class="thumbs">
+      <div class="thumb" data-full="../assets/readme/01-market-regime-map.png" data-cap="Market Analysis — three years of gold cut into R1–R6 regime segments.">
+        <img src="../assets/readme/01-market-regime-map.png" alt="Regime map"><span class="zoom">&#128269; zoom</span><span class="cap">Regime map &middot; Test 1</span></div>
+      <div class="thumb" data-full="../assets/readme/05-optimize-seed.png" data-cap="Auto-Optimization — 5,343 configs generated from one strategy.">
+        <img src="../assets/readme/05-optimize-seed.png" alt="Optimization seed"><span class="zoom">&#128269; zoom</span><span class="cap">1 idea → thousands of configs &middot; Test 2</span></div>
+      <div class="thumb" data-full="../assets/readme/09-portfolio-frontier.png" data-cap="Portfolio — the efficient frontier, allocation pie, and ranked portfolios.">
+        <img src="../assets/readme/09-portfolio-frontier.png" alt="Efficient frontier"><span class="zoom">&#128269; zoom</span><span class="cap">Efficient frontier &middot; Test 3</span></div>
+      <div class="thumb" data-full="../assets/readme/06-backtest-overview.png" data-cap="Backtest — five pillars (Edge · Risk · Structure · Timing · Investment) into one verdict.">
+        <img src="../assets/readme/06-backtest-overview.png" alt="Backtest"><span class="zoom">&#128269; zoom</span><span class="cap">Five-pillar backtest</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ENDING -->
+<section id="ending" class="ending" style="--accent:var(--clean)">
+  <div class="wrap">
+    <span class="kicker">The honest ending</span>
+    <h2>As a startup, it failed.</h2>
+    <p class="big" style="margin:0 auto;">The portfolio was stable &mdash; but the real drawdown ran ~30% worse than the model, and the strategy I ranked second quietly made the money. I ran out of capital and time to keep proving skill from luck.</p>
+    <div class="punch">A clean model isn't the one that makes the most money.<br>It's the one you can <b>prove is right in the shortest time.</b></div>
+    <div class="links">
+      <a href="../../Journey.md">Read the full journey &#8594;</a>
+      <a href="../../README.md">See the README &#8594;</a>
+    </div>
+  </div>
+  <p class="foot">Quant Trading Studio &middot; C# WinForms &middot; Python &middot; MetaTrader 5</p>
+</section>
+
+<!-- lightbox -->
+<div class="lb" id="lb"><span class="x">&times;</span><figure><img id="lb-img" alt=""><figcaption id="lb-cap"></figcaption></figure></div>
+
+<script>
+"use strict";
+var C = { teal:'#35c9bd', blue:'#4b9fe0', green:'#5bd07a', amber:'#e0aa53', purple:'#9a82d8', red:'#e0645d', ink:'#eaf0f7', mut:'#93a1b4', grid:'#1b2436' };
+
+function rng(seed){ var s=seed>>>0||1; return function(){ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+function fit(cv, h){
+  var dpr=window.devicePixelRatio||1, w=cv.parentElement.clientWidth-0;
+  cv.style.height=h+'px'; cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  var ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx:ctx, w:w, h:h};
+}
+function line(ctx, pts, color, wdt){ ctx.beginPath(); for(var i=0;i<pts.length;i++){ i?ctx.lineTo(pts[i][0],pts[i][1]):ctx.moveTo(pts[i][0],pts[i][1]); } ctx.strokeStyle=color; ctx.lineWidth=wdt||2; ctx.lineJoin='round'; ctx.stroke(); }
+function mapPts(vals, w, h, pad){ var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), r=(mx-mn)||1, out=[]; for(var i=0;i<vals.length;i++){ out.push([pad+ i/(vals.length-1)*(w-2*pad), h-pad-(vals[i]-mn)/r*(h-2*pad)]); } return out; }
+
+/* ---------- progress bar ---------- */
+window.addEventListener('scroll', function(){
+  var st=document.documentElement.scrollTop||document.body.scrollTop;
+  var sh=(document.documentElement.scrollHeight||document.body.scrollHeight)-document.documentElement.clientHeight;
+  document.getElementById('pbar').style.width=(sh>0?(st/sh*100):0)+'%';
+}, {passive:true});
+
+/* ---------- HOOK: luck vs skill ---------- */
+(function(){
+  try{
+    var cv=document.getElementById('cv-hook'); if(!cv) return;
+    var skillLeft = (rng(7)()>0.5);   // is skill on side A (left)?
+    var jumpIdx;
+    function build(){
+      var d=fit(cv,300), ctx=d.ctx, w=d.w, h=d.h; ctx.clearRect(0,0,w,h);
+      // two panels
+      var pw=(w-16)/2;
+      var r1=rng(21), r2=rng(88);
+      // skill: steady up
+      var sk=[0]; for(var i=1;i<64;i++){ sk.push(sk[i-1]+0.55+(r1()*2-1)*0.7); }
+      // luck: flat, one jump
+      var lk=[0]; jumpIdx=42; for(var j=1;j<64;j++){ var v=lk[j-1]+(r2()*2-1)*0.35; if(j>=jumpIdx&&j<jumpIdx+3)v+=9; lk.push(v); }
+      // normalise both to end near same value
+      var target=sk[sk.length-1]; var lf=target/lk[lk.length-1]; for(var k=0;k<lk.length;k++)lk[k]*=lf;
+      var A = skillLeft?sk:lk, B = skillLeft?lk:sk;
+      drawPanel(ctx,0,pw,h,A,'A',skillLeft, false);
+      drawPanel(ctx,pw+16,pw,h,B,'B',!skillLeft, false);
+      window.__hook={ctx:ctx,w:w,h:h,pw:pw,sk:sk,lk:lk,A:A,B:B,skillLeft:skillLeft};
+    }
+    function drawPanel(ctx,x0,pw,h,vals,name,isSkill,reveal){
+      ctx.save(); ctx.translate(x0,0);
+      ctx.fillStyle='#0a0e15'; roundRect(ctx,0,0,pw,h,10); ctx.fill();
+      ctx.strokeStyle='#1c2537'; ctx.lineWidth=1; roundRect(ctx,0,0,pw,h,10); ctx.stroke();
+      var pad=26, pts=mapPts(vals,pw,h,pad);
+      // zero baseline
+      var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),r=(mx-mn)||1,zy=h-pad-(0-mn)/r*(h-2*pad);
+      ctx.strokeStyle='#1a2233'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(pad,zy); ctx.lineTo(pw-pad,zy); ctx.stroke(); ctx.setLineDash([]);
+      line(ctx,pts,isSkill?C.green:(reveal?C.red:'#7fb0d8'),2.4);
+      if(reveal && !isSkill){
+        // highlight the single jump
+        var jp=pts.slice(jumpIdx-1,jumpIdx+3);
+        line(ctx,jp,C.red,4);
+        ctx.fillStyle=C.red; ctx.font='12px Segoe UI'; ctx.textAlign='center';
+        ctx.fillText('92% of profit', jp[1][0], jp[0][1]-14);
+        ctx.fillText('from one move', jp[1][0], jp[0][1]-1);
+      }
+      ctx.fillStyle=C.mut; ctx.font='700 13px Segoe UI'; ctx.textAlign='left';
+      ctx.fillText('Trader '+name, pad, 20);
+      if(reveal){ ctx.fillStyle=isSkill?C.green:C.red; ctx.textAlign='right'; ctx.fillText(isSkill?'REAL EDGE':'LUCK', pw-pad, 20); }
+      ctx.restore();
+    }
+    function reveal(){
+      var s=window.__hook; s.ctx.clearRect(0,0,s.w,s.h);
+      drawPanel(s.ctx,0,s.pw,s.h,s.A,'A',s.skillLeft,true);
+      drawPanel(s.ctx,s.pw+16,s.pw,s.h,s.B,'B',!s.skillLeft,true);
+    }
+    function pick(side){
+      var correct=(side==='A')===skillLeft;
+      reveal();
+      var v=document.getElementById('hook-v');
+      v.className='verdict show '+(correct?'good':'bad');
+      v.innerHTML=(correct?'<b class="k">Right.</b> ':'<b class="k">Not quite.</b> ')+
+        'The real edge is the <b class="k">steady climb</b>. The other trader was flat all year, then caught <b class="k">one</b> big move &mdash; on a scorecard both look identical, but only one is repeatable.';
+      document.getElementById('hook-a').disabled=true; document.getElementById('hook-b').disabled=true;
+      document.getElementById('hook-reset').style.display='inline-block';
+    }
+    document.getElementById('hook-a').onclick=function(){pick('A');};
+    document.getElementById('hook-b').onclick=function(){pick('B');};
+    document.getElementById('hook-reset').onclick=function(){
+      document.getElementById('hook-v').className='verdict';
+      document.getElementById('hook-a').disabled=false; document.getElementById('hook-b').disabled=false;
+      this.style.display='none'; build();
+    };
+    var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){ build(); io.disconnect(); }},{threshold:.2});
+    io.observe(cv);
+    window.addEventListener('resize', function(){ if(window.__hook) build(); });
+  }catch(err){}
+})();
+
+/* ---------- TEST 1: regime classifier ---------- */
+(function(){
+  try{
+    var cv=document.getElementById('cv-reg'); if(!cv) return;
+    var kinds=['trend','revert','random'], vols=['low','high'];
+    var names={ 'trend|low':['R1','Slow Trend',C.teal],'trend|high':['R2','Crisis Trend',C.blue],
+      'revert|low':['R3','Tight Range',C.green],'revert|high':['R4','Volatile Chop',C.amber],
+      'random|low':['R5','Drift',C.purple],'random|high':['R6','Noise',C.red] };
+    var order=['trend|low','trend|high','revert|low','revert|high','random|low','random|high'];
+    var cur={}, selMem=null, selVol=null, score=0, rounds=0, seedN=3, found={};
+    var gridEl=document.getElementById('reg-grid');
+    order.forEach(function(k){ var n=names[k]; var d=document.createElement('div'); d.className='cell'; d.id='rgc-'+n[0];
+      d.style.setProperty('--c',n[2]); d.innerHTML='<b>'+n[0]+' '+n[1]+'</b><br><span>'+labelOf(k)+'</span>'; gridEl.appendChild(d); });
+    function labelOf(k){ var p=k.split('|'); var m={trend:'Trending',revert:'Mean-reverting',random:'Random'}[p[0]]; var v=p[1]==='low'?'calm':'wild'; return m+' &middot; '+v; }
+    function gen(){
+      seedN+=7; var r=rng(seedN*13+1);
+      cur.kind=kinds[Math.floor(r()*3)]; cur.vol=vols[Math.floor(r()*2)];
+      var n=90, p=100, arr=[p], mean=100, drift=(r()>.5?1:-1)*0.7, sig=cur.vol==='high'?3.4:1.0;
+      for(var i=1;i<n;i++){ var sh=(r()*2-1)*sig;
+        if(cur.kind==='trend')p+=drift+sh*0.4;
+        else if(cur.kind==='revert')p+=(mean-p)*0.09+sh;
+        else p+=sh;
+        arr.push(p); }
+      cur.vals=arr; draw();
+      selMem=selVol=null; syncSel('reg-mem',null); syncSel('reg-vol',null);
+      document.getElementById('reg-check').disabled=true;
+      document.getElementById('reg-next').style.display='none';
+      document.getElementById('reg-v').className='verdict';
+    }
+    function draw(){ var d=fit(cv,260),ctx=d.ctx,w=d.w,h=d.h; ctx.clearRect(0,0,w,h);
+      ctx.fillStyle='#080b11'; ctx.fillRect(0,0,w,h);
+      var pts=mapPts(cur.vals,w,h,24); line(ctx,pts,'#e6edf3',2); }
+    function syncSel(group,val){ var g=document.getElementById(group); var b=g.getElementsByTagName('button');
+      for(var i=0;i<b.length;i++){ b[i].classList.toggle('sel', b[i].getAttribute('data-v')===val); } }
+    document.getElementById('reg-mem').onclick=function(e){ if(e.target.tagName!=='BUTTON')return; selMem=e.target.getAttribute('data-v'); syncSel('reg-mem',selMem); ready(); };
+    document.getElementById('reg-vol').onclick=function(e){ if(e.target.tagName!=='BUTTON')return; selVol=e.target.getAttribute('data-v'); syncSel('reg-vol',selVol); ready(); };
+    function ready(){ document.getElementById('reg-check').disabled=!(selMem&&selVol); }
+    document.getElementById('reg-check').onclick=function(){
+      rounds++; var ok=(selMem===cur.kind && selVol===cur.vol);
+      var truth=names[cur.kind+'|'+cur.vol]; var guess=names[(selMem||'random')+'|'+(selVol||'low')];
+      if(ok){ score++; }
+      // light the true regime
+      found[cur.kind+'|'+cur.vol]=1; document.getElementById('rgc-'+truth[0]).classList.add('lit');
+      var v=document.getElementById('reg-v'); v.className='verdict show '+(ok?'good':'bad');
+      v.innerHTML=(ok?'<b class="k">Correct &mdash; '+truth[0]+' '+truth[1]+'.</b> ':'<b class="k">It was '+truth[0]+' '+truth[1]+'</b> (you said '+guess[0]+'). ')
+        +tip(cur.kind,cur.vol);
+      document.getElementById('reg-score').textContent='Score '+score+' / '+rounds;
+      document.getElementById('reg-check').disabled=true;
+      document.getElementById('reg-next').style.display='inline-block';
+    };
+    function tip(k,vv){ var m={trend:'clear direction',revert:'keeps returning to the middle',random:'no memory, just drift'}[k];
+      var v=vv==='high'?'big, violent swings':'small, calm swings'; return 'Memory = <b class="k">'+m+'</b>; volatility = <b class="k">'+v+'</b>.'; }
+    document.getElementById('reg-next').onclick=gen;
+    var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){ gen(); io.disconnect(); }},{threshold:.2});
+    io.observe(cv);
+    window.addEventListener('resize', function(){ if(cur.vals) draw(); });
+  }catch(err){}
+})();
+
+/* ---------- TEST 2: overfit scatter ---------- */
+(function(){
+  try{
+    var cv=document.getElementById('cv-of'); if(!cv) return;
+    var dots=[], sel=-1, validated=false, dim;
+    function build(){
+      dim=fit(cv,330); var r=rng(99); dots=[];
+      var pad=34, w=dim.w, h=dim.h;
+      for(var i=0;i<160;i++){
+        var trueEdge=r(), luck=r();
+        var inS=8+trueEdge*34+luck*46;             // luck inflates in-sample
+        var outS=6+trueEdge*36-luck*30+(r()-0.5)*8; // luck destroys out-of-sample
+        var x=pad+ (0.06+0.9*r())*(w-2*pad);
+        dots.push({x:x,inS:inS,outS:outS,y:0,cur:inS});
+      }
+      valScale(); sel=-1; validated=false;
+      document.getElementById('of-validate').disabled=true;
+      document.getElementById('of-reset').style.display='none';
+      document.getElementById('of-hint').textContent='Pick a dot ↑';
+      document.getElementById('of-v').className='verdict';
+      render();
+    }
+    function valScale(){ // compute y from cur value
+      var vals=dots.map(function(d){return d.cur;}); window.__ofmn=0; window.__ofmx=Math.max.apply(null,vals)*1.05; }
+    function ytop(v,h){ var pad=34; return h-pad-(v-window.__ofmn)/(window.__ofmx-window.__ofmn)*(h-2*pad-14); }
+    function render(){
+      var ctx=dim.ctx,w=dim.w,h=dim.h,pad=34; ctx.clearRect(0,0,w,h); ctx.fillStyle='#080b11'; ctx.fillRect(0,0,w,h);
+      // axis labels
+      ctx.fillStyle=C.mut; ctx.font='12px Segoe UI'; ctx.textAlign='left';
+      ctx.fillText(validated?'profit on UNSEEN data':'profit on the data we optimized on', pad, 18);
+      // threshold line when validated
+      if(validated){ var ty=ytop(14,h); ctx.strokeStyle='#33405a'; ctx.setLineDash([5,5]); ctx.beginPath(); ctx.moveTo(pad,ty); ctx.lineTo(w-pad,ty); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle='#5a6a82'; ctx.textAlign='right'; ctx.fillText('break-even', w-pad, ty-5); }
+      for(var i=0;i<dots.length;i++){ var d=dots[i]; d.y=ytop(d.cur,h);
+        var col;
+        if(!validated){ col='rgba(120,150,190,.55)'; }
+        else { col = d.outS<14 ? 'rgba(224,100,93,.75)' : 'rgba(91,208,122,.8)'; }
+        ctx.beginPath(); ctx.arc(d.x,d.y,4.2,0,6.283); ctx.fillStyle=col; ctx.fill();
+      }
+      if(sel>=0){ var s=dots[sel]; ctx.beginPath(); ctx.arc(s.x,s.y,8,0,6.283); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+        ctx.fillStyle='#fff'; ctx.font='700 12px Segoe UI'; ctx.textAlign='center'; ctx.fillText('your pick', s.x, s.y-13); }
+    }
+    cv.addEventListener('click', function(ev){
+      if(validated) return;
+      var rct=cv.getBoundingClientRect(), mx=ev.clientX-rct.left, my=ev.clientY-rct.top, best=-1, bd=1e9;
+      for(var i=0;i<dots.length;i++){ var dx=dots[i].x-mx, dy=dots[i].y-my, dd=dx*dx+dy*dy; if(dd<bd){bd=dd;best=i;} }
+      if(best>=0 && bd<400){ sel=best; document.getElementById('of-validate').disabled=false;
+        document.getElementById('of-hint').textContent='Now validate →'; render(); }
+    });
+    document.getElementById('of-validate').onclick=function(){
+      if(sel<0) return; validated=true; this.disabled=true;
+      var start=performance.now(), from=dots.map(function(d){return d.cur;});
+      valScaleTo();
+      function anim(t){ var k=Math.min(1,(t-start)/750); k=1-Math.pow(1-k,3);
+        for(var i=0;i<dots.length;i++){ dots[i].cur=from[i]+(dots[i].outS-from[i])*k; }
+        window.__ofmx=Math.max(window.__ofmxTarget, 10); render();
+        if(k<1) requestAnimationFrame(anim); else finish(); }
+      requestAnimationFrame(anim);
+    };
+    function valScaleTo(){ var vals=dots.map(function(d){return Math.max(d.inS,d.outS);}); window.__ofmxTarget=Math.max.apply(null,vals)*1.05; }
+    function finish(){
+      var s=dots[sel]; var survived=s.outS>=14;
+      // how many total survived
+      var surv=dots.filter(function(d){return d.outS>=14;}).length;
+      var v=document.getElementById('of-v'); v.className='verdict show '+(survived?'good':'bad');
+      if(survived){
+        v.innerHTML='<b class="k">Nice &mdash; your pick held up.</b> It kept a real edge on unseen data. But notice how many tall in-sample peaks <span style="color:'+C.red+'">collapsed below break-even</span>: '+(dots.length-surv)+' of '+dots.length+' configs were <b class="k">overfit</b>.';
+      } else {
+        v.innerHTML='<b class="k">That’s the trap.</b> Your pick looked great in-sample but <span style="color:'+C.red+'">fell apart</span> on unseen data &mdash; classic <b class="k">overfitting</b>. The green survivors weren’t the tallest peaks; they were the <b class="k">consistent</b> ones.';
+      }
+      document.getElementById('of-hint').textContent=surv+' / '+dots.length+' survived';
+      document.getElementById('of-reset').style.display='inline-block';
+    }
+    document.getElementById('of-reset').onclick=build;
+    var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){ build(); io.disconnect(); }},{threshold:.15});
+    io.observe(cv);
+    window.addEventListener('resize', function(){ if(dots.length){ dim=fit(cv,330); render(); }});
+  }catch(err){}
+})();
+
+/* ---------- TEST 3: efficient frontier ---------- */
+(function(){
+  try{
+    var cv=document.getElementById('cv-ef'); if(!cv) return;
+    // frontier: risk (x, $/mo) -> return (y, $/mo), concave
+    var F=[]; for(var i=0;i<=40;i++){ var risk=60+i*9; var ret=Math.pow(risk-40,0.62)*7.0; F.push({risk:risk,ret:ret}); }
+    var cloud=[]; var r=rng(55); for(var j=0;j<150;j++){ var idx=Math.floor(r()*F.length); var rk=F[idx].risk*(0.6+0.5*r()); var rt=F[idx].ret*(0.35+0.6*r()); cloud.push({risk:rk,ret:rt}); }
+    var dim, budget=1000;
+    function nearest(b){ var best=F[0]; for(var i=0;i<F.length;i++){ if(F[i].risk<=b) best=F[i]; } return best; }
+    function draw(){
+      dim=fit(cv,300); var ctx=dim.ctx,w=dim.w,h=dim.h,pad=44; ctx.clearRect(0,0,w,h); ctx.fillStyle='#080b11'; ctx.fillRect(0,0,w,h);
+      var maxR=420, maxRet=Math.pow(420-40,0.62)*7.0*1.05;
+      function X(v){ return pad+ v/maxR*(w-2*pad); }
+      function Y(v){ return h-pad-(v/maxRet)*(h-2*pad); }
+      // axes
+      ctx.strokeStyle='#1a2233'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(pad,h-pad); ctx.lineTo(w-pad,h-pad); ctx.moveTo(pad,h-pad); ctx.lineTo(pad,pad); ctx.stroke();
+      ctx.fillStyle=C.mut; ctx.font='12px Segoe UI'; ctx.textAlign='center'; ctx.fillText('risk  (expected drawdown / month, $)', w/2, h-10);
+      ctx.save(); ctx.translate(14,h/2); ctx.rotate(-Math.PI/2); ctx.fillText('return / month ($)',0,0); ctx.restore();
+      // cloud
+      for(var j=0;j<cloud.length;j++){ ctx.beginPath(); ctx.arc(X(cloud[j].risk),Y(cloud[j].ret),2.4,0,6.283); ctx.fillStyle='rgba(120,140,175,.35)'; ctx.fill(); }
+      // budget region (shaded beyond budget)
+      ctx.fillStyle='rgba(224,100,93,.06)'; ctx.fillRect(X(budget),pad,w-pad-X(budget),h-2*pad);
+      ctx.strokeStyle='rgba(224,100,93,.55)'; ctx.setLineDash([5,4]); ctx.beginPath(); ctx.moveTo(X(budget),pad); ctx.lineTo(X(budget),h-pad); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=C.red; ctx.textAlign='left'; ctx.fillText('budget', X(budget)+6, pad+12);
+      // frontier line
+      var fp=F.map(function(p){return [X(p.risk),Y(p.ret)];}); line(ctx,fp,C.purple,2.6);
+      // selected point
+      var sel=nearest(budget); var sx=X(sel.risk), sy=Y(sel.ret);
+      ctx.beginPath(); ctx.arc(sx,sy,7,0,6.283); ctx.fillStyle=C.green; ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+      // readouts
+      var rr=(sel.ret/sel.risk); var mix = budget<300?1:budget<620?2:3;
+      document.getElementById('ef-ret').textContent='$'+Math.round(sel.ret);
+      document.getElementById('ef-rr').textContent=rr.toFixed(2);
+      document.getElementById('ef-mix').textContent=mix+' of 3';
+      document.getElementById('ef-budget').textContent='$'+budget.toLocaleString();
+    }
+    document.getElementById('ef-range').addEventListener('input', function(){ budget=parseInt(this.value,10); draw(); });
+    var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){ draw(); io.disconnect(); }},{threshold:.15});
+    io.observe(cv);
+    window.addEventListener('resize', function(){ if(dim) draw(); });
+  }catch(err){}
+})();
+
+/* ---------- count-up stats ---------- */
+(function(){
+  try{
+    var els=[].slice.call(document.querySelectorAll('.stat .num'));
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(!e.isIntersecting) return; var el=e.target; io.unobserve(el);
+        var to=parseInt(el.getAttribute('data-to'),10), st=performance.now();
+        function step(t){ var k=Math.min(1,(t-st)/1100); k=1-Math.pow(1-k,3); el.textContent=Math.round(to*k).toLocaleString(); if(k<1)requestAnimationFrame(step); }
+        requestAnimationFrame(step);
+      });
+    },{threshold:.5});
+    els.forEach(function(el){ io.observe(el); });
+  }catch(err){}
+})();
+
+/* ---------- lightbox ---------- */
+(function(){
+  try{
+    var lb=document.getElementById('lb'), img=document.getElementById('lb-img'), cap=document.getElementById('lb-cap');
+    [].slice.call(document.querySelectorAll('.thumb')).forEach(function(t){
+      t.addEventListener('click', function(){ img.src=t.getAttribute('data-full'); cap.textContent=t.getAttribute('data-cap'); lb.classList.add('open'); });
+    });
+    lb.addEventListener('click', function(){ lb.classList.remove('open'); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') lb.classList.remove('open'); });
+  }catch(err){}
+})();
+
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+</script>
+</body>
+</html>

@@ -1,0 +1,1353 @@
+<title>The Number That Lied</title>
+<style>
+:root{
+  --ground:#0e1420; --panel:#121a28; --ink:#e9edf6; --muted:#8b98ad; --faint:#5c6a80;
+  --trust:#5b9cf5; --lie:#ec5b60; --truth:#46b98a; --line:rgba(255,255,255,.10);
+  --serif:"Iowan Old Style","Charter",Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,"Cascadia Code","SFMono-Regular",Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: light){
+  :root{ --ground:#f5f7fb; --panel:#ffffff; --ink:#182233; --muted:#5a6880; --faint:#93a0b5;
+    --trust:#2f6fd6; --lie:#cf3b40; --truth:#1f8f63; --line:rgba(20,30,50,.12); }
+}
+:root[data-theme="dark"]{ --ground:#0e1420; --panel:#121a28; --ink:#e9edf6; --muted:#8b98ad; --faint:#5c6a80;
+  --trust:#5b9cf5; --lie:#ec5b60; --truth:#46b98a; --line:rgba(255,255,255,.10); }
+:root[data-theme="light"]{ --ground:#f5f7fb; --panel:#ffffff; --ink:#182233; --muted:#5a6880; --faint:#93a0b5;
+  --trust:#2f6fd6; --lie:#cf3b40; --truth:#1f8f63; --line:rgba(20,30,50,.12); }
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--serif);
+  overflow:hidden;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(120% 80% at 50% -10%, rgba(91,156,245,.06), transparent 60%);}
+
+#deck{position:fixed;inset:0;overflow:hidden}
+.track{display:flex;height:100%;width:7500vw;
+  transition:transform .62s cubic-bezier(.76,0,.24,1);will-change:transform}
+.slide{position:relative;width:100vw;height:100%;flex:0 0 100vw;
+  display:flex;align-items:center;justify-content:center;padding:clamp(28px,7vh,84px) clamp(28px,9vw,150px)}
+.slide-body{width:100%;max-width:1180px}
+.wn-slide .slide-body{max-width:1000px}
+
+.act{position:absolute;top:clamp(20px,4vh,40px);left:clamp(24px,7vw,150px);
+  font-family:var(--sans);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);font-weight:600}
+
+.r{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
+.slide.is-active .r{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.r{transition:none!important;opacity:1;transform:none}.track{transition:none}}
+
+.center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:.5em}
+.narrow{max-width:820px;margin:0 auto}
+.wide{text-align:center}
+.split{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(30px,6vw,90px);align-items:center}
+.split-l{display:flex;flex-direction:column;gap:.55em}
+.split-r{display:flex;justify-content:center;align-items:center}
+@media (max-width:860px){.split{grid-template-columns:1fr;text-align:center}.split-r{margin-top:20px}}
+
+.eyebrow-big{font-family:var(--sans);font-size:clamp(12px,1.5vw,15px);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.title{font-weight:600;font-size:clamp(48px,10vw,132px);line-height:.98;letter-spacing:-.02em;text-wrap:balance}
+.rule{width:74px;height:3px;background:var(--trust);border-radius:2px;margin:.2em auto}
+.lede{font-size:clamp(17px,2.2vw,23px);line-height:1.5;color:var(--muted);max-width:40ch;margin:0 auto;text-wrap:balance}
+.meta{font-family:var(--sans);font-size:13px;letter-spacing:.06em;color:var(--faint);margin-top:.6em}
+
+.line{font-size:clamp(23px,3.7vw,44px);line-height:1.25;letter-spacing:-.01em;text-wrap:balance}
+.line.big{font-size:clamp(34px,6vw,68px);font-weight:600}
+.line.dim,.dim{color:var(--muted)}
+.kicker{font-size:clamp(19px,2.6vw,30px);color:var(--ink);margin-bottom:clamp(18px,3vh,30px);text-wrap:balance;max-width:26ch;margin-left:auto;margin-right:auto}
+.foot{font-size:clamp(16px,2vw,22px);color:var(--muted);line-height:1.5;text-wrap:balance}
+em{font-style:italic;color:var(--ink)}.dim em{color:var(--ink)}
+
+.bignum{font-family:var(--mono);font-weight:500;font-size:clamp(48px,9vw,110px);line-height:.98;text-align:center;letter-spacing:-.02em}
+.bignum.trust{color:var(--trust)}
+.ask{font-size:clamp(40px,8vw,104px);font-weight:600;letter-spacing:-.02em;color:var(--ink);text-wrap:balance}
+.ask.small{font-size:clamp(24px,3.6vw,40px);margin-top:.4em}
+.hinge .ask{background:linear-gradient(92deg,var(--trust),var(--lie));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.plan .ask.small{background:linear-gradient(92deg,var(--trust),var(--truth));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+.scope{font-family:var(--sans);font-size:clamp(14px,1.7vw,18px);line-height:1.7;color:var(--muted);border-left:2px solid var(--line);padding-left:20px;text-align:left;max-width:60ch;margin:0 auto}
+.handoff{font-size:clamp(22px,3.4vw,40px);line-height:1.3;margin-top:clamp(22px,4vh,44px);text-wrap:balance}
+.handoff strong{color:var(--trust);font-weight:600}
+
+.pipe{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:clamp(8px,1.3vw,18px);margin:0 auto}
+.step{font-family:var(--sans);font-size:clamp(13px,1.5vw,17px);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.step .dot{width:8px;height:8px;border-radius:50%;background:var(--trust);flex:0 0 auto}
+.step.out{font-family:var(--mono);color:var(--trust);border-color:color-mix(in srgb,var(--trust) 45%,transparent);background:color-mix(in srgb,var(--trust) 10%,var(--panel));font-weight:600}
+.arrow{color:var(--faint);font-size:clamp(15px,1.6vw,20px)}
+
+/* MLP diagram */
+.mlp{width:min(100%,420px);height:auto}
+.mlp .n-in{fill:var(--muted)}.mlp .n-hid{fill:color-mix(in srgb,var(--trust) 55%,var(--panel))}
+.mlp .n-out{fill:var(--trust)}.mlp circle{stroke:var(--ground);stroke-width:2}
+.mlp-t{font-family:var(--sans);font-size:12px;fill:var(--faint);letter-spacing:.04em}
+
+/* four moves */
+.moves{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 auto;max-width:960px}
+@media (max-width:760px){.moves{grid-template-columns:repeat(2,1fr)}}
+.move{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 16px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.move .mnum{font-family:var(--mono);font-size:13px;color:var(--trust);font-weight:700}
+.move b{font-size:clamp(16px,1.9vw,20px)}
+.move span:last-child{font-family:var(--sans);font-size:13px;color:var(--muted);line-height:1.45}
+
+/* formula + source chip */
+.formula{font-family:var(--mono);font-size:clamp(22px,3.4vw,38px);color:var(--ink);display:flex;flex-wrap:wrap;align-items:baseline;gap:.4em;justify-content:center}
+.formula .tk-p{color:var(--trust)}.formula .tk-y{color:var(--truth)}
+.fcomment{font-family:var(--mono);font-size:clamp(12px,1.5vw,15px);color:var(--faint)}
+.srcchip,.src{font-family:var(--mono);font-size:12px;letter-spacing:.02em;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:5px 13px;display:inline-block}
+
+/* pipeline hero chain */
+.chain{display:flex;align-items:stretch;justify-content:center;gap:0;flex-wrap:wrap;margin:0 auto;max-width:1080px}
+.pnode{flex:1 1 150px;max-width:200px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;gap:5px;text-align:center}
+.pnode .pn-num{font-family:var(--mono);color:var(--trust);font-weight:700;font-size:14px}
+.pnode b{font-size:clamp(15px,1.8vw,19px)}
+.pnode .pn-d{font-family:var(--sans);font-size:12px;color:var(--muted);line-height:1.4}
+.pconn{flex:0 0 22px;align-self:center;height:2px;background:var(--line);position:relative}
+.pconn::after{content:"";position:absolute;right:-1px;top:-3px;border-left:6px solid var(--faint);border-top:4px solid transparent;border-bottom:4px solid transparent}
+@media (max-width:760px){.chain{flex-direction:column;align-items:stretch}.pconn{width:2px;height:16px;align-self:center}.pconn::after{display:none}.pnode{max-width:none}}
+
+/* winner / memorise widgets */
+.wn{display:flex;flex-direction:column;gap:14px;align-items:stretch;text-align:center}
+.wn-head{display:flex;justify-content:center;gap:clamp(24px,5vw,64px);align-items:flex-end;flex-wrap:wrap}
+.wn-metric{display:flex;flex-direction:column;gap:2px}
+.wn-label{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.wn-val{font-family:var(--mono);font-size:clamp(34px,6vw,60px);font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.wn-val.trust{color:var(--trust)}.wn-val.lie{color:var(--lie)}.wn-val.faintv{color:var(--muted)}
+.wn-tries .wn-val{font-size:clamp(22px,3vw,34px);font-weight:500}
+#wnPlot,#mmPlot{width:100%;height:auto;display:block}
+.wn-controls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.wn-controls button{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 18px;cursor:pointer;transition:.16s}
+.wn-controls button:hover{border-color:var(--trust);color:var(--trust)}
+.wn-controls button:focus-visible{outline:2px solid var(--trust);outline-offset:2px}
+#wnSeal{border-color:color-mix(in srgb,var(--lie) 45%,transparent);color:var(--lie)}
+#wnSeal:hover{background:color-mix(in srgb,var(--lie) 12%,var(--panel));color:var(--lie)}
+.wn-controls button.ghost{color:var(--faint);border-color:transparent}
+.wn-controls button.ghost:hover{color:var(--ink)}
+.wn-note{font-family:var(--sans);font-size:clamp(12.5px,1.5vw,15px);line-height:1.55;color:var(--muted);max-width:62ch;margin:0 auto}
+.wn-note.punch{color:var(--ink)}.wn-note.punch b{color:var(--lie)}
+.wn-sub{font-family:var(--sans);font-size:11px;color:var(--faint);letter-spacing:.04em;margin-top:2px}
+.wn-val.truth{color:var(--truth)}
+#cdPlot{width:100%;height:auto;display:block}
+
+/* §2 one-client card */
+.client{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 22px;min-width:240px;text-align:left}
+.cl-h{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.cl-row{display:flex;justify-content:space-between;gap:24px;padding:7px 0;border-bottom:1px solid var(--line);font-family:var(--sans);font-size:14px}
+.cl-row span{color:var(--muted)}.cl-row b{font-family:var(--mono);color:var(--ink)}
+.cl-row.def{border-bottom:none}.cl-row.def b{color:var(--lie)}
+
+/* §2 versus */
+.versus{display:flex;align-items:center;justify-content:center;gap:clamp(18px,5vw,60px);margin:clamp(12px,3vh,32px) 0}
+.vs-col{display:flex;flex-direction:column;align-items:center;gap:6px}
+.vs-lab{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.vs-op{font-family:var(--serif);font-style:italic;font-size:clamp(18px,2.4vw,26px);color:var(--faint)}
+
+/* §2 confusion grid */
+.cgrid{display:grid;grid-template-columns:auto 1fr 1fr;gap:12px;align-items:stretch;max-width:720px;margin:0 auto}
+.cg-side{font-family:var(--sans);font-size:13px;color:var(--muted);align-self:center;text-align:right;padding-right:4px}
+.cg-side b{color:var(--ink)}
+.cg-cell{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;gap:3px;align-items:center;transition:.3s}
+.cg-n{font-family:var(--mono);font-size:clamp(24px,3.8vw,38px);font-weight:600;font-variant-numeric:tabular-nums;line-height:1;transition:.3s}
+.cg-l{font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.cg-cell.good{border-color:color-mix(in srgb,var(--truth) 40%,transparent)}.cg-cell.good .cg-n{color:var(--truth)}
+.cg-cell.bad{border-color:color-mix(in srgb,var(--lie) 40%,transparent)}.cg-cell.bad .cg-n{color:var(--lie)}
+.cg-cell.mut .cg-n{color:var(--muted)}
+.cgrid.live{max-width:600px}
+
+/* §2 slider */
+.slider-row{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:2px}
+.sl-lab{font-family:var(--sans);font-size:14px;color:var(--muted)}
+.sl-val{font-family:var(--mono);font-size:19px;color:var(--trust);font-weight:600;min-width:3.4ch;text-align:left}
+input[type=range]{width:min(52vw,360px);accent-color:var(--trust);height:4px;cursor:pointer}
+input[type=range]:focus-visible{outline:2px solid var(--trust);outline-offset:6px}
+
+.ask.small2{font-size:clamp(22px,3.4vw,38px);line-height:1.25;max-width:24ch;margin:.2em auto 0}
+.pullq{font-size:clamp(25px,4.2vw,50px);font-weight:600;line-height:1.22;letter-spacing:-.01em;text-wrap:balance;
+  background:linear-gradient(92deg,var(--trust),var(--truth));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* §3 elements */
+#pxPlot,#lkPlot,#drPlot,#erPlot{width:100%;height:auto;display:block}
+.wn-controls button.on{border-color:var(--trust);color:var(--trust);background:color-mix(in srgb,var(--trust) 10%,var(--panel))}
+.suspects{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:900px;margin:0 auto}
+@media(max-width:760px){.suspects{grid-template-columns:1fr}}
+.suspect{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 16px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.suspect.clear{border-color:color-mix(in srgb,var(--truth) 35%,transparent)}
+.su-h{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.su-q{font-size:clamp(15px,1.9vw,19px);color:var(--ink)}
+.su-v{font-family:var(--mono);font-size:14px;color:var(--muted)}
+.su-tag{font-family:var(--sans);font-size:12px;color:var(--truth);font-weight:600;margin-top:2px}
+.twins{display:flex;flex-direction:column;gap:10px;max-width:720px;margin:0 auto}
+.twin-row{display:flex;gap:8px;align-items:center;justify-content:center}
+.tw-lab{font-family:var(--sans);font-size:12px;color:var(--faint);width:66px;text-align:right}
+.tw-c{font-family:var(--mono);font-size:clamp(15px,2vw,22px);padding:10px 0;width:clamp(50px,8vw,74px);text-align:center;border-radius:8px;background:var(--panel);border:1px solid var(--line);color:var(--muted)}
+.tw-c.sh{border-color:color-mix(in srgb,var(--lie) 45%,transparent);color:var(--lie);background:color-mix(in srgb,var(--lie) 8%,var(--panel))}
+.badge-assume{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--lie);border:1px solid color-mix(in srgb,var(--lie) 40%,transparent);border-radius:20px;padding:5px 14px;align-self:center}
+.pull-lesson{font-size:clamp(20px,3vw,32px);font-weight:600;line-height:1.28;letter-spacing:-.01em;text-wrap:balance;margin-top:.3em;color:var(--ink)}
+.bets{display:flex;flex-direction:column;gap:12px;max-width:840px;margin:0 auto}
+.bet{display:flex;gap:16px;align-items:baseline;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;text-align:left}
+.bet .bt-step{font-family:var(--sans);font-weight:700;font-size:clamp(15px,1.9vw,19px);color:var(--trust);min-width:60px}
+.bet .bt-txt{font-family:var(--sans);font-size:clamp(13px,1.6vw,16px);color:var(--muted);line-height:1.5}
+
+/* §4 elements */
+#wxPlot,#ovPlot{width:100%;height:auto;display:block}
+.weathers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:420px}
+.wx-cell{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 6px;font-family:var(--sans);font-size:12px;color:var(--muted);text-align:center;line-height:1.35}
+.knobs{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:260px;display:flex;flex-direction:column;gap:10px}
+.knob-row{display:flex;justify-content:space-between;gap:20px;font-family:var(--sans);font-size:15px;align-items:baseline}
+.knob-row span{color:var(--muted)}
+.knob-row b.ok{font-family:var(--mono);color:var(--truth);font-weight:600}
+.knob-cap{font-family:var(--sans);font-size:12px;color:var(--faint);border-top:1px solid var(--line);padding-top:10px;line-height:1.4}
+.guards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:960px;margin:0 auto}
+@media(max-width:760px){.guards{grid-template-columns:1fr}}
+.guard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.gu-h{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--trust);font-weight:600}
+.gu-t{font-family:var(--sans);font-size:clamp(13px,1.5vw,15px);color:var(--muted);line-height:1.5}
+#sdPlot,#sbPlot{width:100%;height:auto;display:block}
+.bignum.truth{color:var(--truth)}
+/* §4c ceiling bars */
+.ceiling{display:flex;flex-direction:column;gap:10px;max-width:640px;margin:0 auto}
+.cl-bar{display:flex;align-items:baseline;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 18px}
+.cl-bar.hi{border-color:color-mix(in srgb,var(--truth) 40%,transparent)}
+.cl-v{font-family:var(--mono);font-size:clamp(24px,3.4vw,34px);font-weight:600;color:var(--muted);min-width:3.4ch}
+.cl-bar.hi .cl-v{color:var(--truth)}
+.cl-l{font-family:var(--sans);font-size:clamp(13px,1.5vw,16px);color:var(--muted);text-align:left}
+/* §4c capacity figure */
+.capfig{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:280px;display:flex;flex-direction:column;gap:10px}
+.cap-row{display:flex;justify-content:space-between;gap:18px;font-family:var(--sans);font-size:14px;align-items:baseline}
+.cap-k{color:var(--muted)}
+.cap-t{font-family:var(--mono);font-size:22px;color:var(--trust);font-weight:600}
+.cap-f{font-family:var(--mono);font-size:22px;color:var(--lie);font-weight:600}
+.cap-cap{font-family:var(--sans);font-size:12px;color:var(--faint);border-top:1px solid var(--line);padding-top:10px;line-height:1.4}
+/* §4e diary + bulletin */
+#cbPlot{width:100%;height:auto;display:block}
+.diary{border-collapse:collapse;margin:0 auto;font-family:var(--sans);font-size:clamp(12px,1.5vw,15px);width:100%;max-width:720px}
+.diary th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600;padding:8px 14px;text-align:left;border-bottom:1px solid var(--line)}
+.diary td{padding:9px 14px;color:var(--muted);border-bottom:1px solid var(--line);text-align:left}
+.diary td:first-child{color:var(--ink);font-family:var(--mono);font-size:.92em}
+.diary .good{color:var(--truth);font-weight:600}.diary .bad{color:var(--lie);font-weight:600}.diary .mut{color:var(--faint)}
+.bulletin{display:flex;flex-direction:column;gap:11px;max-width:720px;margin:0 auto}
+.bl-key{display:flex;gap:16px;justify-content:flex-end;font-family:var(--sans);font-size:11px;margin-bottom:2px}
+.bl-key .k{display:flex;align-items:center;gap:5px;color:var(--muted)}
+.bl-key .k::before{content:"";width:10px;height:10px;border-radius:2px;display:inline-block}
+.bl-key .c::before{background:var(--truth)}.bl-key .n::before{background:var(--muted)}.bl-key .s::before{background:var(--lie)}
+.bl-row{display:flex;align-items:center;gap:14px}
+.bl-m{font-family:var(--sans);font-size:14px;color:var(--ink);width:88px;text-align:right;flex:0 0 auto}
+.bl-bar{display:flex;flex:1;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.bl-bar i{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-style:normal;min-width:0}
+.bl-bar .c{background:color-mix(in srgb,var(--truth) 70%,var(--ground));color:#fff}
+.bl-bar .n{background:color-mix(in srgb,var(--muted) 45%,var(--ground));color:var(--ink)}
+.bl-bar .s{background:color-mix(in srgb,var(--lie) 72%,var(--ground));color:#fff}
+
+/* §5 the lineup */
+.lineup{display:flex;flex-direction:column;gap:18px;text-align:center}
+.lu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:960px;margin:0 auto;width:100%}
+@media(max-width:760px){.lu-grid{grid-template-columns:1fr}}
+.lu-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:5px;transition:.25s;min-height:120px}
+.lu-card:hover{border-color:var(--trust)}
+.lu-from{font-family:var(--sans);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.lu-num{font-family:var(--mono);font-size:clamp(23px,3vw,32px);color:var(--trust);font-weight:600;line-height:1}
+.lu-hint{font-family:var(--sans);font-size:12px;color:var(--muted)}
+.lu-face{font-family:var(--sans);font-size:12.5px;color:var(--muted);line-height:1.45;display:none}
+.lu-verdict{font-family:var(--sans);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;display:none;margin-top:auto}
+.lu-card.revealed .lu-hint{display:none}
+.lu-card.revealed .lu-face{display:block}
+.lu-card.revealed .lu-verdict{display:inline-block}
+.lu-card.lie{border-color:color-mix(in srgb,var(--lie) 50%,transparent)}
+.lu-card.lie .lu-num,.lu-card.lie .lu-verdict{color:var(--lie)}
+.lu-card.honest{border-color:color-mix(in srgb,var(--truth) 55%,transparent)}
+.lu-card.honest .lu-num,.lu-card.honest .lu-verdict{color:var(--truth)}
+.lu-tally{font-family:var(--sans);font-size:clamp(13px,1.6vw,16px);color:var(--muted);max-width:62ch;margin:0 auto;line-height:1.5}
+.lu-tally.punch{color:var(--ink)}.lu-tally.punch b{color:var(--truth)}
+/* §5 big statement + method + finale */
+.bigstate{font-size:clamp(26px,4vw,44px);line-height:1.2;color:var(--muted);text-wrap:balance}
+.bigstate strong{color:var(--lie);font-weight:600}
+.method{display:flex;flex-direction:column;gap:10px;max-width:860px;margin:0 auto;text-align:left}
+.mstep{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 18px;font-family:var(--sans);font-size:clamp(13px,1.6vw,16px);color:var(--muted);line-height:1.5;display:flex;gap:14px;align-items:baseline}
+.mstep b{color:var(--ink);font-weight:600}
+.ms-n{font-family:var(--mono);font-size:15px;color:var(--trust);font-weight:700;flex:0 0 auto}
+.finale .closer{font-family:var(--serif);font-weight:600;font-size:clamp(40px,8vw,92px);line-height:1;letter-spacing:-.02em;text-wrap:balance;background:linear-gradient(92deg,var(--trust),var(--truth));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* pipeline mini-map (persistent) */
+#spine{position:fixed;bottom:clamp(14px,3.1vh,26px);left:50%;transform:translateX(-50%);z-index:21;
+  display:flex;align-items:flex-end;gap:0;font-family:var(--sans);opacity:0;transition:opacity .5s ease;pointer-events:none}
+#spine.show{opacity:1}
+.sp-node{display:flex;flex-direction:column-reverse;align-items:center;gap:5px;padding:0 2px}
+.sp-node i{width:9px;height:9px;border-radius:50%;background:var(--faint);opacity:.5;transition:.3s;display:block}
+.sp-node span{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);opacity:.6;transition:.3s}
+.sp-node.on i{background:var(--trust);opacity:1;box-shadow:0 0 0 4px color-mix(in srgb,var(--trust) 22%,transparent)}
+.sp-node.on span{color:var(--trust);opacity:1;font-weight:600}
+.sp-link{width:clamp(20px,3vw,44px);height:2px;background:var(--line);margin:0 0 3px}
+@media (max-width:720px){#spine .sp-node span{display:none}.sp-link{width:16px}}
+
+/* chrome */
+#bar{position:fixed;left:0;right:0;bottom:0;height:3px;background:var(--line);z-index:20}
+#bar>i{display:block;height:100%;background:var(--trust);width:0;transition:width .5s cubic-bezier(.76,0,.24,1)}
+#chrome{position:fixed;bottom:clamp(16px,3.4vh,30px);right:clamp(20px,5vw,54px);z-index:21;display:flex;align-items:center;gap:16px;font-family:var(--sans)}
+#count{font-size:12px;letter-spacing:.12em;color:var(--faint);font-variant-numeric:tabular-nums}
+#count b{color:var(--ink);font-weight:600}
+.nav{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:18px;cursor:pointer;display:grid;place-items:center;transition:.18s;font-family:var(--sans)}
+.nav:hover{border-color:var(--trust);color:var(--trust)}
+.nav:disabled{opacity:.32;cursor:default}
+.nav:focus-visible{outline:2px solid var(--trust);outline-offset:2px}
+#hint{position:fixed;bottom:clamp(16px,3.4vh,30px);left:clamp(20px,5vw,54px);z-index:21;font-family:var(--sans);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+#hint kbd{font-family:var(--mono);background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--muted);font-size:11px}
+#theme,#menuBtn{position:fixed;top:clamp(16px,3.4vh,26px);z-index:22;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;font-size:15px;display:grid;place-items:center;font-family:var(--sans)}
+#theme{right:clamp(20px,5vw,54px)}
+#menuBtn{right:calc(clamp(20px,5vw,54px) + 48px)}
+#theme:hover,#menuBtn:hover{color:var(--trust);border-color:var(--trust)}
+#menu{position:fixed;inset:0;z-index:30;background:color-mix(in srgb,var(--ground) 84%,transparent);backdrop-filter:blur(6px);display:grid;place-items:center;padding:24px}
+#menu[hidden]{display:none}
+.menu-panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;width:min(92vw,440px);max-height:86vh;overflow:auto;display:flex;flex-direction:column;gap:4px}
+.menu-h{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.menu-item{font-family:var(--serif);font-size:clamp(15px,2vw,19px);text-align:left;background:none;border:none;color:var(--ink);padding:10px 12px;border-radius:8px;cursor:pointer;transition:.15s}
+.menu-item:hover{background:color-mix(in srgb,var(--trust) 12%,transparent);color:var(--trust)}
+.menu-item.cur{color:var(--trust);font-weight:600}
+@media (max-width:620px){#hint{display:none}}
+</style>
+
+<div id="deck"><div class="track" id="track">
+<section class="slide title-slide" data-i="0" data-spine="off"><div class="slide-body"><div class="center">
+  <div class="r eyebrow-big" style="--d:0s">A master's dissertation, walked as a journey</div>
+  <h1 class="r title" style="--d:.12s">The Number<br>That Lied</h1>
+  <div class="r rule" style="--d:.24s"></div>
+  <p class="r lede" style="--d:.34s">Data snooping in deep learning: how a good-looking result fools the person who made it, and how to stop being fooled.</p>
+  <div class="r meta" style="--d:.46s">MSc &middot; Royal Holloway, University of London</div>
+</div></div></section>
+<section class="slide " data-i="1" data-spine="off"><div class="act">0 &middot; The number we are about to trust</div><div class="slide-body"><div class="center narrow">
+  <p class="r line big" style="--d:0s">We have a model.</p>
+  <p class="r line dim" style="--d:.28s">Is it any good? How would we even know?</p>
+</div></div></section>
+<section class="slide " data-i="2" data-spine="off"><div class="act">0 &middot; The number we are about to trust</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">So we do the obvious thing.</p>
+  <div class="pipe">
+    <div class="r step" style="--d:.15s"><span class="dot"></span>Take all the data</div>
+    <div class="r arrow" style="--d:.25s">&rarr;</div>
+    <div class="r step" style="--d:.35s"><span class="dot"></span>Hide a slice</div>
+    <div class="r arrow" style="--d:.45s">&rarr;</div>
+    <div class="r step" style="--d:.55s"><span class="dot"></span>Let it guess</div>
+    <div class="r arrow" style="--d:.65s">&rarr;</div>
+    <div class="r step" style="--d:.75s"><span class="dot"></span>Count the hits</div>
+    <div class="r arrow" style="--d:.85s">&rarr;</div>
+    <div class="r step out" style="--d:.95s">a number</div>
+  </div>
+  <p class="r foot" style="--d:1.1s">High? Good. Low? Not good. So we read the number, and we decide.</p>
+</div></div></section>
+<section class="slide " data-i="3" data-spine="off"><div class="act">0 &middot; The number we are about to trust</div><div class="slide-body"><div class="split">
+  <div class="split-l">
+    <p class="r line" style="--d:0s">But we never build just one.</p>
+    <p class="r line dim" style="--d:.2s">We build many, and quietly keep the best.</p>
+    <p class="r line" style="--d:.4s">So what we walk away trusting is a survivor.</p>
+  </div>
+  <div class="split-r">
+    <div class="r bignum trust" style="--d:.6s">one<br>number</div>
+  </div>
+</div></div></section>
+<section class="slide wn-slide" data-i="4" data-spine="off"><div class="act">0 &middot; The number we are about to trust</div><div class="slide-body"><div class="wn" data-widget="winners">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">Play the game everyone plays. Keep the best of many, and watch.</p></div>
+  <div class="wn-head">
+    <div class="wn-metric"><span class="wn-label">best kept score</span><span class="wn-val trust" id="wnBest">0.500</span></div>
+    <div class="wn-metric" id="wnSealedWrap" hidden><span class="wn-label">the sealed test</span><span class="wn-val lie" id="wnSealed">--</span></div>
+    <div class="wn-metric wn-tries"><span class="wn-label">models tried</span><span class="wn-val faintv" id="wnK">0</span></div>
+  </div>
+  <svg id="wnPlot" viewBox="0 0 920 400" role="img" aria-label="Best validation score climbing as more models are tried, while the sealed test stays on a coin flip."></svg>
+  <div class="wn-controls">
+    <button data-act="one">Try another model</button>
+    <button data-act="many">Try 20 more</button>
+    <button data-act="seal" id="wnSeal">Open the sealed test set</button>
+    <button data-act="reset" class="ghost" id="wnReset">Reset</button>
+  </div>
+  <p class="wn-note" id="wnNote">A demonstration on pure noise: every &ldquo;model&rdquo; here learned nothing at all. Yet keep the best of many, and the kept score climbs on its own.</p>
+</div></div></section>
+<section class="slide hinge" data-i="5" data-spine="off"><div class="act">0 &middot; The number we are about to trust</div><div class="slide-body"><div class="center">
+  <p class="r foot dim" style="--d:0s">Every move there was straight out of the book. Hide data, score, keep the best.</p>
+  <div class="r ask" style="--d:.3s">&ldquo;Can we trust it?&rdquo;</div>
+</div></div></section>
+<section class="slide " data-i="6" data-spine="off"><div class="act">0 &middot; The number we are about to trust</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">Let us find out honestly.</p>
+  <p class="r line dim" style="--d:.24s">We will not bend anything to force a problem into view. We will do the opposite, and follow every rule the books give us, <em>exactly</em>.</p>
+  <p class="r line" style="--d:.5s">Then stand back and ask, together, what that honest number is really worth.</p>
+</div></div></section>
+<section class="slide " data-i="7" data-spine="off"><div class="act">0 &middot; The number we are about to trust</div><div class="slide-body"><div class="center narrow">
+  <p class="r scope" style="--d:0s">One limit, so we are not doing everything at once. We stay with deep learning that forecasts and classifies. Is tomorrow a busy day on the market? Did this borrower default? Which activity is this? Not vision, not language, not the rest. Just putting a label on the next case.</p>
+  <p class="r handoff" style="--d:.4s">So, where does everyone start? By the book.<br><strong>Let us start there too.</strong></p>
+</div></div></section>
+<section class="slide " data-i="8" data-spine="off"><div class="act">1 &middot; What deep learning really is, and the plan</div><div class="slide-body"><div class="split">
+  <div class="split-l">
+    <p class="r line" style="--d:0s">We have a job: put a label on the next case. What do we build?</p>
+    <p class="r line dim" style="--d:.22s">Almost always the same thing: a small neural network. A few features go in, get mixed and bent through a hidden layer, and come out as a guess.</p>
+  </div>
+  <div class="split-r r" style="--d:.44s">
+<svg class="mlp" viewBox="0 0 420 220" role="img" aria-label="A small neural network: features, a hidden layer, a guess.">
+  <g stroke="var(--line)" stroke-width="1">
+    <line x1="60" y1="40" x2="210" y2="30"/><line x1="60" y1="40" x2="210" y2="66"/><line x1="60" y1="40" x2="210" y2="102"/><line x1="60" y1="40" x2="210" y2="138"/><line x1="60" y1="40" x2="210" y2="174"/><line x1="60" y1="80" x2="210" y2="30"/><line x1="60" y1="80" x2="210" y2="66"/><line x1="60" y1="80" x2="210" y2="102"/><line x1="60" y1="80" x2="210" y2="138"/><line x1="60" y1="80" x2="210" y2="174"/><line x1="60" y1="120" x2="210" y2="30"/><line x1="60" y1="120" x2="210" y2="66"/><line x1="60" y1="120" x2="210" y2="102"/><line x1="60" y1="120" x2="210" y2="138"/><line x1="60" y1="120" x2="210" y2="174"/><line x1="60" y1="160" x2="210" y2="30"/><line x1="60" y1="160" x2="210" y2="66"/><line x1="60" y1="160" x2="210" y2="102"/><line x1="60" y1="160" x2="210" y2="138"/><line x1="60" y1="160" x2="210" y2="174"/><line x1="210" y1="30" x2="360" y2="80"/><line x1="210" y1="30" x2="360" y2="120"/><line x1="210" y1="66" x2="360" y2="80"/><line x1="210" y1="66" x2="360" y2="120"/><line x1="210" y1="102" x2="360" y2="80"/><line x1="210" y1="102" x2="360" y2="120"/><line x1="210" y1="138" x2="360" y2="80"/><line x1="210" y1="138" x2="360" y2="120"/><line x1="210" y1="174" x2="360" y2="80"/><line x1="210" y1="174" x2="360" y2="120"/>
+  </g>
+  <circle cx="60" cy="40" r="9" class="n-in"/><circle cx="60" cy="80" r="9" class="n-in"/><circle cx="60" cy="120" r="9" class="n-in"/><circle cx="60" cy="160" r="9" class="n-in"/><circle cx="210" cy="30" r="9" class="n-hid"/><circle cx="210" cy="66" r="9" class="n-hid"/><circle cx="210" cy="102" r="9" class="n-hid"/><circle cx="210" cy="138" r="9" class="n-hid"/><circle cx="210" cy="174" r="9" class="n-hid"/><circle cx="360" cy="80" r="11" class="n-out"/><circle cx="360" cy="120" r="11" class="n-out"/>
+  <text x="60" y="208" text-anchor="middle" class="mlp-t">features</text>
+  <text x="210" y="208" text-anchor="middle" class="mlp-t">hidden layer</text>
+  <text x="360" y="208" text-anchor="middle" class="mlp-t">a guess</text>
+</svg>
+</div>
+</div></div></section>
+<section class="slide " data-i="9" data-spine="off"><div class="act">1 &middot; What deep learning really is, and the plan</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">How does it learn? Not by us programming it, but by correcting itself. The same four small moves, over and over.</p>
+  <div class="moves">
+    <div class="r move" style="--d:.15s"><span class="mnum">1</span><b>Forward</b><span>take the numbers in, mix them into a guess</span></div>
+    <div class="r move" style="--d:.3s"><span class="mnum">2</span><b>Loss</b><span>score how wrong the guess is, in one number</span></div>
+    <div class="r move" style="--d:.45s"><span class="mnum">3</span><b>Gradient</b><span>which way to nudge each knob, downhill</span></div>
+    <div class="r move" style="--d:.6s"><span class="mnum">4</span><b>Update</b><span>take one small step that way</span></div>
+  </div>
+  <p class="r foot" style="--d:.8s">A few thousand rounds of those four, and the guesses come out mostly right.</p>
+</div></div></section>
+<section class="slide " data-i="10" data-spine="off"><div class="act">1 &middot; What deep learning really is, and the plan</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">One small marvel hides in those four moves.</p>
+  <p class="r line dim" style="--d:.22s">Score the wrongness this way, and the correction each step makes is <em>exactly how far off the guess was</em>, no more.</p>
+  <div class="r formula" style="--d:.5s">gradient = <span class="tk-p">p</span> &minus; <span class="tk-y">y</span><span class="fcomment"># prediction minus truth: the error itself</span></div>
+  <div class="r srcchip" style="--d:.66s">derived in full &middot; Appendix A</div>
+</div></div></section>
+<section class="slide wn-slide" data-i="11" data-spine="off"><div class="act">1 &middot; What deep learning really is, and the plan</div><div class="slide-body"><div class="wn" data-widget="memorise">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">With enough knobs a network fits almost any pattern. So give it pure noise, and train. Watch.</p></div>
+  <div class="wn-head">
+    <div class="wn-metric"><span class="wn-label">training score</span><span class="wn-val trust" id="mmTrain">0.50</span></div>
+    <div class="wn-metric"><span class="wn-label">held-out (never seen)</span><span class="wn-val lie" id="mmVal">0.50</span></div>
+    <div class="wn-metric wn-tries"><span class="wn-label">epochs</span><span class="wn-val faintv" id="mmEp">0</span></div>
+  </div>
+  <svg id="mmPlot" viewBox="0 0 920 400" role="img" aria-label="Training accuracy climbing to nearly perfect while held-out accuracy stays on a coin flip."></svg>
+  <div class="wn-controls">
+    <button data-act="step">Train 50 more</button>
+    <button data-act="end">Train to the end</button>
+    <button data-act="reset" class="ghost">Reset</button>
+  </div>
+  <p class="wn-note" id="mmNote">The labels here are coin flips: there is nothing to learn. The training score is the tempting one; the held-out score is the honest one.</p>
+</div></div></section>
+<section class="slide " data-i="12" data-spine="off"><div class="act">1 &middot; What deep learning really is, and the plan</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">So a flawless training score can prove <em>nothing</em>.</p>
+  <p class="r line dim" style="--d:.24s">The only way to know is to try the model on data it has never seen. Keep some back, judge it there, and never let it peek while it learns.</p>
+</div></div></section>
+<section class="slide plan-slide" data-i="13" data-spine="all"><div class="act">1 &middot; What deep learning really is, and the plan</div><div class="slide-body"><div class="wide plan">
+  <p class="r kicker" style="--d:0s">To turn a network into a number we can show anyone, we follow a recipe, the same one in every course.</p>
+  <div class="chain"><div class="r pnode" style="--d:0.12s"><span class="pn-num">1</span><b>Frame</b><span class="pn-d">turn raw data into features and a label</span></div><div class="r pconn" style="--d:0.18s"></div><div class="r pnode" style="--d:0.23s"><span class="pn-num">2</span><b>Split</b><span class="pn-d">training, validation, and a sealed test</span></div><div class="r pconn" style="--d:0.29s"></div><div class="r pnode" style="--d:0.34s"><span class="pn-num">3</span><b>Scale</b><span class="pn-d">put the features on a common footing</span></div><div class="r pconn" style="--d:0.40s"></div><div class="r pnode" style="--d:0.45s"><span class="pn-num">4</span><b>Search</b><span class="pn-d">build and tune to find a good model</span></div><div class="r pconn" style="--d:0.51s"></div><div class="r pnode" style="--d:0.56s"><span class="pn-num">5</span><b>Measure</b><span class="pn-d">read the honest number, once</span></div></div>
+  <p class="r foot" style="--d:.9s">Every step standard, careful, exactly what we are told to do. The number at the end is meant to be honest.</p>
+  <div class="r ask small" style="--d:1.05s">&ldquo;Is this really as safe as it looks?&rdquo;</div>
+</div></div></section>
+<section class="slide " data-i="14" data-spine="all"><div class="act">1 &middot; What deep learning really is, and the plan</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">We carry the recipe to two real problems, and take the friendlier first.</p>
+  <p class="r line dim" style="--d:.24s">A bank's loan clients, the clean data the recipe was built for. Then the market, a tougher animal, faced not once but twice.</p>
+  <p class="r handoff" style="--d:.5s"><strong>Let us meet the first one.</strong></p>
+</div></div></section>
+<section class="slide " data-i="15" data-spine="frame"><div class="act">2 &middot; Loan: the well-behaved one that still lies</div><div class="slide-body"><div class="split">
+  <div class="split-l">
+    <p class="r line" style="--d:0s">A bank hands us thirty thousand credit-card clients and one question: which of them will miss their next payment?</p>
+    <p class="r line dim" style="--d:.24s">One row is one person: twenty-three plain numbers, and the answer we want. About one in five default. The same small network from Section 1 does the guessing.</p>
+  </div>
+  <div class="split-r r" style="--d:.5s">
+    <div class="client">
+      <div class="cl-h">one client</div>
+      <div class="cl-row"><span>age</span><b>24</b></div>
+      <div class="cl-row"><span>credit limit</span><b>small</b></div>
+      <div class="cl-row"><span>last bill</span><b>modest</b></div>
+      <div class="cl-row"><span>paid last month</span><b>nothing</b></div>
+      <div class="cl-row def"><span>defaulted?</span><b>yes</b></div>
+    </div>
+  </div>
+</div></div></section>
+<section class="slide " data-i="16" data-spine="measure"><div class="act">2 &middot; Loan: the well-behaved one that still lies</div><div class="slide-body"><div class="split">
+  <div class="split-l">
+    <p class="r line" style="--d:0s">We run the recipe, step for step, exactly as planned.</p>
+    <p class="r line dim" style="--d:.24s">On the sealed test clients, the ones it never trained on, it is right into the eighties. On our very first honest try.</p>
+    <div class="r srcchip" style="--d:.5s">loan.ipynb &middot; sealed test, seed 0</div>
+  </div>
+  <div class="split-r">
+    <div class="r bignum trust" style="--d:.5s">0.819</div>
+  </div>
+</div></div></section>
+<section class="slide wn-slide" data-i="17" data-spine="split"><div class="act">2 &middot; Loan: the well-behaved one that still lies</div><div class="slide-body"><div class="wn" data-widget="cutdeck">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">Is that number real, or a fluke of the one fifth we happened to hold out? Cut the deck again, and again.</p></div>
+  <div class="wn-head">
+    <div class="wn-metric"><span class="wn-label">this split scores</span><span class="wn-val trust" id="cdScore">--</span></div>
+    <div class="wn-metric wn-tries"><span class="wn-label">splits tried</span><span class="wn-val faintv" id="cdK">0</span></div>
+  </div>
+  <svg id="cdPlot" viewBox="0 0 920 190" role="img" aria-label="Each re-split of the data lands in the same tiny band of accuracy."></svg>
+  <div class="wn-controls">
+    <button data-act="resplit">Re-split and re-score</button>
+    <button data-act="strat" class="ghost">stratified cut</button>
+    <button data-act="pos" class="ghost">by file order</button>
+    <button data-act="reset" class="ghost" id="cdReset">Reset</button>
+  </div>
+  <p class="wn-note" id="cdNote">Every fresh cut of the deck lands in the same tiny band. The score is no accident of one lucky split.</p>
+</div></div></section>
+<section class="slide " data-i="18" data-spine="measure"><div class="act">2 &middot; Loan: the well-behaved one that still lies</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">But wait. That score, how much of it is really ours? Answer &ldquo;no default&rdquo; for every client, look at nothing.</p>
+  <div class="versus">
+    <div class="r vs-col" style="--d:.2s"><span class="vs-lab">our trained network</span><span class="bignum trust" style="font-size:clamp(40px,7vw,84px)">0.819</span></div>
+    <div class="r vs-op" style="--d:.35s">vs</div>
+    <div class="r vs-col" style="--d:.5s"><span class="vs-lab">answer &ldquo;no&rdquo; every time</span><span class="bignum faintv" style="font-size:clamp(40px,7vw,84px);color:var(--muted)">0.779</span></div>
+  </div>
+  <p class="r foot" style="--d:.75s">Everything we built sits <em>four points</em> above what the data was handing out for nothing.</p>
+</div></div></section>
+<section class="slide hinge" data-i="19" data-spine="measure"><div class="act">2 &middot; Loan: the well-behaved one that still lies</div><div class="slide-body"><div class="center narrow">
+  <p class="r foot dim" style="--d:0s">Four points. Is our model any good at all, or mostly just riding that free 78 percent?</p>
+  <div class="r ask small2" style="--d:.3s">If one number cannot tell a trained model from an answer that never looked at the data, what is it measuring?</div>
+</div></div></section>
+<section class="slide " data-i="20" data-spine="measure"><div class="act">2 &middot; Loan: the well-behaved one that still lies</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">Stop reading the blended score. Of the 1,353 test clients who really defaulted, how many did we catch?</p>
+  <div class="cgrid r" style="--d:.25s">
+    <div class="cg-side">of 1,353 who <b>defaulted</b></div>
+    <div class="cg-cell good"><span class="cg-n">472</span><span class="cg-l">caught</span></div>
+    <div class="cg-cell bad"><span class="cg-n">881</span><span class="cg-l">missed</span></div>
+    <div class="cg-side">of 4,647 who <b>paid</b></div>
+    <div class="cg-cell mut"><span class="cg-n">202</span><span class="cg-l">flagged</span></div>
+    <div class="cg-cell mut"><span class="cg-n">4,445</span><span class="cg-l">cleared</span></div>
+  </div>
+  <p class="r foot" style="--d:.5s">Two of every three people who default, our 82 percent model waved straight through. Almost the whole score is the big, easy group it got right.</p>
+</div></div></section>
+<section class="slide " data-i="21" data-spine="measure"><div class="act">2 &middot; Loan: the well-behaved one that still lies</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">Picture an illness that 78 percent of people do not have.</p>
+  <p class="r line dim" style="--d:.24s">A lazy doctor tells everyone the same thing, &ldquo;you are healthy,&rdquo; and is right 78 percent of the time. <em>And catches zero sick people.</em></p>
+  <p class="r line" style="--d:.5s">Our model is a little better, it catches about one in three. But its accuracy barely moves, 82 against 78, because accuracy mostly measures the healthy majority.</p>
+</div></div></section>
+<section class="slide wn-slide" data-i="22" data-spine="measure"><div class="act">2 &middot; Loan: the well-behaved one that still lies</div><div class="slide-body"><div class="wn rswap" data-widget="rulerswap">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">Here is the ruler that gives each group its due. Now chase a higher accuracy: demand more confidence before you flag a default.</p></div>
+  <div class="wn-head">
+    <div class="wn-metric"><span class="wn-label">accuracy</span><span class="wn-val trust" id="rsAcc">0.819</span></div>
+    <div class="wn-metric"><span class="wn-label">balanced accuracy</span><span class="wn-val truth" id="rsBal">0.653</span></div>
+    <div class="wn-metric"><span class="wn-label">defaulters caught</span><span class="wn-val" id="rsCaught">472</span><span class="wn-sub">of 1,353</span></div>
+  </div>
+  <div class="cgrid live">
+    <div class="cg-side">defaulted</div>
+    <div class="cg-cell good"><span class="cg-n" id="rsTP">472</span><span class="cg-l">caught</span></div>
+    <div class="cg-cell bad"><span class="cg-n" id="rsFN">881</span><span class="cg-l">missed</span></div>
+    <div class="cg-side">paid</div>
+    <div class="cg-cell mut"><span class="cg-n" id="rsFP">202</span><span class="cg-l">flagged</span></div>
+    <div class="cg-cell mut"><span class="cg-n" id="rsTN">4,445</span><span class="cg-l">cleared</span></div>
+  </div>
+  <div class="slider-row">
+    <span class="sl-lab">flag as default when confidence &ge;</span>
+    <input type="range" id="rsThr" min="0" max="100" value="50" step="1" aria-label="decision threshold">
+    <span class="sl-val" id="rsThrV">0.50</span>
+  </div>
+  <p class="wn-note" id="rsNote">At the natural setting the model catches 472 of 1,353. Slide the threshold up to chase a higher accuracy, and watch what happens to the counts.</p>
+</div></div></section>
+<section class="slide " data-i="23" data-spine="measure"><div class="act">2 &middot; Loan: the well-behaved one that still lies</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">We changed only the ruler, and four grudging points became fifteen. So which number do we keep? <em>Neither</em>, on faith.</p>
+  <p class="r line dim" style="--d:.26s">What we trust is not a number at all. It is the four counts underneath: 472 caught, 881 missed, 4,445 cleared, 202 flagged. Nothing can hide inside four counts.</p>
+  <p class="r line" style="--d:.54s">And there is the assumption we never knew we had made: <em>that every client counts the same, and getting most of them right means the job is done.</em></p>
+</div></div></section>
+<section class="slide hinge" data-i="24" data-spine="measure"><div class="act">2 &middot; Loan: the well-behaved one that still lies</div><div class="slide-body"><div class="center narrow">
+  <div class="r pullq" style="--d:0s">&ldquo;The score, the goal we chase, we cannot trust on its own.<br>The process that earns it, we can.&rdquo;</div>
+  <p class="r handoff" style="--d:.5s">If a clean process is the only thing worth trusting, then at the next problem, where is the next <strong>hidden assumption</strong> hiding?</p>
+</div></div></section>
+<section class="slide wn-slide" data-i="25" data-spine="frame"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">We come to the market already wary. And there is almost nothing here to trust: one long column of numbers, the daily close of the S&amp;P 500.</p>
+  <div class="r" style="--d:.3s" data-widget="price"><svg id="pxPlot" viewBox="0 0 920 220" role="img" aria-label="The S&amp;P 500 closing price wandering across the years."></svg></div>
+  <p class="r foot" style="--d:.5s">6,664 days in a row, wandering from a low near 677 to a high near 7,610.</p>
+</div></div></section>
+<section class="slide " data-i="26" data-spine="frame"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">We cannot predict the raw price. So we stop looking at the price and look at how much it <em>moved</em>.</p>
+  <p class="r line dim" style="--d:.24s">Then we drop the direction too: which way the market goes is the textbook random walk, hopeless. We keep only the <em>size</em> of the move. Wild days sit near other wild days.</p>
+  <p class="r line" style="--d:.5s">The task: from the last five sizes, is tomorrow <em>busy</em> or <em>calm</em>? Cut at the middle day, so it is 50/50. A blind guess is a straight coin, 0.5.</p>
+</div></div></section>
+<section class="slide " data-i="27" data-spine="split"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">Same little network, untouched. Same five-step recipe. And at the split, we do what the book says: <em>shuffle the days and deal them at random.</em></p>
+  <p class="r line dim" style="--d:.26s">It even feels correct. If nobody can time a random walk, then the order we file the days in cannot matter either.</p>
+  <p class="r line" style="--d:.52s">And accuracy, the number that fooled us on the loans? We cross-examine it first. It lied there because the classes were lopsided. Here they are 50/50, dead even. No majority to hide behind, so accuracy is an honest judge. We checked.</p>
+</div></div></section>
+<section class="slide " data-i="28" data-spine="measure"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="split">
+  <div class="split-l">
+    <p class="r line" style="--d:0s">We run it, and the score comes back.</p>
+    <p class="r line dim" style="--d:.22s">Right about 61 percent of the time on days it has never seen, against the 50 a coin would get. Eleven points of something.</p>
+    <div class="r srcchip" style="--d:.5s">market.ipynb &middot; shuffle split, 5 seeds</div>
+  </div>
+  <div class="split-r"><div class="r bignum trust" style="--d:.5s">0.612</div></div>
+</div></div></section>
+<section class="slide " data-i="29" data-spine="all"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">If 0.612 is lying, the lie sits at one of the stations. Three we can check right now.</p>
+  <div class="suspects">
+    <div class="r suspect clear" style="--d:.15s"><span class="su-h">the build</span><span class="su-q">did it actually learn?</span><span class="su-v">0.494 &rarr; 0.630</span><span class="su-tag">learned &check;</span></div>
+    <div class="r suspect clear" style="--d:.3s"><span class="su-h">the measure</span><span class="su-q">deciding, or parroting?</span><span class="su-v">56% busy, 66% calm</span><span class="su-tag">both sides &check;</span></div>
+    <div class="r suspect clear" style="--d:.45s"><span class="su-h">the split</span><span class="su-q">a fair exam?</span><span class="su-v">every shuffle ~0.61</span><span class="su-tag">steady &check;</span></div>
+  </div>
+  <p class="r foot" style="--d:.66s">All three clean. The model learned, it decides both ways, the score holds however we deal the cards. Trust this number.</p>
+</div></div></section>
+<section class="slide hinge" data-i="30" data-spine="split"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="center narrow">
+  <p class="r foot dim" style="--d:0s">And then something simple gets in the way. Look at what we did to clear the split. Shuffle, and score. Shuffle, and score. Five times over.</p>
+  <div class="r ask small2" style="--d:.3s">That is not five checks. It is one check, five times.</div>
+  <p class="r foot dim" style="--d:.6s">So what happens if we check it a completely different way?</p>
+</div></div></section>
+<section class="slide wn-slide" data-i="31" data-spine="split"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="wn rswap" data-widget="leak">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">Nobody in real life shuffles time. Re-shuffle to feel safe, then cut the days the way the world deals them: past to future.</p></div>
+  <div class="wn-head">
+    <div class="wn-metric"><span class="wn-label">shuffle (by the book)</span><span class="wn-val trust" id="lkSh">--</span></div>
+    <div class="wn-metric"><span class="wn-label">honest (cut by time)</span><span class="wn-val lie" id="lkCh">--</span></div>
+    <div class="wn-metric"><span class="wn-label">the gap</span><span class="wn-val" id="lkGap">--</span></div>
+  </div>
+  <svg id="lkPlot" viewBox="0 0 920 210" role="img" aria-label="Shuffle scores cluster high; the honest time-cut score sits lower. The gap is the leak."></svg>
+  <div class="wn-controls">
+    <button data-act="resplit">Re-shuffle and score</button>
+    <button data-act="time" id="lkTime">Cut by time</button>
+    <button data-act="task" class="ghost" id="lkTask">task: predict the size</button>
+    <button data-act="reset" class="ghost">Reset</button>
+  </div>
+  <p class="wn-note" id="lkNote">Every shuffle lands near 0.61, rock steady. Now cut by time instead, and watch where the honest score falls.</p>
+</div></div></section>
+<section class="slide " data-i="32" data-spine="split"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">Why should it matter which pile a day lands in? Look at two rows, side by side.</p>
+  <div class="twins r" style="--d:.25s">
+    <div class="twin-row"><span class="tw-lab">days 1&ndash;5</span><span class="tw-c a">3.83</span><span class="tw-c sh">0.19</span><span class="tw-c sh">0.10</span><span class="tw-c sh">2.71</span><span class="tw-c sh">1.12</span></div>
+    <div class="twin-row"><span class="tw-lab">days 2&ndash;6</span><span class="tw-c sh">0.19</span><span class="tw-c sh">0.10</span><span class="tw-c sh">2.71</span><span class="tw-c sh">1.12</span><span class="tw-c b">1.31</span></div>
+  </div>
+  <p class="r foot" style="--d:.5s">The window slides one day at a time, so every row shares four of five with the next. Shuffle these near-twins, and one lands in revision while its twin lands in the exam. <em>The model had already revised the exam. 0.612 was memory, not skill.</em></p>
+</div></div></section>
+<section class="slide " data-i="33" data-spine="split"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="center narrow">
+  <div class="r badge-assume" style="--d:0s">hidden assumption</div>
+  <p class="r line" style="--d:.12s">When we shuffled, we assumed the days were <em>interchangeable</em>: that one row has nothing to do with the next.</p>
+  <p class="r line dim" style="--d:.4s">The random walk is about which <em>way</em> the market moves, not how <em>big</em>. And the sizes remember each other.</p>
+  <p class="r pull-lesson" style="--d:.62s">A number can be steady, repeatable, and wrong, and it will never tell you so itself.</p>
+</div></div></section>
+<section class="slide wn-slide" data-i="34" data-spine="scale"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="wn" data-widget="drift">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">We froze the mean and spread once, on the training years, and used them forever. That is a bet: that a normal day stays normal. Hand it a feature that drifts, and watch.</p></div>
+  <div class="wn-head">
+    <div class="wn-metric"><span class="wn-label">the score</span><span class="wn-val trust" id="drScore">0.587</span></div>
+    <div class="wn-metric"><span class="wn-label">test day, average outlier</span><span class="wn-val" id="drZ">&ndash;</span><span class="wn-sub">standard deviations from the frozen normal</span></div>
+  </div>
+  <svg id="drPlot" viewBox="0 0 920 260" role="img" aria-label="A normal day in raw points drifts far above the frozen band by the test years."></svg>
+  <div class="wn-controls">
+    <button data-act="pct" class="on">size in percent</button>
+    <button data-act="pts">size in points</button>
+    <button data-act="reset" class="ghost">Reset</button>
+  </div>
+  <p class="wn-note" id="drNote">In percent, a normal day barely drifts (0.85% to 0.75%), so the frozen scaler still fits the world. The kept score holds at 0.587.</p>
+</div></div></section>
+<section class="slide " data-i="35" data-spine="scale"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="center narrow">
+  <div class="r badge-assume" style="--d:0s">hidden assumption</div>
+  <p class="r line" style="--d:.12s">Standardizing froze one mean and one spread and used them forever, betting a normal day would stay normal. We never once checked whether it would.</p>
+  <p class="r line dim" style="--d:.4s">Percent survived not because it is safe, but because it drifted little where points drifted a lot. A cleverer, backward-looking scaler lifts points only to 0.528, still nowhere near.</p>
+  <p class="r pull-lesson" style="--d:.62s">The scaler is not arithmetic. It is a memory: two numbers from the past, used to mark everything that came after.</p>
+</div></div></section>
+<section class="slide " data-i="36" data-spine="all"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">Twice now a step we ran on faith was quietly betting on something. So the recipe is not a list of steps to carry out. <em>It is a list of bets to read.</em></p>
+  <p class="r line dim" style="--d:.28s">We build the plan again from the top, eyes open. Split past to future. Scale in percent. Every station cross-examined, a longer list than ever, and every one clean. The number settles a little under 0.60.</p>
+  <p class="r line" style="--d:.54s">For the first time, not a number to trust, but <em>a process we believe in</em>. We very nearly close the book.</p>
+</div></div></section>
+<section class="slide wn-slide" data-i="37" data-spine="frame"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="wn" data-widget="eras">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">One last check we nearly skip. Was that one slice of time special? Test the same model at five moments in history instead of one.</p></div>
+  <div class="wn-head">
+    <div class="wn-metric"><span class="wn-label">mean margin over the bar</span><span class="wn-val trust" id="erMargin">+0.102</span></div>
+    <div class="wn-metric"><span class="wn-label" id="erVsLab">against a flat coin, 0.50</span><span class="wn-val faintv" id="erVerdict" style="font-size:clamp(15px,2vw,20px)">every era looks like a win</span></div>
+  </div>
+  <svg id="erPlot" viewBox="0 0 920 300" role="img" aria-label="Model accuracy across five eras against the pass mark it is judged by."></svg>
+  <div class="wn-controls">
+    <button data-act="coin" class="on">mark against the coin (0.50)</button>
+    <button data-act="lazy">mark against the lazy classmate</button>
+  </div>
+  <p class="wn-note" id="erNote">Five honest tests, and the grades come back all over the place, 0.52 to 0.65. There was never one number. Now, were the exams equally hard?</p>
+</div></div></section>
+<section class="slide " data-i="38" data-spine="frame"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">We did everything right. We found the leak and sealed it, the drift and fixed it, put every step on trial twice. And the number still came apart in our hands.</p>
+  <p class="r line dim" style="--d:.28s">The one thing that kept moving, how hard each exam was, traced back before every step we checked, to the very first thing we did: setting the exam. Choosing what it asks, and what counts as a pass. Station one. <em>Frame.</em></p>
+  <p class="r pull-lesson" style="--d:.56s">We cleared every station but the first. It was not a step we ran badly. It was a choice we never even saw as a choice.</p>
+</div></div></section>
+<section class="slide " data-i="39" data-spine="all"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">Three times we found a number, trusted it, and watched it move. Each time, one step ran on faith was hiding a bet.</p>
+  <div class="bets">
+    <div class="r bet" style="--d:.15s"><span class="bt-step">Split</span><span class="bt-txt">bet one day has nothing to do with the next. The near-twins broke it: 0.612 was memory.</span></div>
+    <div class="r bet" style="--d:.3s"><span class="bt-step">Scale</span><span class="bt-txt">bet a normal day stays normal. The drift broke it: a working model fell to a coin.</span></div>
+    <div class="r bet" style="--d:.45s"><span class="bt-step">Frame</span><span class="bt-txt">bet the question and pass-mark were simply given. The eras broke it: the single score never existed.</span></div>
+  </div>
+  <p class="r foot" style="--d:.66s">We found all three the same way: never in advance, always after the fall. And we did it one-handed, with the same tiny untouched network.</p>
+</div></div></section>
+<section class="slide " data-i="40" data-spine="all"><div class="act">3 &middot; Market: busy days and calm days</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">The sentence we wanted to write, &ldquo;the model is 61 percent accurate,&rdquo; does not survive this data for a moment. There was no single number to be right about.</p>
+  <p class="r line dim" style="--d:.26s">What survives is smaller and real: the size of recent days carries a little about the size of the next, but only with its conditions held right beside it.</p>
+  <p class="r handoff" style="--d:.5s">So we take the same problem back to the top, read each bet before it bites, and <strong>hold nothing back.</strong></p>
+</div></div></section>
+<section class="slide " data-i="41" data-spine="frame"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">Section 3 built something and could not use it. A forecast with no job is just a number. So this time we start with the job.</p>
+  <p class="r line dim" style="--d:.26s">A weather forecast for the market, read each morning like the sky. Not a flat busy-or-calm, but the <em>odds</em> across the weathers, honest about its own doubt. And not one market: seventeen at once.</p>
+</div></div></section>
+<section class="slide " data-i="42" data-spine="frame"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="split">
+  <div class="split-l">
+    <p class="r line" style="--d:0s">Weather had two readings: how <em>rough</em> the market is, and how it <em>behaves</em>. Cross them, and you get six lovely kinds of weather.</p>
+    <p class="r line dim" style="--d:.28s">And if we are honest, that was the danger. A picture that lovely is one you want to be true, and wanting a result is already half the road to fooling yourself into one.</p>
+  </div>
+  <div class="split-r"><div class="r weathers" style="--d:.5s">
+    <div class="wx-cell">calm<br>&amp; trending</div><div class="wx-cell">calm<br>&amp; reverting</div><div class="wx-cell">calm<br>&amp; wandering</div>
+    <div class="wx-cell">stormy<br>&amp; trending</div><div class="wx-cell">stormy<br>&amp; reverting</div><div class="wx-cell">stormy<br>&amp; wandering</div>
+  </div></div>
+</div></div></section>
+<section class="slide " data-i="43" data-spine="frame"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r kicker" style="--d:0s">And here is the idea the whole chapter stands on.</p>
+  <p class="r line" style="--d:.2s">The seventeen markets were never a bigger dataset to boast about. They were seventeen chances to catch ourselves believing a ghost.</p>
+  <p class="r pull-lesson" style="--d:.46s">A signal that survives being carried to a market it has never seen is real. One that dies on the journey was never there.</p>
+</div></div></section>
+<section class="slide " data-i="44" data-spine="frame"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">We tested the behaviour reading first. Sort pure noise into low, medium, high and it comes out a tidy 31, 38, 31. <em>A pretty picture is never the proof.</em></p>
+  <p class="r line dim" style="--d:.28s">And the measure was fragile. The euro read a strong minus 0.175, real mean-reversion by the look of it, and almost all of it came from one afternoon: the 8th of December 2008, a sixteen percent move. Pull that one day back, and it collapses to minus 0.038.</p>
+</div></div></section>
+<section class="slide wn-slide" data-i="45" data-spine="measure"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="wn" data-widget="wxnull">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">Two readings across all seventeen markets. Which way it leans, or how rough it is. Run the honest null and see which one is real.</p></div>
+  <div class="wn-head">
+    <div class="wn-metric"><span class="wn-label">roughness (how rough)</span><span class="wn-val trust" id="wxRough">+0.18</span><span class="wn-sub">strong on every market</span></div>
+    <div class="wn-metric"><span class="wn-label">behaviour (which way)</span><span class="wn-val lie" id="wxDir">&ndash;0.02</span><span class="wn-sub">tiny, scattered near zero</span></div>
+  </div>
+  <svg id="wxPlot" viewBox="0 0 920 250" role="img" aria-label="Roughness is strongly positive on every market; behaviour sits near zero, and only five markets scrape past the honest null."></svg>
+  <div class="wn-controls">
+    <button data-act="run">Run the honest sign-shuffle null</button>
+    <button data-act="reset" class="ghost">Reset</button>
+  </div>
+  <p class="wn-note" id="wxNote">A free shuffle destroys the roughness too and flatters us: eight of seventeen look &ldquo;significant.&rdquo; The honest null flips the sign of each move, keeping the roughness. Watch how many behaviour readings survive that.</p>
+</div></div></section>
+<section class="slide " data-i="46" data-spine="frame"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">Five survivors, scattered across unrelated assets, every one a whiff near minus 0.04. That is not a pattern. It is the picture noise paints.</p>
+  <p class="r pull-lesson" style="--d:.28s">Six kinds of weather collapse into one honest question. How rough, not which way.</p>
+  <p class="r foot dim" style="--d:.5s">The market simply has almost no behaviour to read, and saying that plainly is a finding, not a failure. This was the station Section 3 never reached: the question itself.</p>
+</div></div></section>
+<section class="slide " data-i="47" data-spine="split"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">A real signal is not the same as a clean problem. Deep learning is powerful, and easy to fool: hand it a leak and it will find it, fit it, and hand back a confident number that means nothing.</p>
+  <p class="r line dim" style="--d:.28s">So we do not try to tame the tool. We make the problem so clean that even a powerful tool cannot lie to us. Every choice is a knob; test every one; pin the few that matter by reason, in advance.</p>
+</div></div></section>
+<section class="slide " data-i="48" data-spine="scale"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="split">
+  <div class="split-l">
+    <p class="r line" style="--d:0s">We pulled the wildest days back toward the pack, trimming the extreme half a percent. The test that mattered: the real crises had to survive.</p>
+    <p class="r line dim" style="--d:.26s">They did. The S&amp;P's 2008 roughness came down from 1.74 to 1.45 percent a day, still four times a calm year's 0.30. We cleaned out the glitches without cleaning out the storms.</p>
+  </div>
+  <div class="split-r"><div class="r knobs" style="--d:.5s">
+    <div class="knob-row"><span>trim threshold</span><b class="ok">agrees 98%</b></div>
+    <div class="knob-row"><span>standardise</span><b class="ok">agrees 93%</b></div>
+    <div class="knob-cap">knobs that do not move the answer: take the simpler one</div>
+  </div></div>
+</div></div></section>
+<section class="slide wn-slide" data-i="49" data-spine="split"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="wn" data-widget="wxoverlap">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">From this week's roughness, how much of next week's can we explain? The first answer thrilled us. Then we looked at the windows.</p></div>
+  <div class="wn-head">
+    <div class="wn-metric"><span class="wn-label">edge over guessing</span><span class="wn-val trust" id="ovEdge">+30.6%</span></div>
+    <div class="wn-metric"><span class="wn-label">the two windows share</span><span class="wn-val" id="ovShare" style="font-size:clamp(20px,3vw,30px)">15 of 20 days</span></div>
+  </div>
+  <svg id="ovPlot" viewBox="0 0 920 150" role="img" aria-label="Two averaging windows overlap heavily at the weekly step, and not at all at the monthly step."></svg>
+  <div class="wn-controls">
+    <button data-act="overlap" class="on">weekly, overlapping</button>
+    <button data-act="weekly">weekly, separated</button>
+    <button data-act="monthly">monthly, no overlap</button>
+  </div>
+  <p class="wn-note" id="ovNote">A 20-day average, stepped one week, shares fifteen of its twenty days with the next. We were mostly comparing a number with itself. That +30.6% is a mirage.</p>
+</div></div></section>
+<section class="slide " data-i="50" data-spine="scale"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">What is &ldquo;normal&rdquo; roughness? Not one fixed level for all time, a rolling window of the recent past, built only from the past. But how long a window?</p>
+  <p class="r line dim" style="--d:.26s">We assumed it could not matter, and nearly waved it through. We tested instead: one year against two against three agreed only three times in four. This one was <em>load-bearing.</em> We pinned it at two years, by reason, in advance.</p>
+  <p class="r pull-lesson" style="--d:.52s">Not the trap we saw coming, but the one we almost did not.</p>
+</div></div></section>
+<section class="slide " data-i="51" data-spine="all"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">Three last guards, fixed before any result could soften them.</p>
+  <div class="guards">
+    <div class="r guard" style="--d:.15s"><span class="gu-h">the placebo</span><span class="gu-t">scramble the answers, and a real 54.8% falls to 34.5, pure chance. It found nothing in nonsense.</span></div>
+    <div class="r guard" style="--d:.3s"><span class="gu-h">the split</span><span class="gu-t">hold out the future, and hold out four whole markets the model never meets while it learns.</span></div>
+    <div class="r guard" style="--d:.45s"><span class="gu-h">the ceiling</span><span class="gu-t">a plain rule reaches ~54%. So the alarm is set at 60: anything above is a leak to hunt, not a triumph.</span></div>
+  </div>
+  <p class="r handoff" style="--d:.66s">The cage is built, and it is honest. <strong>Now, and only now, we open the door.</strong></p>
+</div></div></section>
+<section class="slide " data-i="52" data-spine="measure"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">Before a single network tries, we draw the ceiling with three baselines, dumbest first.</p>
+  <div class="ceiling">
+    <div class="r cl-bar" style="--d:.15s"><span class="cl-v">42%</span><span class="cl-l">always guess the commonest weather</span></div>
+    <div class="r cl-bar" style="--d:.3s"><span class="cl-v">54%</span><span class="cl-l">repeat last month (a rule a child could apply)</span></div>
+    <div class="r cl-bar hi" style="--d:.45s"><span class="cl-v">56%</span><span class="cl-l">a plain linear model</span></div>
+  </div>
+  <p class="r foot" style="--d:.66s">That is the ceiling: 54 to 56, and a dumb rule already reaches it. Our alarm sits at 60. Almost no room. So the only question is: with all the machinery, can we honestly beat 56?</p>
+</div></div></section>
+<section class="slide " data-i="53" data-spine="search"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="split">
+  <div class="split-l">
+    <p class="r line" style="--d:0s">The obvious reach is for more brain. A small network, a deep one, a rich one fed a whole year of history.</p>
+    <p class="r line dim" style="--d:.24s">On the sealed test, all three land in the same place: 56, 56, 54. More capacity, and the ceiling did not move an inch.</p>
+  </div>
+  <div class="split-r"><div class="r capfig" style="--d:.5s">
+    <div class="cap-row"><span class="cap-k">rich net, on its training months</span><b class="cap-t">62%</b></div>
+    <div class="cap-row"><span class="cap-k">rich net, on the sealed test</span><b class="cap-f">54%</b></div>
+    <div class="cap-cap">eight points of gap: it was memorising noise, and noise does not carry</div>
+  </div></div>
+</div></div></section>
+<section class="slide " data-i="54" data-spine="search"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">So we reached for the cures: L2, dropout, early stopping. They pulled the train-to-test gap from fourteen points to two, and the test climbed back to <em>56</em>. The ceiling. They stop the overfit throwing skill away; they cannot add skill that was never there.</p>
+  <p class="r line dim" style="--d:.3s">Then a cleverer descent: gradient descent, momentum, Adam. Three different paths down, and they end at 0.886, 0.884, 0.885. The same floor. Batch size, activation, all the same: knobs of how fast, never how high.</p>
+</div></div></section>
+<section class="slide " data-i="55" data-spine="search"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">We wrote this network by hand, forward and backward. How do we know the backward pass is even correct?</p>
+  <div class="r formula" style="--d:.24s">gradient = <span class="tk-p">p</span> &minus; <span class="tk-y">y</span></div>
+  <p class="r line dim" style="--d:.4s">We nudged each weight by a hair, measured how the loss actually moved, and set it beside what our backprop computes.</p>
+  <div class="r bignum truth" style="--d:.58s;font-size:clamp(30px,5vw,58px)">4.12&times;10<sup style="font-size:.5em;vertical-align:super">&minus;10</sup></div>
+  <p class="r foot" style="--d:.72s">The analytic and numerical gradients agreed to four parts in ten billion. The machinery is correct.</p>
+</div></div></section>
+<section class="slide wn-slide" data-i="56" data-spine="search"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="wn rswap" data-widget="searchdial">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">The last tool is the most dangerous: try many configurations and keep the best. Keeping the best of many is exactly how a number inflates by luck.</p></div>
+  <div class="wn-head">
+    <div class="wn-metric"><span class="wn-label">best of the search</span><span class="wn-val trust" id="sdBest">53.6%</span></div>
+    <div class="wn-metric"><span class="wn-label">typical config</span><span class="wn-val faintv" id="sdTyp">50.7%</span></div>
+    <div class="wn-metric"><span class="wn-label">configs tried</span><span class="wn-val" id="sdK">36</span></div>
+  </div>
+  <svg id="sdPlot" viewBox="0 0 920 290" role="img" aria-label="The best validation score creeps up as more configurations are tried, while the typical config stays put."></svg>
+  <div class="slider-row"><span class="sl-lab">how hard did you search</span><input type="range" id="sdSlider" min="4" max="120" value="36" step="1" aria-label="number of configurations"><span class="sl-val" id="sdKv">36</span></div>
+  <p class="wn-note" id="sdNote">Each dot is one configuration scored on the validation months. Slide it wider, and watch the best of the search creep up while the typical config sits right on the honest signal.</p>
+</div></div></section>
+<section class="slide " data-i="57" data-spine="search"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">So we are left holding one tempting number: the validation winner at <em>54.8</em>, sitting just over the ceiling, whispering that maybe, this time, the machinery found something real.</p>
+  <p class="r line dim" style="--d:.28s">There is exactly one honest way to find out. The thing we have been saving since the start.</p>
+  <p class="r handoff" style="--d:.5s"><strong>We open the sealed test.</strong></p>
+</div></div></section>
+<section class="slide wn-slide" data-i="58" data-spine="measure"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="wn" data-widget="scoreboard">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">Five candidates, one sealed test, opened once. The two dumb rules, two honest networks, and the 3,011-parameter monster that won the search.</p></div>
+  <svg id="sbPlot" viewBox="0 0 920 360" role="img" aria-label="On the sealed test the cheapest network is most accurate and best calibrated; the big-search winner is worst on both."></svg>
+  <div class="wn-controls">
+    <button data-act="val" class="on">by the validation score</button>
+    <button data-act="test">open the sealed test</button>
+  </div>
+  <p class="wn-note" id="sbNote">By the validation score we chose on, the 3,011-parameter big-search winner looks best of all. Now open the test.</p>
+</div></div></section>
+<section class="slide " data-i="59" data-spine="measure"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">The smallest trained model in the room, fifty-one parameters, is the most accurate and the most trustworthy at once. The largest, three thousand and eleven, cost the most, won the search, and sits worst on both.</p>
+  <p class="r pull-lesson" style="--d:.3s">Complexity and search did not buy a little. They bought less than nothing.</p>
+</div></div></section>
+<section class="slide " data-i="60" data-spine="all"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">A modest number you can trust, 56 percent with honest odds beneath it, beats a higher number you cannot. And the higher number is exactly what the machinery hands you when you let it off the leash and believe what it says about itself.</p>
+  <p class="r line dim" style="--d:.3s">The alarm we set never made a sound. The honest number turned out to be honest, which, after Sections 2 and 3, felt like something close to relief.</p>
+  <p class="r handoff" style="--d:.54s">But a forecaster is only worth keeping if it <strong>earns its keep.</strong></p>
+</div></div></section>
+<section class="slide " data-i="61" data-spine="measure"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">A number on a sealed test is not the same thing as a tool. So the last question is the only one that ever mattered: put in front of a person, on a market it has never seen, is it any good?</p>
+  <p class="r line dim" style="--d:.28s">Each month, the forecast issues its odds, a chance of calm, of normal, of stormy, and you read it the way you read the sky before you leave the house. When the market tore itself apart in early 2020, the stormy band had already swelled to fill the forecast.</p>
+</div></div></section>
+<section class="slide wn-slide" data-i="62" data-spine="measure"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="wn" data-widget="calib">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">&ldquo;It looks like it tracks&rdquo; is the oldest trap in this book. The real test: when it says a forty percent chance of a storm, does a storm come about forty percent of the time?</p></div>
+  <svg id="cbPlot" viewBox="0 0 920 330" role="img" aria-label="The forecast probabilities sit close to the diagonal of perfect calibration; acting on the warnings more than doubles the storm hit-rate."></svg>
+  <div class="wn-controls">
+    <button data-act="honest" class="on">is the number honest?</button>
+    <button data-act="pays">does acting on it pay?</button>
+  </div>
+  <p class="wn-note" id="cbNote">Checked on the four markets the model never trained on: it said 11 and 10 came, said 26 and 28 came, said 43 and 38 came, said 68 and 64 came. The points sit on the diagonal. The percentage means what it claims.</p>
+</div></div></section>
+<section class="slide " data-i="63" data-spine="measure"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">A summary hides what using it feels like. So here is the least flattering view: the forecast on Ethereum, a market it never trained on, month by month, misses printed beside hits.</p>
+  <table class="diary r" style="--d:.25s">
+    <tr><th>month</th><th>it said</th><th>storm %</th><th>what came</th><th>the verdict</th></tr>
+    <tr><td>Feb 2026</td><td>stormy</td><td>50%</td><td>stormy</td><td class="good">good call</td></tr>
+    <tr><td>Jan 2026</td><td>calm</td><td>8%</td><td>stormy</td><td class="bad">caught out</td></tr>
+    <tr><td>Nov 2025</td><td>stormy</td><td>50%</td><td>normal</td><td class="bad">false alarm</td></tr>
+    <tr><td>Mar 2026</td><td>stormy</td><td>51%</td><td>calm</td><td class="bad">false alarm</td></tr>
+    <tr><td>Apr 2026</td><td>calm</td><td>13%</td><td>calm</td><td class="mut">quiet</td></tr>
+    <tr><td>Jun 2026</td><td>calm</td><td>9%</td><td>calm</td><td class="mut">quiet</td></tr>
+  </table>
+  <p class="r foot" style="--d:.5s">Right more often than not, wrong often enough to keep you humble, and never once a certainty. The worth was never in any single month, but that month after month, the odds sit tilted your way.</p>
+</div></div></section>
+<section class="slide " data-i="64" data-spine="measure"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">And this, finally, is the forecast simply in use: the plain bulletin a person would open of a morning.</p>
+  <div class="bulletin r" style="--d:.25s">
+    <div class="bl-key"><span class="k c">calm</span><span class="k n">normal</span><span class="k s">stormy</span></div>
+    <div class="bl-row"><span class="bl-m">S&amp;P 500</span><div class="bl-bar"><i class="c" style="width:28%">28</i><i class="n" style="width:44%">44</i><i class="s" style="width:28%">28</i></div></div>
+    <div class="bl-row"><span class="bl-m">Ethereum</span><div class="bl-bar"><i class="c" style="width:67%">67</i><i class="n" style="width:25%">25</i><i class="s" style="width:8%">8</i></div></div>
+    <div class="bl-row"><span class="bl-m">Gold</span><div class="bl-bar"><i class="c" style="width:12%">12</i><i class="n" style="width:31%">31</i><i class="s" style="width:56%">56</i></div></div>
+    <div class="bl-row"><span class="bl-m">Euro</span><div class="bl-bar"><i class="c" style="width:64%">64</i><i class="n" style="width:27%">27</i><i class="s" style="width:9%">9</i></div></div>
+  </div>
+  <p class="r pull-lesson" style="--d:.5s">Section 3 left us unable to trust a high number. Here, at last, is a low one we can.</p>
+</div></div></section>
+<section class="slide " data-i="65" data-spine="all"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">Step back, and something surprising comes into focus. The architectures, the optimisers, the searches: page after page of the most powerful machinery in the field, and every last piece landed on the same modest number the plainest baseline had already reached.</p>
+  <p class="r pull-lesson" style="--d:.3s">The deep learning, the thing this chapter was ostensibly about, changed almost nothing.</p>
+</div></div></section>
+<section class="slide " data-i="66" data-spine="all"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">The real work was somewhere else, done before the first network ran. It was in the cleaning: the ghost axis, the overlap leak, the normal built from the past alone, the load-bearing knob we nearly waved through.</p>
+  <p class="r line dim" style="--d:.28s">We spent our effort on the problem, not the model, and that is exactly why the model could not fool us. <em>A powerful tool turned loose in a clean cage has nowhere to hide.</em></p>
+  <p class="r line" style="--d:.54s">We were wrong, repeatedly. What made the difference was a loop we trusted to catch us. The relief was not that we had become clever. It was that we had stopped needing to be. <em>We could be wrong and know we would catch it.</em></p>
+</div></div></section>
+<section class="slide " data-i="67" data-spine="all"><div class="act">4 &middot; A weather forecast for the market</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">So the real product was never the forecast. <strong>What we made was the loop.</strong> The novice and the master walked the exact same five steps. The only thing that changed was that the master knew to distrust each one.</p>
+  <p class="r line dim" style="--d:.3s">That loop has run quietly under the loan clients, the market, and now the weather, the real subject of this whole book. And we have not once given it a name.</p>
+  <p class="r handoff" style="--d:.54s"><strong>It is time we did.</strong></p>
+</div></div></section>
+<section class="slide " data-i="68" data-spine="off"><div class="act">5 &middot; The thing worth keeping</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">So here we are at the end. We started doing the most natural thing in the world: we hid some data, let the model guess, counted the hits, read off a number, and were ready to believe it.</p>
+  <p class="r line dim" style="--d:.28s">Then we watched that belief break, again and again. The loan number was high and quietly lying. The market's edge was tomorrow leaking into today. And then we went back to that same market, watching this time, and it did not catch us once.</p>
+  <p class="r pull-lesson" style="--d:.54s">Every single time, the enemy wore the face of a number that looked exactly like a good one.</p>
+</div></div></section>
+<section class="slide wn-slide lineup-slide" data-i="69" data-spine="off"><div class="act">5 &middot; The thing worth keeping</div><div class="slide-body"><div class="lineup" data-widget="lineup">
+  <div class="wn-top"><p class="r kicker" style="--d:0s">Here are six good-looking numbers from the journey. One is honest. Turn each one over and see.</p></div>
+  <div class="lu-grid" id="luGrid"></div>
+  <p class="lu-tally" id="luTally">Click a card to turn it over.</p>
+</div></div></section>
+<section class="slide " data-i="70" data-spine="off"><div class="act">5 &middot; The thing worth keeping</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">That enemy has a name. The books call it <em>data snooping</em>, and the definition you will find is narrow: you try a great many models and keep the one that scored best, and it scored best only by luck. The winner's curse.</p>
+  <p class="r line dim" style="--d:.3s">That is real, and we met it head on. But almost nothing that actually fooled us was &ldquo;trying too many models.&rdquo; The leak was a quiet assumption about cutting the data. The lie was the wrong ruler on lopsided classes. The ghost was one wild day and a broken test.</p>
+</div></div></section>
+<section class="slide " data-i="71" data-spine="off"><div class="act">5 &middot; The thing worth keeping</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">So here is the definition we actually earned. Snooping is the plain, everyday result of trusting a number without checking what each step quietly took for granted.</p>
+  <div class="r bigstate" style="--d:.3s">It is not the exception.<br><strong>It is the default.</strong></div>
+  <p class="r foot dim" style="--d:.54s">The textbook names one corner of the room. What we found was the whole room. A number can be bent by a leak, the wrong measure, one bad day, a broken test, secret overlap, or too much searching, and from the outside, you cannot tell any of them from an honest one.</p>
+</div></div></section>
+<section class="slide " data-i="72" data-spine="off"><div class="act">5 &middot; The thing worth keeping</div><div class="slide-body"><div class="wide">
+  <p class="r kicker" style="--d:0s">Which is why the thing worth keeping was never a result. It was a way of working, and it is simpler than it sounds.</p>
+  <div class="method">
+    <div class="r mstep" style="--d:.14s"><span class="ms-n">1</span><b>Name the bet.</b> Before you run a step, say out loud what it assumes, and ask the data in front of you, not the textbook, whether that is true here.</div>
+    <div class="r mstep" style="--d:.26s"><span class="ms-n">2</span><b>Clean before you reach for the tool.</b> A powerful tool let loose on a messy problem will find the mess and proudly call it a discovery.</div>
+    <div class="r mstep" style="--d:.38s"><span class="ms-n">3</span><b>Test on ground it has never seen.</b> A real pattern travels to a new place; a fake one dies on the road.</div>
+    <div class="r mstep" style="--d:.5s"><span class="ms-n">4</span><b>Seal one test.</b> Open it exactly once, at the very end, and never let it help you choose.</div>
+    <div class="r mstep" style="--d:.62s"><span class="ms-n">5</span><b>Know the ceiling.</b> Work out beforehand how good an honest answer could be, so a number sailing past it makes you suspicious, not pleased.</div>
+  </div>
+</div></div></section>
+<section class="slide " data-i="73" data-spine="off"><div class="act">5 &middot; The thing worth keeping</div><div class="slide-body"><div class="center narrow">
+  <p class="r line" style="--d:0s">And underneath all of it, the quietest lesson, the one that took three chapters to feel. Do not try to be right the first time. You will not be, and you do not need to be.</p>
+  <p class="r line dim" style="--d:.3s">Build yourself a loop that catches you when you are wrong, and then trust the loop instead of trusting yourself. That, in the end, was where the calm came from. Not from being clever, but from having a way of working we could lean on even as we kept getting things wrong.</p>
+</div></div></section>
+<section class="slide title-slide finale" data-i="74" data-spine="off"><div class="act">5 &middot; The thing worth keeping</div><div class="slide-body"><div class="center">
+  <div class="r eyebrow-big" style="--d:0s">We set out to find a number we could trust. We came back with something better.</div>
+  <div class="r closer" style="--d:.2s">The trust was never<br>in the number.</div>
+  <div class="r rule" style="--d:.4s"></div>
+  <p class="r lede" style="--d:.5s">It is in the method that earned it, the one you can walk back through, one honest step at a time, until you can see it had no room left to fool you. And that is worth far more than any answer it will ever give you.</p>
+</div></div></section>
+</div></div>
+
+<div id="spine">
+  <div class="sp-node" data-k="frame"><i></i><span>Frame</span></div><div class="sp-link"></div>
+  <div class="sp-node" data-k="split"><i></i><span>Split</span></div><div class="sp-link"></div>
+  <div class="sp-node" data-k="scale"><i></i><span>Scale</span></div><div class="sp-link"></div>
+  <div class="sp-node" data-k="search"><i></i><span>Search</span></div><div class="sp-link"></div>
+  <div class="sp-node" data-k="measure"><i></i><span>Measure</span></div>
+</div>
+<button id="theme" title="Toggle light/dark" aria-label="Toggle theme">&#9788;</button>
+<button id="menuBtn" title="Contents" aria-label="Contents">&#9776;</button>
+<div id="menu" hidden><div class="menu-panel"><div class="menu-h">Contents</div><button class="menu-item" data-go="0">Start</button><button class="menu-item" data-go="1">&sect;0 &middot; The number we are about to trust</button><button class="menu-item" data-go="8">&sect;1 &middot; What deep learning really is, and the plan</button><button class="menu-item" data-go="15">&sect;2 &middot; Loan: the well-behaved one that still lies</button><button class="menu-item" data-go="25">&sect;3 &middot; Market: busy days and calm days</button><button class="menu-item" data-go="41">&sect;4 &middot; A weather forecast for the market</button><button class="menu-item" data-go="68">&sect;5 &middot; The thing worth keeping</button></div></div>
+<div id="hint"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> or scroll to move</div>
+<div id="chrome"><span id="count"><b>1</b> / 75</span>
+  <button class="nav" id="prev" aria-label="Previous">&larr;</button>
+  <button class="nav" id="next" aria-label="Next">&rarr;</button></div>
+<div id="bar"><i id="fill"></i></div>
+
+<script>
+const NULLD={"n": 252, "val": [0.504, 0.5, 0.5238, 0.5397, 0.4921, 0.504, 0.496, 0.4762, 0.4683, 0.5357, 0.496, 0.5397, 0.4405, 0.4881, 0.4841, 0.4563, 0.5159, 0.5476, 0.5278, 0.5, 0.5198, 0.5317, 0.4722, 0.4881, 0.4643, 0.5317, 0.4881, 0.5278, 0.5079, 0.5, 0.4683, 0.4365, 0.4484, 0.4563, 0.5357, 0.496, 0.4881, 0.4603, 0.4484, 0.4881, 0.5357, 0.5079, 0.5714, 0.5119, 0.5516, 0.496, 0.4405, 0.504, 0.5794, 0.5198, 0.5357, 0.4881, 0.4524, 0.4921, 0.4802, 0.4683, 0.4841, 0.5437, 0.5119, 0.4921, 0.5079, 0.4762, 0.4762, 0.5238, 0.4325, 0.4722, 0.4881, 0.4841, 0.5238, 0.4881, 0.5476, 0.4524, 0.5238, 0.4722, 0.5238, 0.6032, 0.5079, 0.496, 0.4603, 0.4841, 0.4048, 0.504, 0.5437, 0.4722, 0.504, 0.4722, 0.4722, 0.4921, 0.4603, 0.5198, 0.4563, 0.5198, 0.5238, 0.5476, 0.5198, 0.5159, 0.5119, 0.5516, 0.5437, 0.4722, 0.5079, 0.4246, 0.4841, 0.5556, 0.5357, 0.5238, 0.5079, 0.4563, 0.4603, 0.5079, 0.504, 0.4921, 0.4405, 0.4921, 0.4683, 0.5278, 0.5556, 0.4802, 0.4762, 0.5159, 0.5516, 0.4643, 0.4881, 0.4563, 0.4484, 0.4921, 0.4802, 0.4087, 0.496, 0.5198, 0.5357, 0.5079, 0.5476, 0.5238, 0.4802, 0.4881, 0.5278, 0.4921, 0.5119, 0.5278, 0.5198, 0.4643, 0.5079, 0.4722, 0.4762, 0.4802, 0.5675, 0.4563, 0.5397, 0.5119, 0.5278, 0.4722, 0.504, 0.5317, 0.4802, 0.4802, 0.5675, 0.504, 0.5198, 0.5159, 0.4722, 0.5238, 0.4643, 0.5556, 0.4802, 0.5119, 0.504, 0.5198, 0.5476, 0.4603, 0.5278, 0.5119, 0.504, 0.5317, 0.5357, 0.5159, 0.5198, 0.4484, 0.5, 0.4921, 0.4563, 0.4722, 0.4603, 0.4683, 0.5, 0.5397, 0.496, 0.5159, 0.5, 0.5317, 0.504, 0.5119, 0.4722, 0.5437, 0.5159, 0.4881, 0.4841, 0.504, 0.5238, 0.5198], "test": [0.4643, 0.5079, 0.5079, 0.5476, 0.5198, 0.5119, 0.5, 0.5079, 0.4246, 0.504, 0.4722, 0.4405, 0.4881, 0.4246, 0.4841, 0.5516, 0.4563, 0.4722, 0.4881, 0.5198, 0.4881, 0.4841, 0.4683, 0.4722, 0.4762, 0.4325, 0.4722, 0.4921, 0.4802, 0.5278, 0.4762, 0.496, 0.5198, 0.5159, 0.5119, 0.5238, 0.5278, 0.5079, 0.5079, 0.4921, 0.5238, 0.504, 0.5754, 0.504, 0.4683, 0.5119, 0.5198, 0.5119, 0.504, 0.496, 0.4643, 0.5317, 0.4881, 0.5397, 0.4127, 0.5238, 0.5198, 0.4762, 0.504, 0.4722, 0.5397, 0.5317, 0.5159, 0.4722, 0.4921, 0.4603, 0.4444, 0.5238, 0.5357, 0.4802, 0.4683, 0.5278, 0.5238, 0.4802, 0.4524, 0.5079, 0.496, 0.4921, 0.4405, 0.4484, 0.5, 0.5357, 0.4167, 0.504, 0.5278, 0.4683, 0.4881, 0.496, 0.4841, 0.4762, 0.504, 0.5198, 0.5198, 0.4921, 0.5198, 0.4881, 0.4921, 0.5357, 0.4762, 0.4603, 0.504, 0.5595, 0.5198, 0.4722, 0.4683, 0.4722, 0.5159, 0.504, 0.4563, 0.5, 0.4603, 0.5397, 0.4563, 0.4563, 0.4841, 0.5397, 0.5159, 0.5, 0.5238, 0.5317, 0.5278, 0.5, 0.4881, 0.5476, 0.5278, 0.504, 0.4881, 0.5119, 0.4206, 0.5476, 0.5238, 0.5675, 0.5595, 0.5119, 0.5079, 0.4444, 0.5357, 0.5119, 0.496, 0.4921, 0.4841, 0.5317, 0.4643, 0.5, 0.5, 0.5397, 0.5278, 0.4524, 0.5079, 0.4762, 0.5119, 0.5357, 0.5714, 0.4722, 0.4683, 0.4563, 0.5119, 0.4841, 0.4762, 0.5397, 0.4802, 0.5238, 0.4603, 0.5556, 0.5079, 0.4841, 0.4921, 0.4524, 0.5238, 0.5159, 0.4881, 0.504, 0.5476, 0.4524, 0.5079, 0.5675, 0.4563, 0.5198, 0.5079, 0.5198, 0.5159, 0.5238, 0.496, 0.5159, 0.4921, 0.4881, 0.4683, 0.4921, 0.5238, 0.4762, 0.4921, 0.4683, 0.4643, 0.4881, 0.5437, 0.4365, 0.5198, 0.4603, 0.5238, 0.4722]}, NOISE={"ep": [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360, 370, 380, 390, 400], "train": [0.5167, 0.7111, 0.75, 0.7667, 0.7833, 0.8222, 0.8333, 0.8389, 0.85, 0.8611, 0.8833, 0.9, 0.9111, 0.9222, 0.9278, 0.9444, 0.9556, 0.9556, 0.9556, 0.9611, 0.9611, 0.9667, 0.9722, 0.9722, 0.9778, 0.9778, 0.9833, 0.9889, 0.9944, 0.9944, 0.9944, 0.9944, 0.9944, 0.9944, 0.9944, 0.9944, 0.9944, 0.9944, 0.9944, 0.9944, 0.9944], "val": [0.5389, 0.4722, 0.45, 0.45, 0.4444, 0.4444, 0.4556, 0.45, 0.4722, 0.4833, 0.4889, 0.4833, 0.4889, 0.5, 0.5, 0.5056, 0.5, 0.4889, 0.4889, 0.4889, 0.4889, 0.4944, 0.4944, 0.4944, 0.5, 0.5, 0.4944, 0.4944, 0.4889, 0.4889, 0.4944, 0.4944, 0.4944, 0.4889, 0.4889, 0.4889, 0.4889, 0.4889, 0.4889, 0.4889, 0.4944]}, LOAN={"grid": [0.0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.3, 0.31, 0.32, 0.33, 0.34, 0.35, 0.36, 0.37, 0.38, 0.39, 0.4, 0.41, 0.42, 0.43, 0.44, 0.45, 0.46, 0.47, 0.48, 0.49, 0.5, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.57, 0.58, 0.59, 0.6, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], "tab": [[1353, 4647, 0, 0], [1352, 4618, 29, 1], [1349, 4598, 49, 4], [1346, 4561, 86, 7], [1346, 4516, 131, 7], [1343, 4463, 184, 10], [1340, 4419, 228, 13], [1337, 4342, 305, 16], [1333, 4230, 417, 20], [1326, 4097, 550, 27], [1313, 3934, 713, 40], [1299, 3723, 924, 54], [1286, 3482, 1165, 67], [1256, 3173, 1474, 97], [1207, 2873, 1774, 146], [1159, 2532, 2115, 194], [1100, 2193, 2454, 253], [1049, 1889, 2758, 304], [981, 1571, 3076, 372], [925, 1308, 3339, 428], [874, 1093, 3554, 479], [835, 953, 3694, 518], [804, 842, 3805, 549], [778, 761, 3886, 575], [762, 682, 3965, 591], [748, 647, 4000, 605], [733, 614, 4033, 620], [719, 573, 4074, 634], [705, 541, 4106, 648], [679, 506, 4141, 674], [658, 476, 4171, 695], [644, 444, 4203, 709], [626, 411, 4236, 727], [611, 382, 4265, 742], [599, 360, 4287, 754], [587, 345, 4302, 766], [575, 331, 4316, 778], [567, 318, 4329, 786], [559, 303, 4344, 794], [549, 290, 4357, 804], [545, 282, 4365, 808], [538, 273, 4374, 815], [529, 263, 4384, 824], [524, 255, 4392, 829], [516, 249, 4398, 837], [508, 245, 4402, 845], [499, 235, 4412, 854], [493, 227, 4420, 860], [489, 222, 4425, 864], [480, 211, 4436, 873], [472, 202, 4445, 881], [460, 194, 4453, 893], [452, 187, 4460, 901], [438, 177, 4470, 915], [425, 168, 4479, 928], [409, 160, 4487, 944], [393, 147, 4500, 960], [369, 138, 4509, 984], [349, 129, 4518, 1004], [330, 120, 4527, 1023], [312, 109, 4538, 1041], [290, 99, 4548, 1063], [274, 92, 4555, 1079], [265, 91, 4556, 1088], [257, 85, 4562, 1096], [249, 81, 4566, 1104], [235, 79, 4568, 1118], [225, 77, 4570, 1128], [213, 74, 4573, 1140], [199, 71, 4576, 1154], [186, 68, 4579, 1167], [171, 63, 4584, 1182], [155, 57, 4590, 1198], [138, 47, 4600, 1215], [115, 41, 4606, 1238], [102, 34, 4613, 1251], [83, 33, 4614, 1270], [76, 30, 4617, 1277], [72, 27, 4620, 1281], [67, 24, 4623, 1286], [61, 23, 4624, 1292], [54, 22, 4625, 1299], [54, 21, 4626, 1299], [49, 21, 4626, 1304], [49, 20, 4627, 1304], [44, 20, 4627, 1309], [43, 17, 4630, 1310], [38, 17, 4630, 1315], [32, 16, 4631, 1321], [30, 16, 4631, 1323], [27, 15, 4632, 1326], [25, 13, 4634, 1328], [25, 13, 4634, 1328], [22, 11, 4636, 1331], [18, 9, 4638, 1335], [16, 8, 4639, 1337], [11, 7, 4640, 1342], [10, 6, 4641, 1343], [5, 4, 4643, 1348], [3, 2, 4645, 1350], [0, 0, 4647, 1353]], "defaulters": 1353, "payers": 4647, "total": 6000, "argmax": {"TP": 472, "FN": 881, "TN": 4445, "FP": 202}, "cuts": {"random": [0.82, 0.813, 0.82, 0.817, 0.814], "stratified": 0.815, "position": 0.808}}, MKT={"vol_shuffle": [0.607, 0.624, 0.621, 0.618, 0.59], "V_SH": 0.612, "v_ch": [0.587, 0.586, 0.585, 0.588, 0.589], "V_CH": 0.587, "D_SH": 0.54, "D_CH": 0.539, "d_sh": [0.559, 0.53, 0.53, 0.535, 0.548], "d_ch": [0.548, 0.532, 0.542, 0.542, 0.531], "twin0": [3.834, 0.192, 0.096, 2.709, 1.119], "twin1": [0.192, 0.096, 2.709, 1.119, 1.306], "marks": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300], "curve": [0.494, 0.504, 0.513, 0.523, 0.534, 0.546, 0.556, 0.567, 0.579, 0.594, 0.604, 0.608, 0.613, 0.615, 0.616, 0.618, 0.619, 0.62, 0.621, 0.62, 0.621, 0.624, 0.624, 0.626, 0.627, 0.627, 0.627, 0.628, 0.628, 0.627, 0.628, 0.628, 0.629, 0.629, 0.629, 0.629, 0.629, 0.629, 0.629, 0.629, 0.63, 0.629, 0.629, 0.629, 0.629, 0.63, 0.63, 0.63, 0.63], "bshare": 0.452, "bhit": 0.564, "chit": 0.659, "PCT_FROZ": 0.587, "PTS_FROZ": 0.509, "PTS_ROLL": 0.528, "m_froz": 10.57, "s_froz": 10.61, "m_test": 37.07, "zmean": 2.73, "zmax": 43.7, "drift": [55.8, 15.65, 17.65, 16.4, 14.68, 14.92, 14.65, 14.48, 13.31, 13.43, 13.04, 11.68, 10.55, 10.25, 11.67, 12.01, 12.18, 12.2, 11.98, 10.79, 9.24, 8.01, 7.33, 6.75, 6.42, 6.31, 6.21, 6.18, 5.97, 6.15, 6.06, 6.19, 6.2, 6.16, 5.73, 6.49, 6.48, 6.13, 6.0, 6.49, 6.41, 7.96, 9.17, 11.38, 12.96, 13.54, 13.83, 16.91, 19.46, 19.43, 19.74, 19.43, 17.24, 12.02, 10.51, 8.55, 9.22, 9.53, 9.12, 8.97, 9.16, 7.98, 8.28, 10.77, 12.57, 12.64, 12.76, 12.91, 10.69, 8.63, 8.2, 8.27, 8.59, 8.53, 8.98, 8.75, 9.56, 9.66, 9.11, 9.2, 9.81, 10.72, 11.08, 11.74, 13.91, 14.17, 15.07, 15.46, 15.35, 14.64, 13.01, 11.62, 9.46, 9.07, 8.13, 7.7, 7.36, 9.45, 12.63, 13.55, 14.24, 17.28, 20.82, 17.96, 18.07, 19.37, 20.03, 16.16, 20.81, 32.44, 36.02, 37.11, 40.59, 41.93, 29.84, 26.83, 25.95, 24.19, 27.18, 31.57, 37.76, 42.2, 46.57, 48.49, 45.86, 41.21, 36.05, 33.12, 28.7, 26.34, 26.47, 26.17, 30.13, 30.77, 32.99, 36.79, 44.68, 43.5, 42.74, 44.38, 43.01, 38.17], "split_frac": 0.8, "close_series": [1455.2, 1395.1, 1447.8, 1474.5, 1436.5, 1351.5, 1315.9, 1209.5, 1224.4, 1106.4, 1138.7, 1133.1, 1122.7, 1020.3, 950.7, 882.5, 909.0, 804.2, 920.8, 998.7, 1018.2, 1069.3, 1157.0, 1140.6, 1128.9, 1116.3, 1184.2, 1167.9, 1180.6, 1197.3, 1230.4, 1195.8, 1256.5, 1275.9, 1291.2, 1249.1, 1336.3, 1396.7, 1433.4, 1484.3, 1506.3, 1489.4, 1474.8, 1333.2, 1325.8, 1377.7, 1296.3, 907.8, 871.6, 696.3, 929.2, 940.7, 1071.7, 1091.5, 1066.2, 1211.7, 1095.3, 1064.6, 1198.0, 1274.5, 1298.4, 1325.7, 1260.3, 1194.9, 1215.8, 1365.7, 1402.3, 1341.5, 1465.8, 1409.2, 1513.2, 1593.4, 1651.8, 1663.5, 1763.3, 1837.5, 1872.2, 1900.5, 1930.7, 1935.1, 2002.3, 2109.7, 2085.5, 2046.7, 1953.0, 2083.6, 1893.4, 2066.7, 2079.1, 2187.0, 2143.2, 2257.8, 2373.5, 2365.7, 2477.8, 2529.1, 2637.0, 2731.2, 2639.4, 2726.7, 2871.7, 2722.2, 2642.3, 2867.2, 2886.7, 2847.6, 2996.0, 3221.3, 2746.6, 2852.5, 3276.0, 3351.6, 3666.7, 3916.4, 4173.4, 4290.6, 4537.0, 4685.2, 4577.1, 4543.1, 4176.8, 4210.2, 3677.9, 3822.4, 4045.6, 4137.6, 4565.7, 4337.4, 4567.8, 4997.9, 5022.2, 5469.3, 5648.4, 5929.0, 5937.3, 5712.2, 5970.4, 6373.5, 6629.1, 6909.8, 6869.5, 7412.8], "n_days": 6664, "price_lo": 677, "price_hi": 7610, "eras": [{"era": 1, "model": 0.519, "busy": 0.456, "lazy": 0.544, "margin": -0.025}, {"era": 2, "model": 0.602, "busy": 0.541, "lazy": 0.541, "margin": 0.061}, {"era": 3, "model": 0.651, "busy": 0.374, "lazy": 0.626, "margin": 0.026}, {"era": 4, "model": 0.654, "busy": 0.472, "lazy": 0.528, "margin": 0.127}, {"era": 5, "model": 0.582, "busy": 0.522, "lazy": 0.522, "margin": 0.06}], "headline": 0.112}, WX={"markets": [{"name": "AUDUSD", "rough": 0.175, "dir": -0.038, "surv": 1}, {"name": "EURUSD", "rough": 0.161, "dir": -0.038, "surv": 1}, {"name": "US30", "rough": 0.237, "dir": -0.045, "surv": 1}, {"name": "USDJPY", "rough": 0.157, "dir": -0.036, "surv": 1}, {"name": "XAGUSD", "rough": 0.189, "dir": -0.037, "surv": 1}, {"name": "BTCUSD", "rough": 0.154, "dir": -0.003, "surv": 0}, {"name": "ETHUSD", "rough": 0.129, "dir": -0.018, "surv": 0}, {"name": "GBPUSD", "rough": 0.121, "dir": -0.0, "surv": 0}, {"name": "NZDUSD", "rough": 0.148, "dir": -0.007, "surv": 0}, {"name": "UKOIL", "rough": 0.237, "dir": -0.03, "surv": 0}, {"name": "US100", "rough": 0.256, "dir": -0.023, "surv": 0}, {"name": "US2000", "rough": 0.286, "dir": -0.006, "surv": 0}, {"name": "US500", "rough": 0.2, "dir": 0.015, "surv": 0}, {"name": "USDCAD", "rough": 0.18, "dir": -0.023, "surv": 0}, {"name": "USDCHF", "rough": 0.144, "dir": -0.02, "surv": 0}, {"name": "USOIL", "rough": 0.215, "dir": -0.021, "surv": 0}, {"name": "XAUUSD", "rough": 0.083, "dir": -0.027, "surv": 0}], "panel_rough": 0.181, "panel_dir": -0.021, "surv_right": 5, "surv_wrong": 8, "n_markets": 17, "edge_overlap": 30.6, "edge_weekly": 3.4, "edge_monthly": 14.2, "r2_overlap": 0.7, "sp2008": [1.74, 1.45], "sp2020": [1.35, 1.16], "calm": 0.3, "knob_trim": 98, "knob_std": 93, "knob_window": 76, "placebo_real": 54.8, "placebo_scrambled": 34.5, "feat_this": 27, "feat_last": 1, "ceiling": 54, "alarm": 60, "n_train": 3000, "n_val": 642, "n_test": 635, "n_train_mkts": 13, "n_held_mkts": 4, "board": [{"name": "persistence rule", "params": 0, "val": 52.3, "test": 53.9, "cal": 0.461, "trained": 0}, {"name": "logistic", "params": 9, "val": 51.2, "test": 56.4, "cal": 0.028, "trained": 1}, {"name": "MLP [2, 8, 3]", "params": 51, "val": 51.1, "test": 56.4, "cal": 0.012, "trained": 1}, {"name": "MLP [2, 32, 16, 3]", "params": 675, "val": 53.1, "test": 56.4, "cal": 0.026, "trained": 1}, {"name": "big-search winner", "params": 3011, "val": 54.8, "test": 54.2, "cal": 0.069, "trained": 1}], "search": {"configs": [52.82, 51.46, 49.43, 50.75, 50.54, 50.69, 51.81, 49.27, 52.3, 49.48, 50.75, 52.2, 51.9, 50.07, 53.39, 51.49, 49.71, 51.06, 49.88, 51.59, 49.19, 51.65, 48.61, 52.48, 51.37, 52.83, 50.04, 48.17, 49.15, 50.67, 53.65, 51.77, 52.77, 49.82, 50.28, 50.55, 52.58, 50.24, 50.61, 53.19, 49.82, 50.96, 49.18, 50.68, 52.12, 52.61, 49.12, 47.59, 51.73, 53.25, 50.05, 51.36, 51.04, 48.09, 47.39, 50.91, 51.66, 48.95, 50.56, 49.93, 49.7, 49.26, 52.58, 51.01, 50.68, 50.34, 51.51, 50.31, 51.2, 49.94, 51.45, 50.56, 51.73, 48.84, 49.88, 49.27, 53.06, 50.1, 50.83, 48.59, 49.62, 48.59, 50.74, 49.57, 52.94, 49.68, 52.22, 50.67, 51.56, 49.62, 50.79, 50.64, 49.79, 51.61, 48.84, 50.62, 50.58, 50.98, 49.3, 51.76, 49.64, 50.05, 49.56, 50.34, 51.37, 54.78, 47.29, 52.1, 52.07, 52.86, 51.23, 51.51, 53.31, 51.04, 51.16, 50.91, 51.52, 53.32, 49.72, 52.51], "ceiling": 56, "persistence": 54, "best36": 53.6, "best120": 54.8, "typical": 50.7}, "calib": [[11, 10], [26, 28], [43, 38], [68, 64]], "umbrella": {"base": 27, "warned": 60, "quiet": 17, "discrim": 1.45}, "diary": [{"m": "Nov 2025", "said": "stormy", "p": 50, "came": "normal", "v": "false alarm"}, {"m": "Dec 2025", "said": "normal", "p": 35, "came": "calm", "v": "quiet"}, {"m": "Jan 2026", "said": "calm", "p": 8, "came": "stormy", "v": "caught out"}, {"m": "Feb 2026", "said": "stormy", "p": 50, "came": "stormy", "v": "good call"}, {"m": "Mar 2026", "said": "stormy", "p": 51, "came": "calm", "v": "false alarm"}, {"m": "Apr 2026", "said": "calm", "p": 13, "came": "calm", "v": "quiet"}, {"m": "May 2026", "said": "calm", "p": 3, "came": "normal", "v": "quiet"}, {"m": "Jun 2026", "said": "calm", "p": 9, "came": "calm", "v": "quiet"}], "bulletin": [{"mkt": "S&P 500", "calm": 28, "normal": 44, "stormy": 28}, {"mkt": "Ethereum", "calm": 67, "normal": 25, "stormy": 8}, {"mkt": "Gold", "calm": 12, "normal": 31, "stormy": 56}, {"mkt": "Euro", "calm": 64, "normal": 27, "stormy": 9}]};
+const WIDGETS={};
+const track=document.getElementById('track'),slides=[...document.querySelectorAll('.slide')],
+  N=slides.length,fill=document.getElementById('fill'),countB=document.querySelector('#count b'),
+  prev=document.getElementById('prev'),next=document.getElementById('next'),spine=document.getElementById('spine'),
+  menuBtn=document.getElementById('menuBtn'),menu=document.getElementById('menu');
+let idx=0,lock=false;
+function initWidgets(sl){sl.querySelectorAll('[data-widget]').forEach(el=>{
+  if(el.dataset.ready)return;el.dataset.ready='1';const f=WIDGETS[el.dataset.widget];if(f)f(el);});}
+function setSpine(sl){const k=sl.dataset.spine;
+  if(!k||k==='off'){spine.classList.remove('show');return;}
+  spine.classList.add('show');
+  spine.querySelectorAll('.sp-node').forEach(nd=>nd.classList.toggle('on',k==='all'||nd.dataset.k===k));}
+function go(n){
+  n=Math.max(0,Math.min(N-1,n));idx=n;
+  track.style.transform='translateX(-'+(n*100)+'vw)';
+  slides.forEach((s,i)=>s.classList.toggle('is-active',i===n));
+  fill.style.width=(n/(N-1)*100)+'%';countB.textContent=n+1;
+  prev.disabled=n===0;next.disabled=n===N-1;initWidgets(slides[n]);setSpine(slides[n]);
+  if(history.replaceState)history.replaceState(null,'','#'+(n+1));
+}
+next.onclick=()=>go(idx+1);prev.onclick=()=>go(idx-1);
+addEventListener('keydown',e=>{
+  if(!menu.hidden){if(e.key==='Escape')menu.hidden=true;return;}
+  if(e.target.tagName==='INPUT')return;
+  if(e.target.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter'))return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();go(idx+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(idx-1);}
+  else if(e.key==='Home'){go(0);}else if(e.key==='End'){go(N-1);}});
+addEventListener('wheel',e=>{if(lock)return;const d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+  if(Math.abs(d)<18)return;lock=true;go(idx+(d>0?1:-1));setTimeout(()=>lock=false,640);},{passive:true});
+let x0=null;addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;
+  if(Math.abs(dx)>50)go(idx+(dx<0?1:-1));x0=null;},{passive:true});
+const root=document.documentElement;
+document.getElementById('theme').onclick=()=>{const cur=root.getAttribute('data-theme')||
+  (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  root.setAttribute('data-theme',cur==='dark'?'light':'dark');};
+menuBtn.onclick=()=>{menu.hidden=false;const its=[...menu.querySelectorAll('.menu-item')];let cur=its[0];
+  its.forEach(it=>{if(+it.dataset.go<=idx)cur=it;});its.forEach(it=>it.classList.toggle('cur',it===cur));};
+menu.onclick=(e)=>{if(e.target===menu){menu.hidden=true;return;}
+  const g=e.target.closest('.menu-item');if(g){go(+g.dataset.go);menu.hidden=true;}};
+
+/* ---- shared plot helpers ---- */
+const NS='http://www.w3.org/2000/svg';
+function mk(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---- Winner's Number ---- */
+WIDGETS.winners=function(el){
+  const val=NULLD.val, test=NULLD.test, M=val.length;
+  const svg=el.querySelector('#wnPlot'),W=920,H=400,L=64,R=26,T=18,B=40,y0=0.40,y1=0.66;
+  const xOf=i=>L+(i/(M-1))*(W-L-R), yOf=a=>T+((y1-a)/(y1-y0))*(H-T-B);
+  const stat=mk('g',{}),dyn=mk('g',{});svg.appendChild(stat);svg.appendChild(dyn);
+  for(const a of [0.40,0.45,0.50,0.55,0.60,0.65]){const yy=yOf(a),coin=Math.abs(a-0.50)<1e-9;
+    stat.appendChild(mk('line',{x1:L,x2:W-R,y1:yy,y2:yy,stroke:coin?'var(--faint)':'var(--line)','stroke-width':coin?1.2:1,'stroke-dasharray':coin?'5 4':''}));
+    const tx=mk('text',{x:L-9,y:yy+4,'text-anchor':'end','font-family':'var(--mono)','font-size':12,fill:'var(--faint)'});tx.textContent=a.toFixed(2);stat.appendChild(tx);}
+  const clab=mk('text',{x:W-R,y:yOf(0.50)-7,'text-anchor':'end','font-family':'var(--sans)','font-size':12,fill:'var(--faint)'});clab.textContent='a true coin: 0.50';stat.appendChild(clab);
+  const bestEl=el.querySelector('#wnBest'),kEl=el.querySelector('#wnK'),sealWrap=el.querySelector('#wnSealedWrap'),
+    sealEl=el.querySelector('#wnSealed'),note=el.querySelector('#wnNote');
+  let k=0,sealed=false;
+  function champ(){let m=-1,mi=0;for(let i=0;i<k;i++)if(val[i]>m){m=val[i];mi=i;}return{m,mi};}
+  function render(){while(dyn.firstChild)dyn.removeChild(dyn.firstChild);
+    for(let i=0;i<k;i++)dyn.appendChild(mk('circle',{cx:xOf(i),cy:yOf(val[i]),r:3,fill:cssv('--muted'),'fill-opacity':.35}));
+    if(k>0){let m=-1,pts=[];for(let i=0;i<k;i++){if(val[i]>m)m=val[i];pts.push(xOf(i)+','+yOf(m));}
+      dyn.appendChild(mk('polyline',{points:pts.join(' '),fill:'none',stroke:cssv('--trust'),'stroke-width':2.5,'stroke-linejoin':'round'}));
+      const c=champ();dyn.appendChild(mk('circle',{cx:xOf(c.mi),cy:yOf(c.m),r:7,fill:cssv('--trust'),stroke:cssv('--ground'),'stroke-width':2}));
+      bestEl.textContent=c.m.toFixed(3);kEl.textContent=k;
+      if(sealed){const ty=yOf(test[c.mi]);
+        dyn.appendChild(mk('line',{x1:xOf(c.mi),x2:xOf(c.mi),y1:yOf(c.m),y2:ty,stroke:cssv('--lie'),'stroke-width':1.6,'stroke-dasharray':'4 3','stroke-opacity':.8}));
+        dyn.appendChild(mk('circle',{cx:xOf(c.mi),cy:ty,r:7,fill:cssv('--lie'),stroke:cssv('--ground'),'stroke-width':2}));
+        sealEl.textContent=test[c.mi].toFixed(3);}}}
+  function add(n){if(sealed)return;k=Math.min(M,k+n);render();}
+  el.querySelector('[data-act="one"]').onclick=()=>add(1);
+  el.querySelector('[data-act="many"]').onclick=()=>add(20);
+  el.querySelector('#wnSeal').onclick=()=>{if(k===0||sealed)return;sealed=true;sealWrap.hidden=false;render();
+    note.classList.add('punch');note.innerHTML='The sealed test never saw the search. On it, the kept model scores <b>a coin flip</b>. The whole climb was the search, not the skill.';};
+  el.querySelector('[data-act="reset"]').onclick=()=>{k=0;sealed=false;sealWrap.hidden=true;note.classList.remove('punch');
+    bestEl.textContent='0.500';kEl.textContent='0';
+    note.innerHTML='A demonstration on pure noise: every &ldquo;model&rdquo; here learned nothing at all. Yet keep the best of many, and the kept score climbs on its own.';render();};
+  render();
+};
+
+/* ---- Memorise the noise ---- */
+WIDGETS.memorise=function(el){
+  const ep=NOISE.ep,tr=NOISE.train,va=NOISE.val,M=ep.length,EPmax=ep[M-1];
+  const svg=el.querySelector('#mmPlot'),W=920,H=400,L=58,R=24,T=18,B=42,y0=0.40,y1=1.0;
+  const xOf=e=>L+(e/EPmax)*(W-L-R), yOf=a=>T+((y1-a)/(y1-y0))*(H-T-B);
+  const stat=mk('g',{}),dyn=mk('g',{});svg.appendChild(stat);svg.appendChild(dyn);
+  for(const a of [0.40,0.50,0.60,0.70,0.80,0.90,1.00]){const yy=yOf(a),coin=Math.abs(a-0.50)<1e-9;
+    stat.appendChild(mk('line',{x1:L,x2:W-R,y1:yy,y2:yy,stroke:coin?'var(--faint)':'var(--line)','stroke-width':coin?1.2:1,'stroke-dasharray':coin?'5 4':''}));
+    const tx=mk('text',{x:L-9,y:yy+4,'text-anchor':'end','font-family':'var(--mono)','font-size':12,fill:'var(--faint)'});tx.textContent=a.toFixed(2);stat.appendChild(tx);}
+  const clab=mk('text',{x:W-R,y:yOf(0.50)-7,'text-anchor':'end','font-family':'var(--sans)','font-size':12,fill:'var(--faint)'});clab.textContent='a true coin: 0.50';stat.appendChild(clab);
+  const xl=mk('text',{x:(L+W-R)/2,y:H-8,'text-anchor':'middle','font-family':'var(--sans)','font-size':12,fill:'var(--faint)'});xl.textContent='epochs of training';stat.appendChild(xl);
+  const trEl=el.querySelector('#mmTrain'),vaEl=el.querySelector('#mmVal'),epEl=el.querySelector('#mmEp'),note=el.querySelector('#mmNote');
+  let k=1;
+  function line(arr,col,w){let p=[];for(let i=0;i<k;i++)p.push(xOf(ep[i])+','+yOf(arr[i]));
+    return mk('polyline',{points:p.join(' '),fill:'none',stroke:col,'stroke-width':w,'stroke-linejoin':'round'});}
+  function tag(arr,col,txt){const i=k-1,x=xOf(ep[i]),y=yOf(arr[i]);
+    dyn.appendChild(mk('circle',{cx:x,cy:y,r:5,fill:col,stroke:cssv('--ground'),'stroke-width':2}));
+    const t=mk('text',{x:x-8,y:y+ (txt==='train'?-8:16),'text-anchor':'end','font-family':'var(--sans)','font-size':12,fill:col});t.textContent=txt;dyn.appendChild(t);}
+  function render(){while(dyn.firstChild)dyn.removeChild(dyn.firstChild);
+    dyn.appendChild(line(va,cssv('--lie'),2.5));dyn.appendChild(line(tr,cssv('--trust'),2.5));
+    tag(va,cssv('--lie'),'held-out');tag(tr,cssv('--trust'),'train');
+    trEl.textContent=tr[k-1].toFixed(2);vaEl.textContent=va[k-1].toFixed(2);epEl.textContent=ep[k-1];
+    if(tr[k-1]>=0.98){note.classList.add('punch');
+      note.innerHTML='A perfect score, on <b>nothing</b>. The network memorised which random point got which random label. The held-out number, stuck on a coin, is the only one telling the truth.';}
+    else{note.classList.remove('punch');
+      note.innerHTML='The labels here are coin flips: there is nothing to learn. The training score is the tempting one; the held-out score is the honest one.';}}
+  el.querySelector('[data-act="step"]').onclick=()=>{k=Math.min(M,k+5);render();};
+  el.querySelector('[data-act="end"]').onclick=()=>{k=M;render();};
+  el.querySelector('[data-act="reset"]').onclick=()=>{k=1;render();};
+  render();
+};
+
+/* ---- Cut the deck ---- */
+WIDGETS.cutdeck=function(el){
+  const rand=LOAN.cuts.random,strat=LOAN.cuts.stratified,pos=LOAN.cuts.position,base=0.779;
+  const svg=el.querySelector('#cdPlot'),W=920,H=190,L=60,R=26,T=26,B=44,x0=0.70,x1=0.85,axisY=H-B;
+  const xOf=a=>L+((a-x0)/(x1-x0))*(W-L-R);
+  const stat=mk('g',{}),dyn=mk('g',{});svg.appendChild(stat);svg.appendChild(dyn);
+  stat.appendChild(mk('rect',{x:xOf(0.806),y:T,width:xOf(0.821)-xOf(0.806),height:axisY-T,fill:'var(--trust)','fill-opacity':.08,rx:4}));
+  stat.appendChild(mk('line',{x1:L,x2:W-R,y1:axisY,y2:axisY,stroke:'var(--line)','stroke-width':1}));
+  for(const a of [0.70,0.75,0.80,0.85]){const xx=xOf(a);
+    stat.appendChild(mk('line',{x1:xx,x2:xx,y1:axisY,y2:axisY+5,stroke:'var(--faint)','stroke-width':1}));
+    const tx=mk('text',{x:xx,y:axisY+20,'text-anchor':'middle','font-family':'var(--mono)','font-size':12,fill:'var(--faint)'});tx.textContent=a.toFixed(2);stat.appendChild(tx);}
+  const bx=xOf(base);
+  stat.appendChild(mk('line',{x1:bx,x2:bx,y1:T,y2:axisY,stroke:'var(--faint)','stroke-width':1,'stroke-dasharray':'4 3'}));
+  const bl=mk('text',{x:bx,y:T-9,'text-anchor':'middle','font-family':'var(--sans)','font-size':11,fill:'var(--faint)'});bl.textContent='do nothing: 0.779';stat.appendChild(bl);
+  const scoreEl=el.querySelector('#cdScore'),kEl=el.querySelector('#cdK'),note=el.querySelector('#cdNote');
+  let shown=[],ri=0;
+  function draw(){while(dyn.firstChild)dyn.removeChild(dyn.firstChild);
+    shown.forEach((s,i)=>{const xx=xOf(s.v),yy=axisY-16-((i%3)*15);
+      dyn.appendChild(mk('circle',{cx:xx,cy:yy,r:5,fill:s.c,stroke:cssv('--ground'),'stroke-width':1.5}));});
+    if(shown.length){const last=shown[shown.length-1];scoreEl.textContent=last.v.toFixed(3);scoreEl.style.color=last.c;}
+    kEl.textContent=shown.length;
+    if(shown.length>=4){note.classList.add('punch');note.innerHTML='Every cut lands in the same tiny band. Rock steady. The score is no accident of one lucky split, so surely we can trust it.';}}
+  el.querySelector('[data-act="resplit"]').onclick=()=>{shown.push({v:rand[ri%rand.length],c:cssv('--trust')});ri++;draw();};
+  el.querySelector('[data-act="strat"]').onclick=()=>{shown.push({v:strat,c:cssv('--truth')});draw();};
+  el.querySelector('[data-act="pos"]').onclick=()=>{shown.push({v:pos,c:cssv('--muted')});draw();};
+  el.querySelector('[data-act="reset"]').onclick=()=>{shown=[];ri=0;scoreEl.textContent='--';scoreEl.style.color='';note.classList.remove('punch');
+    note.innerHTML='Every fresh cut of the deck lands in the same tiny band. The score is no accident of one lucky split.';draw();};
+  draw();
+};
+
+/* ---- The Ruler Swap ---- */
+WIDGETS.rulerswap=function(el){
+  const grid=LOAN.grid,tab=LOAN.tab,D=LOAN.defaulters,P=LOAN.payers,TOT=LOAN.total;
+  const slider=el.querySelector('#rsThr'),thrV=el.querySelector('#rsThrV'),acc=el.querySelector('#rsAcc'),
+    bal=el.querySelector('#rsBal'),caught=el.querySelector('#rsCaught'),tp=el.querySelector('#rsTP'),
+    fn=el.querySelector('#rsFN'),fp=el.querySelector('#rsFP'),tn=el.querySelector('#rsTN'),note=el.querySelector('#rsNote');
+  const fmt=n=>n.toLocaleString('en-US');
+  function upd(){const i=+slider.value,t=grid[i];thrV.textContent=t.toFixed(2);
+    const a=tab[i],TP=a[0],FP=a[1],TN=a[2],FN=a[3];
+    const ac=(TP+TN)/TOT,b=(TP/D+TN/P)/2;
+    acc.textContent=ac.toFixed(3);bal.textContent=b.toFixed(3);caught.textContent=fmt(TP);
+    tp.textContent=fmt(TP);fn.textContent=fmt(FN);fp.textContent=fmt(FP);tn.textContent=fmt(TN);
+    if(TP<80){note.classList.add('punch');
+      note.innerHTML='Accuracy barely moved, yet you now catch <b>almost no one</b>. Chasing accuracy rewarded you for making the model useless. Only the counts, and the balanced ruler, told the truth.';}
+    else{note.classList.remove('punch');
+      note.innerHTML='At the natural setting the model catches 472 of 1,353. Slide the threshold up to chase a higher accuracy, and watch what happens to the counts.';}}
+  slider.addEventListener('input',upd);upd();
+};
+
+/* ---- §3 price sparkline ---- */
+WIDGETS.price=function(el){
+  const c=MKT.close_series,svg=el.querySelector('#pxPlot'),W=920,H=220,L=54,R=22,T=16,B=30,M=c.length;
+  const lo=Math.min.apply(0,c),hi=Math.max.apply(0,c),bot=H-B;
+  const xOf=i=>L+(i/(M-1))*(W-L-R),yOf=v=>T+((hi-v)/(hi-lo))*(H-T-B);
+  let pts=[];for(let i=0;i<M;i++)pts.push(xOf(i)+','+yOf(c[i]));
+  svg.appendChild(mk('polygon',{points:xOf(0)+','+bot+' '+pts.join(' ')+' '+xOf(M-1)+','+bot,fill:cssv('--trust'),'fill-opacity':.08}));
+  svg.appendChild(mk('polyline',{points:pts.join(' '),fill:'none',stroke:cssv('--trust'),'stroke-width':2}));
+  const t1=mk('text',{x:L,y:bot+20,'font-family':'var(--mono)','font-size':12,fill:'var(--faint)'});t1.textContent=MKT.price_lo.toLocaleString();svg.appendChild(t1);
+  const t2=mk('text',{x:W-R,y:T+14,'text-anchor':'end','font-family':'var(--mono)','font-size':12,fill:'var(--faint)'});t2.textContent=MKT.price_hi.toLocaleString();svg.appendChild(t2);
+};
+
+/* ---- §3 the shuffle leak ---- */
+WIDGETS.leak=function(el){
+  const tasks={vol:{sh:MKT.vol_shuffle,ch:MKT.V_CH,shm:MKT.V_SH},dir:{sh:MKT.d_sh,ch:MKT.D_CH,shm:MKT.D_SH}};
+  let task='vol',shown=[],ri=0,timed=false;
+  const svg=el.querySelector('#lkPlot'),W=920,H=210,L=56,R=26,T=26,B=42,x0=0.47,x1=0.66,axisY=H-B;
+  const xOf=a=>L+((a-x0)/(x1-x0))*(W-L-R);
+  const stat=mk('g',{}),dyn=mk('g',{});svg.appendChild(stat);svg.appendChild(dyn);
+  stat.appendChild(mk('line',{x1:L,x2:W-R,y1:axisY,y2:axisY,stroke:'var(--line)'}));
+  for(const a of [0.50,0.55,0.60,0.65]){const xx=xOf(a),coin=a===0.50;
+    stat.appendChild(mk('line',{x1:xx,x2:xx,y1:T,y2:axisY,stroke:coin?'var(--faint)':'var(--line)','stroke-dasharray':coin?'4 3':''}));
+    const tx=mk('text',{x:xx,y:axisY+18,'text-anchor':'middle','font-family':'var(--mono)','font-size':12,fill:'var(--faint)'});tx.textContent=a.toFixed(2);stat.appendChild(tx);}
+  const shEl=el.querySelector('#lkSh'),chEl=el.querySelector('#lkCh'),gapEl=el.querySelector('#lkGap'),
+    note=el.querySelector('#lkNote'),taskBtn=el.querySelector('#lkTask');
+  function draw(){while(dyn.firstChild)dyn.removeChild(dyn.firstChild);const t=tasks[task];
+    if(timed&&shown.length){const sx=xOf(t.shm),cx=xOf(t.ch);
+      dyn.appendChild(mk('rect',{x:Math.min(sx,cx),y:T,width:Math.abs(sx-cx),height:axisY-T,fill:cssv('--lie'),'fill-opacity':.09}));}
+    shown.forEach((v,i)=>dyn.appendChild(mk('circle',{cx:xOf(v),cy:axisY-16-((i%3)*15),r:5,fill:cssv('--trust'),stroke:cssv('--ground'),'stroke-width':1.5})));
+    if(shown.length)shEl.textContent=t.shm.toFixed(3);
+    if(timed){const cx=xOf(t.ch);
+      dyn.appendChild(mk('line',{x1:cx,x2:cx,y1:T,y2:axisY,stroke:cssv('--lie'),'stroke-width':2}));
+      dyn.appendChild(mk('circle',{cx:cx,cy:T+8,r:5,fill:cssv('--lie')}));
+      chEl.textContent=t.ch.toFixed(3);const gap=t.shm-t.ch;
+      gapEl.textContent=(gap>=0?'+':'')+gap.toFixed(3);gapEl.style.color=gap>0.012?cssv('--lie'):cssv('--muted');
+      if(task==='vol')note.innerHTML='The honest cut falls to <b style="color:var(--lie)">0.587</b>. That gap is the leak: near-twin rows let the model revise the exam. It was memory, not skill.';
+      else note.innerHTML='No pattern to steal, so <b>no gap</b>: shuffle and honest land together near a coin. The leak only appears where there was something worth stealing.';}}
+  el.querySelector('[data-act="resplit"]').onclick=()=>{const t=tasks[task];shown.push(t.sh[ri%t.sh.length]);ri++;draw();};
+  el.querySelector('[data-act="time"]').onclick=()=>{if(!shown.length)return;timed=true;draw();};
+  taskBtn.onclick=()=>{task=(task==='vol')?'dir':'vol';shown=[];ri=0;timed=false;
+    shEl.textContent='--';chEl.textContent='--';gapEl.textContent='--';gapEl.style.color='';
+    taskBtn.textContent='task: '+(task==='vol'?'predict the size':'predict the direction');
+    note.innerHTML=(task==='vol')?'Every shuffle lands near 0.61, rock steady. Now cut by time instead, and watch where the honest score falls.':'A task with no pattern at all: up or down, a pure coin. Re-shuffle, then cut by time.';draw();};
+  el.querySelector('[data-act="reset"]').onclick=()=>{shown=[];ri=0;timed=false;
+    shEl.textContent='--';chEl.textContent='--';gapEl.textContent='--';gapEl.style.color='';draw();};
+  draw();
+};
+
+/* ---- §3 the frozen-scaler drift ---- */
+WIDGETS.drift=function(el){
+  const d=MKT.drift,sf=MKT.split_frac,mf=MKT.m_froz,sfr=MKT.s_froz,mt=MKT.m_test;
+  const svg=el.querySelector('#drPlot'),W=920,H=260,L=52,R=24,T=20,B=38,M=d.length;
+  const hi=Math.max(Math.max.apply(0,d),mf+sfr)*1.05,bot=H-B;
+  const xOf=i=>L+(i/(M-1))*(W-L-R),yOf=v=>T+((hi-v)/(hi))*(H-T-B);
+  const bandTop=yOf(mf+sfr),bandBot=yOf(Math.max(0,mf-sfr));
+  svg.appendChild(mk('rect',{x:L,y:bandTop,width:W-L-R,height:bandBot-bandTop,fill:cssv('--muted'),'fill-opacity':.14}));
+  svg.appendChild(mk('line',{x1:L,x2:W-R,y1:yOf(mf),y2:yOf(mf),stroke:cssv('--muted'),'stroke-dasharray':'4 3'}));
+  const fl=mk('text',{x:L+4,y:yOf(mf)-6,'font-family':'var(--sans)','font-size':11,fill:'var(--faint)'});fl.textContent='frozen normal: '+mf+' pts';svg.appendChild(fl);
+  let pts=[];for(let i=3;i<M;i++)pts.push(xOf(i)+','+yOf(d[i]));
+  const driftLine=mk('polyline',{points:pts.join(' '),fill:'none',stroke:cssv('--lie'),'stroke-width':2});svg.appendChild(driftLine);
+  const bx=L+sf*(W-L-R);svg.appendChild(mk('line',{x1:bx,x2:bx,y1:T,y2:bot,stroke:cssv('--faint'),'stroke-width':1}));
+  const sl=mk('text',{x:bx+5,y:T+12,'font-family':'var(--sans)','font-size':11,fill:'var(--faint)'});sl.textContent='train | test';svg.appendChild(sl);
+  const scoreEl=el.querySelector('#drScore'),zEl=el.querySelector('#drZ'),note=el.querySelector('#drNote');
+  const btnPct=el.querySelector('[data-act="pct"]'),btnPts=el.querySelector('[data-act="pts"]');
+  function set(mode){btnPct.classList.toggle('on',mode==='pct');btnPts.classList.toggle('on',mode==='pts');
+    driftLine.setAttribute('stroke-opacity',mode==='pts'?'1':'.28');
+    if(mode==='pts'){scoreEl.textContent=MKT.PTS_FROZ.toFixed(3);scoreEl.style.color=cssv('--lie');zEl.textContent=MKT.zmean.toFixed(2);
+      note.classList.add('punch');note.innerHTML='In points, a normal day drifts from '+mf+' to '+mt+', over three times larger. Every test day now looks like a wild outlier, <b>'+MKT.zmean+'</b> standard deviations out on average and '+MKT.zmax+' at worst. The model is asked a question in a language it never heard.';}
+    else{scoreEl.textContent=MKT.PCT_FROZ.toFixed(3);scoreEl.style.color=cssv('--trust');zEl.textContent='–';
+      note.classList.remove('punch');note.innerHTML='In percent, a normal day barely drifts (0.85% to 0.75%), so the frozen scaler still fits the world. The kept score holds at 0.587, but it survived by luck, not by safety.';}}
+  btnPct.onclick=()=>set('pct');btnPts.onclick=()=>set('pts');el.querySelector('[data-act="reset"]').onclick=()=>set('pct');
+  set('pct');
+};
+
+/* ---- §3 eras: the moving pass-mark ---- */
+WIDGETS.eras=function(el){
+  const E=MKT.eras,coin=0.5;
+  const svg=el.querySelector('#erPlot'),W=920,H=300,L=48,R=24,T=22,B=46,n=E.length,y0=0.45,y1=0.70;
+  const yOf=v=>T+((y1-v)/(y1-y0))*(H-T-B),bw=(W-L-R)/n,cx=i=>L+bw*i+bw/2;
+  const stat=mk('g',{}),dyn=mk('g',{});svg.appendChild(stat);svg.appendChild(dyn);
+  for(const a of [0.50,0.55,0.60,0.65]){const yy=yOf(a);
+    stat.appendChild(mk('line',{x1:L,x2:W-R,y1:yy,y2:yy,stroke:'var(--line)'}));
+    const tx=mk('text',{x:L-8,y:yy+4,'text-anchor':'end','font-family':'var(--mono)','font-size':11,fill:'var(--faint)'});tx.textContent=a.toFixed(2);stat.appendChild(tx);}
+  const marginEl=el.querySelector('#erMargin'),vsLab=el.querySelector('#erVsLab'),verdict=el.querySelector('#erVerdict'),note=el.querySelector('#erNote');
+  const btnCoin=el.querySelector('[data-act="coin"]'),btnLazy=el.querySelector('[data-act="lazy"]');
+  function draw(mode){while(dyn.firstChild)dyn.removeChild(dyn.firstChild);
+    btnCoin.classList.toggle('on',mode==='coin');btnLazy.classList.toggle('on',mode==='lazy');
+    let sum=0,beaten=[];
+    E.forEach((e,i)=>{const barY=yOf(e.model),baseVal=(mode==='coin')?coin:e.lazy,baseY=yOf(baseVal);
+      const marg=e.model-baseVal;sum+=marg;if(marg<0)beaten.push(e.era);
+      const col=marg<0?cssv('--lie'):cssv('--truth'),top=Math.min(barY,baseY),h=Math.max(Math.abs(barY-baseY),1);
+      dyn.appendChild(mk('rect',{x:cx(i)-bw*0.28,y:top,width:bw*0.56,height:h,fill:col,'fill-opacity':.34,rx:3}));
+      dyn.appendChild(mk('circle',{cx:cx(i),cy:barY,r:5,fill:cssv('--trust'),stroke:cssv('--ground'),'stroke-width':2}));
+      const tx=mk('text',{x:cx(i),y:H-B+20,'text-anchor':'middle','font-family':'var(--sans)','font-size':12,fill:'var(--faint)'});tx.textContent='era '+e.era;dyn.appendChild(tx);});
+    if(mode==='coin'){const yy=yOf(coin);dyn.appendChild(mk('line',{x1:L,x2:W-R,y1:yy,y2:yy,stroke:cssv('--faint'),'stroke-width':1.5,'stroke-dasharray':'5 4'}));}
+    else E.forEach((e,i)=>dyn.appendChild(mk('line',{x1:cx(i)-bw*0.4,x2:cx(i)+bw*0.4,y1:yOf(e.lazy),y2:yOf(e.lazy),stroke:cssv('--faint'),'stroke-width':2})));
+    const mean=sum/n;marginEl.textContent=(mean>=0?'+':'')+mean.toFixed(3);marginEl.style.color=mode==='coin'?cssv('--trust'):cssv('--lie');
+    vsLab.textContent=mode==='coin'?'against a flat coin, 0.50':'against the lazy classmate';
+    if(mode==='coin'){verdict.textContent='every era looks like a win';verdict.style.color=cssv('--muted');
+      note.innerHTML='Judged against one flat coin, the model clears the bar in every era, and the headline read as +0.11. But were the exams equally hard?';}
+    else{verdict.textContent='beaten outright on era '+beaten.join(', ');verdict.style.color=cssv('--lie');
+      note.innerHTML='The lazy classmate scores by writing down whichever answer has been common lately, and that bar drifts era to era. Marked against it, the model’s lead more than halves, and on era '+beaten.join(', ')+' it is beaten by someone who never opened a book.';}}
+  btnCoin.onclick=()=>draw('coin');btnLazy.onclick=()=>draw('lazy');
+  draw('coin');
+};
+
+/* ---- §4 the sign-shuffle null: roughness is real, behaviour is a ghost ---- */
+WIDGETS.wxnull=function(el){
+  const M=WX.markets,svg=el.querySelector('#wxPlot'),W=920,H=250,L=54,R=24,T=30,B=40;
+  const x0=-0.07,x1=0.31,xOf=v=>L+((v-x0)/(x1-x0))*(W-L-R),yR=95,yD=190;
+  const stat=mk('g',{}),dyn=mk('g',{});svg.appendChild(stat);svg.appendChild(dyn);
+  for(const a of [-0.05,0,0.10,0.20,0.30]){const xx=xOf(a);
+    stat.appendChild(mk('line',{x1:xx,x2:xx,y1:T,y2:H-B,stroke:a===0?'var(--faint)':'var(--line)'}));
+    const tx=mk('text',{x:xx,y:H-B+18,'text-anchor':'middle','font-family':'var(--mono)','font-size':11,fill:'var(--faint)'});tx.textContent=(a>0?'+':'')+a.toFixed(2);stat.appendChild(tx);}
+  const l1=mk('text',{x:L,y:yR-32,'font-family':'var(--sans)','font-size':12,fill:'var(--trust)'});l1.textContent='roughness (how rough)';stat.appendChild(l1);
+  const l2=mk('text',{x:L,y:yD-30,'font-family':'var(--sans)','font-size':12,fill:'var(--muted)'});l2.textContent='behaviour (which way)';stat.appendChild(l2);
+  const band=mk('rect',{x:xOf(-0.033),y:yD-24,width:xOf(0.033)-xOf(-0.033),height:48,fill:cssv('--muted'),'fill-opacity':0,rx:4});stat.appendChild(band);
+  const note=el.querySelector('#wxNote');let ran=false;
+  const jit=i=>((i%5)-2)*7;
+  function draw(){while(dyn.firstChild)dyn.removeChild(dyn.firstChild);
+    M.forEach((m,i)=>{dyn.appendChild(mk('circle',{cx:xOf(m.rough),cy:yR+jit(i),r:5,fill:cssv('--trust'),'fill-opacity':.85}));
+      const surv=ran&&m.surv;
+      dyn.appendChild(mk('circle',{cx:xOf(m.dir),cy:yD+jit(i),r:surv?6:5,fill:surv?cssv('--lie'):cssv('--muted'),
+        'fill-opacity':ran?(m.surv?1:.3):.7,stroke:surv?cssv('--ground'):'none','stroke-width':surv?2:0}));});}
+  el.querySelector('[data-act="run"]').onclick=()=>{ran=true;band.setAttribute('fill-opacity','.10');draw();
+    note.classList.add('punch');note.innerHTML='Only <b>five of seventeen</b> survive, scattered across unrelated assets, every one a whiff near minus 0.04. Roughness, meanwhile, towers on every single market. Behaviour was a ghost.';};
+  el.querySelector('[data-act="reset"]').onclick=()=>{ran=false;band.setAttribute('fill-opacity','0');draw();
+    note.classList.remove('punch');note.innerHTML='A free shuffle destroys the roughness too and flatters us: eight of seventeen look &ldquo;significant.&rdquo; The honest null flips the sign of each move, keeping the roughness. Watch how many behaviour readings survive that.';};
+  draw();
+};
+
+/* ---- §4 the monthly overlap leak ---- */
+WIDGETS.wxoverlap=function(el){
+  const modes={
+    overlap:{edge:WX.edge_overlap,share:'15 of 20 days',w1:[0,20],w2:[5,25],ov:[5,20],col:'--lie',
+      note:'A 20-day average, stepped one week, shares fifteen of its twenty days with the next. We were mostly comparing a number with itself. That +30.6% is a mirage.'},
+    weekly:{edge:WX.edge_weekly,share:'no shared days',w1:[0,5],w2:[5,10],ov:null,col:'--muted',
+      note:'Pull the windows apart at the weekly speed, and the edge collapses to +3.4%, as faint as the behaviour reading we just buried.'},
+    monthly:{edge:WX.edge_monthly,share:'no shared days',w1:[0,20],w2:[20,40],ov:null,col:'--truth',
+      note:'Only at a full month, with windows that never touch, does a real, modest edge appear: +14.2% better than guessing. That is the scale we build on.'}
+  };
+  const svg=el.querySelector('#ovPlot'),W=920,H=150,L=30,R=24,DAYS=42,xOf=d=>L+(d/DAYS)*(W-L-R);
+  const edgeEl=el.querySelector('#ovEdge'),shareEl=el.querySelector('#ovShare'),note=el.querySelector('#ovNote');
+  const g=mk('g',{});svg.appendChild(g);
+  const bar=(a,b,y,c,o)=>mk('rect',{x:xOf(a),y:y,width:xOf(b)-xOf(a),height:26,rx:5,fill:c,'fill-opacity':o});
+  function set(mode){const m=modes[mode];while(g.firstChild)g.removeChild(g.firstChild);
+    ['overlap','weekly','monthly'].forEach(k=>el.querySelector('[data-act="'+k+'"]').classList.toggle('on',k===mode));
+    g.appendChild(bar(m.w1[0],m.w1[1],48,cssv('--trust'),.3));
+    g.appendChild(bar(m.w2[0],m.w2[1],82,cssv('--truth'),.3));
+    if(m.ov){g.appendChild(bar(m.ov[0],m.ov[1],48,cssv('--lie'),.55));g.appendChild(bar(m.ov[0],m.ov[1],82,cssv('--lie'),.55));}
+    const t1=mk('text',{x:xOf(m.w1[0]),y:42,'font-family':'var(--sans)','font-size':11,fill:'var(--faint)'});t1.textContent='this window';g.appendChild(t1);
+    const t2=mk('text',{x:xOf(m.w2[0]),y:124,'font-family':'var(--sans)','font-size':11,fill:'var(--faint)'});t2.textContent='next window';g.appendChild(t2);
+    edgeEl.textContent='+'+m.edge+'%';edgeEl.style.color=cssv(m.col);
+    shareEl.textContent=m.share;note.innerHTML=m.note;note.classList.toggle('punch',mode==='overlap');}
+  el.querySelector('[data-act="overlap"]').onclick=()=>set('overlap');
+  el.querySelector('[data-act="weekly"]').onclick=()=>set('weekly');
+  el.querySelector('[data-act="monthly"]').onclick=()=>set('monthly');
+  set('overlap');
+};
+
+/* ---- §4c the search dial: the winner's curse in real time ---- */
+WIDGETS.searchdial=function(el){
+  const cfg=WX.search.configs,M=cfg.length,ceil=WX.search.ceiling,pers=WX.search.persistence;
+  const svg=el.querySelector('#sdPlot'),W=920,H=290,L=46,R=150,T=18,B=40,y0=48,y1=58;
+  const xOf=i=>L+(i/(M-1))*(W-L-R),yOf=v=>T+((y1-v)/(y1-y0))*(H-T-B);
+  const stat=mk('g',{}),dyn=mk('g',{});svg.appendChild(stat);svg.appendChild(dyn);
+  for(const [v,lab,col] of [[ceil,'honest ceiling: 56','--truth'],[pers,'repeat last month: 54','--muted']]){
+    const yy=yOf(v);stat.appendChild(mk('line',{x1:L,x2:W-R,y1:yy,y2:yy,stroke:cssv(col),'stroke-dasharray':'5 4','stroke-opacity':.75}));
+    const tx=mk('text',{x:W-R+8,y:yy+4,'font-family':'var(--sans)','font-size':11,fill:cssv(col)});tx.textContent=lab;stat.appendChild(tx);}
+  for(const a of [48,50,52,54,56,58]){const tx=mk('text',{x:L-8,y:yOf(a)+4,'text-anchor':'end','font-family':'var(--mono)','font-size':11,fill:'var(--faint)'});tx.textContent=a;stat.appendChild(tx);}
+  const bestEl=el.querySelector('#sdBest'),typEl=el.querySelector('#sdTyp'),kEl=el.querySelector('#sdK'),
+    kv=el.querySelector('#sdKv'),slider=el.querySelector('#sdSlider'),note=el.querySelector('#sdNote');
+  function draw(){const K=+slider.value;while(dyn.firstChild)dyn.removeChild(dyn.firstChild);
+    let m=-1,mi=0,pts=[];for(let i=0;i<K;i++){dyn.appendChild(mk('circle',{cx:xOf(i),cy:yOf(cfg[i]),r:3,fill:cssv('--muted'),'fill-opacity':.4}));
+      if(cfg[i]>m){m=cfg[i];mi=i;}pts.push(xOf(i)+','+yOf(m));}
+    dyn.appendChild(mk('polyline',{points:pts.join(' '),fill:'none',stroke:cssv('--trust'),'stroke-width':2.5}));
+    dyn.appendChild(mk('circle',{cx:xOf(mi),cy:yOf(m),r:6,fill:cssv('--trust'),stroke:cssv('--ground'),'stroke-width':2}));
+    bestEl.textContent=m.toFixed(1)+'%';kEl.textContent=K;kv.textContent=K;
+    const s=cfg.slice(0,K).sort((a,b)=>a-b);typEl.textContent=s[Math.floor(K/2)].toFixed(1)+'%';
+    if(K>=100)note.innerHTML='You did not build a better model between 36 configs and 120. You just took more draws, and the best of more draws is higher by luck. <b style="color:var(--trust)">The number went up and the truth did not move an inch.</b>';
+    else note.innerHTML='Each dot is one configuration scored on the validation months. Slide it wider, and watch the best of the search creep up while the typical config sits right on the honest signal.';}
+  slider.addEventListener('input',draw);draw();
+};
+
+/* ---- §4d the verdict scoreboard: validation vs the sealed test ---- */
+WIDGETS.scoreboard=function(el){
+  const B=WX.board,svg=el.querySelector('#sbPlot'),W=920,H=360,L=60,R=170,T=30,BB=48;
+  const ax0=51,ax1=57.4,xOf=v=>L+((v-ax0)/(ax1-ax0))*(W-L-R);
+  const yTop=T+22,yBot=H-BB,yCal=c=>yTop+(c/0.5)*(yBot-yTop);
+  const rOf=p=>7+Math.sqrt(p)/2.4;
+  const g=mk('g',{});svg.appendChild(g);const note=el.querySelector('#sbNote');
+  const btnVal=el.querySelector('[data-act="val"]'),btnTest=el.querySelector('[data-act="test"]');
+  const lbl=(x,y,t,c,a)=>{const e=mk('text',{x:x,y:y,'font-family':'var(--sans)','font-size':11.5,fill:c,'text-anchor':a||'start'});e.textContent=t;return e;};
+  function draw(mode){while(g.firstChild)g.removeChild(g.firstChild);
+    btnVal.classList.toggle('on',mode==='val');btnTest.classList.toggle('on',mode==='test');
+    for(let a=52;a<=57;a+=1){const xx=xOf(a);g.appendChild(mk('line',{x1:xx,x2:xx,y1:yTop,y2:yBot,stroke:'var(--line)'}));
+      g.appendChild(lbl(xx,yBot+18,a+'%','var(--faint)','middle'));}
+    g.appendChild(lbl((L+W-R)/2,H-8,mode==='val'?'validation accuracy':'sealed-test accuracy','var(--faint)','middle'));
+    for(const c of [0.0,0.2,0.4]){const yy=yCal(c);g.appendChild(mk('line',{x1:L,x2:W-R,y1:yy,y2:yy,stroke:'var(--line)','stroke-dasharray':'2 3'}));
+      g.appendChild(lbl(L-8,yy+4,'ECE '+c.toFixed(1),'var(--faint)','end'));}
+    g.appendChild(lbl(L-8,yTop-8,'trustworthy','var(--truth)','end'));
+    B.forEach(d=>{const x=xOf(mode==='val'?d.val:d.test),y=yCal(d.cal);
+      const win=d.params===3011,cheap=d.params===51,col=win?cssv('--lie'):(cheap?cssv('--truth'):cssv('--muted'));
+      g.appendChild(mk('circle',{cx:x,cy:y,r:rOf(d.params),fill:col,'fill-opacity':.32,stroke:col,'stroke-width':1.6}));
+      const txt=(win||cheap)?(d.name+' · '+d.params+'p'):(d.params+'p');
+      g.appendChild(lbl(x+rOf(d.params)+7,y+4,txt,(win||cheap)?col:cssv('--faint')));});
+    note.classList.toggle('punch',mode==='test');
+    if(mode==='val')note.innerHTML='By the validation score we chose on, the <b style="color:var(--lie)">3,011-parameter big-search winner</b> looks best of all, at 54.8%. Now open the test.';
+    else note.innerHTML='On the sealed test the big winner falls to the <b>worst</b> of the trained models, 54.2%, with the worst calibration. The <b style="color:var(--truth)">51-parameter network</b> is the most accurate and most trustworthy at once. The cheapest model won.';}
+  btnVal.onclick=()=>draw('val');btnTest.onclick=()=>draw('test');draw('val');
+};
+
+/* ---- §4e calibration curve + umbrella test ---- */
+WIDGETS.calib=function(el){
+  const C=WX.calib,U=WX.umbrella,svg=el.querySelector('#cbPlot'),W=920,H=330;
+  const note=el.querySelector('#cbNote'),g=mk('g',{});svg.appendChild(g);
+  const btnH=el.querySelector('[data-act="honest"]'),btnP=el.querySelector('[data-act="pays"]');
+  const txt=(x,y,s,a,f,sz)=>{const e=mk('text',{x:x,y:y,'text-anchor':a||'start','font-family':'var(--sans)','font-size':sz||11,fill:f||'var(--faint)'});e.textContent=s;g.appendChild(e);return e;};
+  function honest(){while(g.firstChild)g.removeChild(g.firstChild);
+    const S=250,cx=(W-S)/2,cy=22,xOf=p=>cx+(p/100)*S,yOf=p=>cy+S-(p/100)*S;
+    g.appendChild(mk('rect',{x:cx,y:cy,width:S,height:S,fill:'none',stroke:'var(--line)'}));
+    g.appendChild(mk('line',{x1:xOf(0),y1:yOf(0),x2:xOf(100),y2:yOf(100),stroke:cssv('--faint'),'stroke-dasharray':'5 4'}));
+    txt(xOf(100)-6,yOf(100)+16,'perfect calibration','end','var(--faint)',11);
+    for(const t of [0,25,50,75,100]){txt(xOf(t),cy+S+17,t,'middle','var(--faint)',11);txt(cx-8,yOf(t)+4,t,'end','var(--faint)',11);}
+    C.forEach(p=>g.appendChild(mk('circle',{cx:xOf(p[0]),cy:yOf(p[1]),r:6,fill:cssv('--truth'),stroke:cssv('--ground'),'stroke-width':2})));
+    txt(cx+S/2,H-4,'forecast: chance of a storm','middle','var(--muted)',12);
+    const yt=mk('text',{x:cx-36,y:cy+S/2,'font-family':'var(--sans)','font-size':12,fill:'var(--muted)','text-anchor':'middle','transform':'rotate(-90 '+(cx-36)+' '+(cy+S/2)+')'});yt.textContent='what actually came';g.appendChild(yt);
+    note.classList.remove('punch');
+    note.innerHTML='Checked on the four markets the model never trained on: it said 11 and 10 came, 26 and 28 came, 43 and 38 came, 68 and 64 came. The points sit on the diagonal. The percentage means what it claims.';}
+  function pays(){while(g.firstChild)g.removeChild(g.firstChild);
+    const bars=[['base rate',U.base,'--muted'],['when it warned',U.warned,'--lie'],['when it called quiet',U.quiet,'--truth']];
+    const baseY=262,plotH=200,y1=70,bw=110,gap=64,total=3*bw+2*gap,x0=(W-total)/2;
+    txt(x0,26,'how often a storm actually came','start','var(--faint)',12);
+    for(const t of [0,20,40,60]){const yy=baseY-(t/y1)*plotH;g.appendChild(mk('line',{x1:x0-14,x2:x0+total+14,y1:yy,y2:yy,stroke:'var(--line)','stroke-dasharray':'2 3'}));txt(x0-18,yy+4,t+'%','end','var(--faint)',11);}
+    bars.forEach((b,i)=>{const bx=x0+i*(bw+gap),h=(b[1]/y1)*plotH,by=baseY-h;
+      g.appendChild(mk('rect',{x:bx,y:by,width:bw,height:h,fill:cssv(b[2]),'fill-opacity':.38,stroke:cssv(b[2]),'stroke-width':1.6,rx:6}));
+      txt(bx+bw/2,by-10,b[1]+'%','middle',cssv(b[2]),22);
+      txt(bx+bw/2,baseY+22,b[0],'middle','var(--muted)',12.5);});
+    note.classList.add('punch');
+    note.innerHTML='On unseen markets a storm arrives about <b>27%</b> of the time. But on the months it flagged, storms came <b style="color:var(--lie)">60%</b>, more than double; on the months it called quiet, only <b style="color:var(--truth)">17%</b>. Stormy-called months also ran about 1.45x rougher. Acting on it pays.';}
+  btnH.onclick=()=>{btnH.classList.add('on');btnP.classList.remove('on');honest();};
+  btnP.onclick=()=>{btnP.classList.add('on');btnH.classList.remove('on');pays();};
+  honest();
+};
+
+/* ---- §5 the lineup: six good-looking numbers, one honest ---- */
+WIDGETS.lineup=function(el){
+  const F=[
+   {from:'Loan · accuracy',num:'0.819',face:'The wrong ruler. On lopsided classes, accuracy waved through two of every three people who defaulted.',lie:1},
+   {from:'Market · busy or calm',num:'0.612',face:'A leak. Near-twin rows let the model revise the exam. It was memory, not skill.',lie:1},
+   {from:'Weather · week ahead',num:'R² 0.70',face:'Overlapping windows sharing 15 of 20 days. We were comparing a number with itself.',lie:1},
+   {from:'Euro · mean reversion',num:'&minus;0.175',face:'One wild day. A single 2008 session, up 16 percent, faked almost the entire signal.',lie:1},
+   {from:'The big search',num:'54.8%',face:'The winner&rsquo;s curse, the textbook&rsquo;s one corner: the luckiest of 120 draws, higher by chance alone.',lie:1},
+   {from:'The weather forecast',num:'56.4%',face:'Honest. Cleaned, carried to markets it never saw, one sealed test opened once, and calibrated.',lie:0},
+  ];
+  const grid=el.querySelector('#luGrid'),tally=el.querySelector('#luTally');
+  if(grid.childElementCount)return;
+  F.forEach((f,i)=>{const c=document.createElement('button');c.className='lu-card';c.dataset.i=i;
+    c.innerHTML='<span class="lu-from">'+f.from+'</span><span class="lu-num">'+f.num+'</span>'+
+      '<span class="lu-hint">looks like a good number</span><span class="lu-face">'+f.face+'</span>'+
+      '<span class="lu-verdict">'+(f.lie?'a lie':'honest')+'</span>';
+    c.onclick=()=>{if(c.classList.contains('revealed'))return;c.classList.add('revealed',f.lie?'lie':'honest');upd();};
+    grid.appendChild(c);});
+  function upd(){const rev=grid.querySelectorAll('.lu-card.revealed').length,lies=grid.querySelectorAll('.lu-card.lie').length;
+    if(rev<F.length)tally.innerHTML='Turned over: '+rev+' of 6.'+(lies?' So far, '+lies+' were lies.':'');
+    else{tally.classList.add('punch');tally.innerHTML='Five of the six were lies, and every one looked exactly like the honest one. The textbook names only the search. <b>Snooping is the whole room.</b>';}}
+};
+
+const h=parseInt(location.hash.slice(1));go(Number.isFinite(h)&&h>=1?h-1:0);
+</script>
