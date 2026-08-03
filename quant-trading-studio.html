@@ -3,566 +3,783 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quant Trading Studio — Play the 4 tests we built</title>
-<style>
-  :root{
-    --bg:#0a0e14; --bg2:#0d1219; --panel:#121826; --panel2:#161d2b; --border:#26324a; --line:#1c2537;
-    --ink:#eaf0f7; --muted:#93a1b4; --muted2:#6b7688;
-    --teal:#35c9bd; --blue:#4b9fe0; --green:#5bd07a; --amber:#e0aa53; --purple:#9a82d8; --red:#e0645d; --clean:#48d17a;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
-  body{background:var(--bg); color:var(--ink);
-    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased; line-height:1.6; overflow-x:hidden;}
-  a{color:var(--teal);}
-  .wrap{max-width:920px; margin:0 auto; padding:0 22px;}
-
-  /* progress bar */
-  .progress{position:fixed; top:0; left:0; right:0; height:3px; background:rgba(255,255,255,.05); z-index:100;}
-  .progress__bar{height:100%; width:0; background:linear-gradient(90deg,var(--teal),var(--green));}
-
-  section{padding:74px 0; border-top:1px solid var(--line);}
-  section:first-of-type{border-top:0;}
-  .kicker{font-size:12.5px; font-weight:800; letter-spacing:2.5px; text-transform:uppercase; color:var(--accent,var(--teal));}
-  h1{font-size:clamp(30px,5.6vw,52px); line-height:1.08; font-weight:800; letter-spacing:-.5px;}
-  h2{font-size:clamp(24px,3.8vw,38px); line-height:1.12; font-weight:800; letter-spacing:-.3px; margin:14px 0 12px;}
-  p.big{font-size:clamp(16px,1.7vw,19px); color:var(--muted); max-width:60ch;}
-  .lead{color:var(--muted); font-size:16.5px; max-width:64ch;}
-
-  /* hero */
-  .hero{padding:96px 0 64px; text-align:center;}
-  .hero .badge{display:inline-block; margin-bottom:20px; padding:6px 14px; border:1px solid var(--border);
-    border-radius:999px; font-size:12.5px; letter-spacing:1.5px; color:var(--teal); text-transform:uppercase; font-weight:700;}
-  .hero p{margin:20px auto 0; max-width:62ch; color:var(--muted); font-size:clamp(16px,1.8vw,20px);}
-  .scrollcue{margin-top:34px; color:var(--muted2); font-size:14px;}
-  .scrollcue span{display:inline-block; animation:bob 2s ease-in-out infinite;}
-  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
-
-  /* generic interactive card */
-  .play{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px; margin-top:26px;}
-  .play canvas{display:block; width:100%; border-radius:10px; background:#080b11;}
-  .prompt{font-weight:700; font-size:17px; margin:2px 0 14px;}
-  .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
-  .btn{appearance:none; border:1px solid var(--border); background:var(--panel2); color:var(--ink);
-    padding:11px 18px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; transition:.15s;}
-  .btn:hover{border-color:var(--teal); color:#fff;}
-  .btn.sel{border-color:var(--teal); background:rgba(53,201,189,.14); color:#fff;}
-  .btn.primary{background:linear-gradient(90deg,#1c6f66,#248a5f); border-color:transparent; color:#fff;}
-  .btn.primary:hover{filter:brightness(1.1);}
-  .btn:disabled{opacity:.45; cursor:default;}
-  .label{font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted2); font-weight:700; margin:4px 0 8px;}
-
-  /* verdict / takeaway */
-  .verdict{margin-top:16px; padding:15px 17px; border-radius:12px; border:1px solid var(--border);
-    background:var(--bg2); font-size:15.5px; color:#cfd8e4; display:none;}
-  .verdict.show{display:block;}
-  .verdict.good{border-color:rgba(91,208,122,.5); background:rgba(91,208,122,.08);}
-  .verdict.bad{border-color:rgba(224,100,93,.5); background:rgba(224,100,93,.08);}
-  .verdict b.k{color:var(--ink);}
-  .takeaway{margin-top:22px; border-left:3px solid var(--accent,var(--teal)); padding:6px 0 6px 16px; color:#cbd5e2; font-size:16px;}
-  .takeaway b{color:var(--ink);}
-
-  /* regime grid mini */
-  .rg{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:14px;}
-  .rg .cell{border:1px solid var(--line); border-radius:9px; padding:9px 11px; background:var(--bg2); opacity:.4; transition:.3s;}
-  .rg .cell.lit{opacity:1; border-color:var(--c);}
-  .rg .cell b{color:var(--c); font-size:15px;} .rg .cell span{color:var(--muted); font-size:12.5px;}
-
-  /* stats */
-  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:26px;}
-  .stat{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px 16px; text-align:center;}
-  .stat .num{font-size:clamp(26px,3.4vw,38px); font-weight:800; color:var(--teal); letter-spacing:-.5px;}
-  .stat .cap{font-size:13px; color:var(--muted); margin-top:4px;}
-
-  /* evidence thumbs */
-  .thumbs{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:24px;}
-  .thumb{position:relative; border:1px solid var(--border); border-radius:12px; overflow:hidden; cursor:zoom-in; background:#080b11;}
-  .thumb img{display:block; width:100%; height:170px; object-fit:cover; object-position:top left; opacity:.92; transition:.2s;}
-  .thumb:hover img{opacity:1; transform:scale(1.02);}
-  .thumb .cap{position:absolute; left:0; right:0; bottom:0; padding:9px 12px; font-size:13px;
-    background:linear-gradient(transparent,rgba(6,9,14,.92)); color:#e6edf3;}
-  .thumb .zoom{position:absolute; top:9px; right:9px; background:rgba(10,14,20,.8); border:1px solid var(--border);
-    border-radius:7px; padding:3px 8px; font-size:11px; color:var(--muted);}
-
-  /* lightbox */
-  .lb{position:fixed; inset:0; background:rgba(4,6,10,.94); z-index:200; display:none; align-items:center; justify-content:center; padding:24px; cursor:zoom-out;}
-  .lb.open{display:flex;}
-  .lb figure{max-width:100%; max-height:100%; text-align:center;}
-  .lb img{max-width:100%; max-height:82vh; border:1px solid var(--border); border-radius:10px;}
-  .lb figcaption{color:var(--muted); font-size:14px; margin-top:12px;}
-  .lb .x{position:fixed; top:16px; right:20px; color:#fff; font-size:30px; cursor:pointer; opacity:.8;}
-
-  /* ending */
-  .ending{text-align:center;}
-  .punch{margin:22px auto 0; max-width:20ch; font-size:clamp(22px,3.2vw,34px); font-weight:800; line-height:1.25;}
-  .punch b{color:var(--clean);}
-  .links{margin-top:28px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
-  .links a{border:1px solid var(--border); background:var(--panel); padding:12px 20px; border-radius:10px; color:var(--ink); font-weight:600; text-decoration:none;}
-  .links a:hover{border-color:var(--teal);}
-
-  .foot{color:var(--muted2); font-size:13px; text-align:center; padding:30px 0 60px;}
-
-  @media (max-width:720px){
-    .stats{grid-template-columns:repeat(2,1fr);}
-    .thumbs{grid-template-columns:1fr;}
-    .rg{grid-template-columns:1fr;}
-  }
-</style>
+<title>Quant Trading Studio — the mechanisms, and the one that broke</title>
+<meta name="description" content="An interactive walk through a quant research pipeline, every claim traced to a real line of source — including the constant that explains why it failed.">
+<link rel="stylesheet" href="story.css">
 </head>
 <body>
-<div class="progress"><div class="progress__bar" id="pbar"></div></div>
 
-<!-- HERO -->
+<div class="progress" aria-hidden="true"><div class="progress__bar" id="pbar"></div></div>
+
+<!-- ══════════════════════════ HERO ══════════════════════════ -->
 <header class="hero">
   <div class="wrap">
     <span class="badge">Quant Trading Studio</span>
-    <h1>A real edge, or just luck?</h1>
-    <p>Every trading tool finds something that <em>looks</em> profitable. This one is built to answer the harder question. Don't just read about it — <b style="color:var(--ink)">play the four tests</b> the system runs, and feel why they're hard.</p>
-    <div class="scrollcue"><span>&#8595;</span>&nbsp; scroll to begin</div>
+    <h1>I built a system to tell<br>skill from luck.<br><span class="hero__turn">Then I audited it.</span></h1>
+    <p class="hero__lead">
+      Six stages, one question: <em>is this edge real, or am I fooling myself?</em>
+      Every mechanism below is drawn from the actual source — file and line.
+      Play the labs. Open the drawers for the real formulas and constants.
+      The last one explains why the whole thing failed, and it isn't the reason I wrote in my journal.
+    </p>
+    <div class="hero__meta">
+      <span>C# WinForms · .NET 8</span><span>Python 3.11</span><span>MetaTrader 5</span>
+    </div>
+    <div class="scrollcue"><span aria-hidden="true">&#8595;</span> ten mechanisms, nine of them interactive</div>
   </div>
 </header>
 
-<!-- HOOK: luck vs skill -->
-<section id="hook" style="--accent:var(--red)">
+<!-- ══════════════════════════ CHAPTER 1 ══════════════════════════ -->
+<div class="chapter" id="ch1">
   <div class="wrap">
-    <span class="kicker">Warm-up &middot; the core problem</span>
-    <h2>Which trader actually has an edge?</h2>
-    <p class="big">Both finished the year up the same amount. Only one did it with a repeatable method. Look at the <b style="color:var(--ink)">shape</b>, then choose.</p>
-    <div class="play">
-      <canvas id="cv-hook" height="300"></canvas>
-      <div class="btnrow">
-        <button class="btn" id="hook-a">Trader&nbsp;A</button>
-        <button class="btn" id="hook-b">Trader&nbsp;B</button>
-        <button class="btn" id="hook-reset" style="margin-left:auto; display:none;">Try again</button>
-      </div>
-      <div class="verdict" id="hook-v"></div>
-    </div>
-    <p class="takeaway"><b>Luck</b> hides in the shape: profit from one lucky move looks identical to skill on a scorecard. The whole studio exists to tell them apart.</p>
+    <span class="chapter__num">01</span>
+    <h2 class="chapter__title">The two enemies</h2>
+    <p class="chapter__sub">Luck is profit from a moment, not a method. Overfitting is a strategy quietly shaped to fit the past it was tested on. Both draw beautiful equity curves.</p>
   </div>
-</section>
+</div>
 
-<!-- TEST 1: regimes -->
-<section id="regime" style="--accent:var(--blue)">
+<section class="act" id="act-fragility" style="--accent:var(--red)">
   <div class="wrap">
-    <span class="kicker">Test 1 &middot; read the market</span>
-    <h2>Name the market's mood</h2>
-    <p class="big">Before optimizing anything, the system describes the market with two honest axes: <b style="color:var(--ink)">memory</b> and <b style="color:var(--ink)">volatility</b>. Together they make six regimes, R1&ndash;R6. Try it on a real-looking sample.</p>
-    <div class="play">
-      <canvas id="cv-reg" height="260"></canvas>
-      <div class="label" style="margin-top:16px;">Memory &mdash; how does it move?</div>
-      <div class="btnrow" id="reg-mem">
-        <button class="btn" data-v="trend">Trending</button>
-        <button class="btn" data-v="revert">Mean-reverting</button>
-        <button class="btn" data-v="random">Random</button>
-      </div>
-      <div class="label" style="margin-top:14px;">Volatility &mdash; how wild?</div>
-      <div class="btnrow" id="reg-vol">
-        <button class="btn" data-v="low">Calm (low)</button>
-        <button class="btn" data-v="high">Wild (high)</button>
-      </div>
-      <div class="btnrow">
-        <button class="btn primary" id="reg-check" disabled>Check</button>
-        <button class="btn" id="reg-next" style="display:none;">Next sample &#8594;</button>
-        <span id="reg-score" style="margin-left:auto; align-self:center; color:var(--muted); font-size:14px;">Score 0 / 0</span>
-      </div>
-      <div class="verdict" id="reg-v"></div>
-      <div class="rg" id="reg-grid"></div>
-    </div>
-    <p class="takeaway">Six regimes let you <b>split time honestly</b> &mdash; build a strategy in one regime, prove it on a <b>different occurrence of the same one</b>. Never a random date split (neighbouring days move together, so random leaks the future into the past).</p>
-  </div>
-</section>
+    <span class="kicker">Act 1 · Structure pillar</span>
+    <h3 class="act__q">How much of this year came from three trades?</h3>
+    <p class="act__lead">
+      A backtest reports a healthy profit factor and a clean-looking curve. The Structure pillar
+      asks something ruder: delete the three biggest winners and recompute. If what remains can no
+      longer pay for the losses, the edge was three trades wearing a strategy's clothes.
+    </p>
 
-<!-- TEST 2: overfit -->
-<section id="overfit" style="--accent:var(--green)">
-  <div class="wrap">
-    <span class="kicker">Test 2 &middot; the overfit trap</span>
-    <h2>One idea becomes thousands of settings</h2>
-    <p class="big">A single strategy has hundreds of parameter combinations. Below are 160 of them, plotted by profit on the data we optimized on. <b style="color:var(--ink)">Click the one you'd trade</b> &mdash; then test it on data it has never seen.</p>
-    <div class="play">
-      <canvas id="cv-of" height="330" style="cursor:crosshair;"></canvas>
-      <div class="btnrow">
-        <button class="btn primary" id="of-validate" disabled>Validate on unseen data</button>
-        <button class="btn" id="of-reset" style="display:none;">Reset</button>
-        <span id="of-hint" style="margin-left:auto; align-self:center; color:var(--muted); font-size:14px;">Pick a dot &#8593;</span>
-      </div>
-      <div class="verdict" id="of-v"></div>
-    </div>
-    <p class="takeaway">The tallest peaks are usually <b>overfit</b> &mdash; they win once and collapse. So the system never picks max profit: it clusters the settings, keeps a few genuinely different survivors, and re-tests each on unseen regimes (<b>PASS / DEGRADE / FAIL</b>).</p>
-  </div>
-</section>
+    <div class="lab">
+      <canvas id="cv-frag" height="260" aria-describedby="frag-alt"></canvas>
+      <p class="visually-hidden" id="frag-alt">Bar chart of individual trade profit and loss, with the largest winners highlighted.</p>
 
-<!-- TEST 3: efficient frontier -->
-<section id="frontier" style="--accent:var(--purple)">
-  <div class="wrap">
-    <span class="kicker">Test 3 &middot; size the risk</span>
-    <h2>Spend a risk budget, not a hope</h2>
-    <p class="big">With a few proven strategies, the last question is how to combine them for the money you actually have. Drag your <b style="color:var(--ink)">max drawdown budget</b> and watch the best portfolio move along the efficient frontier.</p>
-    <div class="play">
-      <canvas id="cv-ef" height="300"></canvas>
-      <div style="margin-top:16px;">
-        <div style="display:flex; justify-content:space-between; font-size:14px; color:var(--muted);">
-          <span>Max drawdown budget</span><span id="ef-budget" style="color:var(--ink); font-weight:700;">$1,000</span>
+      <div class="lab__controls">
+        <div class="ctrl">
+          <label class="ctrl__label" for="frag-remove">Remove the biggest winners</label>
+          <input type="range" id="frag-remove" min="0" max="6" value="0" step="1" list="frag-ticks">
+          <datalist id="frag-ticks"><option value="0"></option><option value="3"></option><option value="5"></option></datalist>
+          <div class="ctrl__val"><b id="frag-n">0</b> removed</div>
         </div>
-        <input type="range" id="ef-range" min="150" max="1000" value="1000" step="10" style="width:100%; margin-top:8px; accent-color:#9a82d8;">
+        <button class="btn" id="frag-shuffle" type="button">New sample</button>
       </div>
-      <div class="btnrow" style="gap:22px; margin-top:14px;">
-        <div><div class="label" style="margin:0;">Return / month</div><div id="ef-ret" style="font-size:20px; font-weight:800; color:var(--green);">&mdash;</div></div>
-        <div><div class="label" style="margin:0;">Return / risk</div><div id="ef-rr" style="font-size:20px; font-weight:800; color:var(--ink);">&mdash;</div></div>
-        <div><div class="label" style="margin:0;">Strategies used</div><div id="ef-mix" style="font-size:20px; font-weight:800; color:var(--purple);">&mdash;</div></div>
+
+      <div class="lab__readout">
+        <div class="ro"><span class="ro__cap">Profit factor</span><b class="ro__num" id="frag-pf">—</b></div>
+        <div class="ro"><span class="ro__cap">% of gross profit from top 3</span><b class="ro__num" id="frag-share">—</b></div>
+        <div class="ro"><span class="ro__cap"><code>pf_without_top3</code></span><b class="ro__num" id="frag-pf3">—</b></div>
+        <div class="ro"><span class="ro__cap">Structure pillar</span><b class="ro__num" id="frag-score">—</b></div>
       </div>
+      <div class="verdict" id="frag-v" role="status"></div>
     </div>
-    <p class="takeaway">The output isn't a promise &mdash; it's an <b>owner's manual</b>: how many lots of each strategy, the expected monthly return and risk, and how much of your budget it burns. Bigger budget buys more return, but never for free.</p>
+
+    <details class="cite">
+      <summary>How it's actually computed</summary>
+      <div class="cite__body">
+        <p class="cite__path">scripts/backtest/analytics.py:1057</p>
+<pre><code>def _edge_fragility(profits):
+    """Remove top N winning trades and recalculate PF.
+    If PF collapses -> strategy depends on outlier wins,
+    not consistent noise capture."""
+    sorted_desc  = sorted(profits, reverse=True)
+    total_profit = sum(p for p in profits if p &gt; 0)   # gross, not net
+    top3_profit  = sum(sorted_desc[:3])
+    pct_top3     = top3_profit / total_profit * 100.0</code></pre>
+        <p class="cite__path">scripts/backtest/investor_summary.py:224 — the Structure pillar and its cap</p>
+<pre><code>_score_higher(win_rate - breakeven_win_rate, 0.0, 0.08) * 28
++ _score_higher(payoff_ratio,           1.0, 2.2)       * 24
++ _score_lower(top3_profit_share_pct,  65.0, 30.0)      * 24
++ _score_higher(pf_without_top3,        1.0, 1.35)      * 24
+
+if win_rate &lt;= be_wr or payoff &lt;= 1.0:  score = min(score, 54)
+if 0 &lt; pf_without_top3 &lt; 1.0:           score = min(score, 54)</code></pre>
+        <p class="cite__note">
+          The second cap is the interesting one: a profit factor below 1.0 <em>after</em> the top three
+          trades are removed means the strategy was profitable <em>only</em> because of three trades.
+          The score is held at 54 no matter how good the rest of the pillar looks.
+          Note also that <code>pct_top3</code> divides by <em>gross</em> profit, so a strategy with many
+          small wins and heavy losses reads deceptively low here — the <code>pf_without_top3</code> term
+          is the one that catches it.
+        </p>
+      </div>
+    </details>
   </div>
 </section>
 
-<!-- EVIDENCE / DEPTH -->
-<section id="evidence" style="--accent:var(--teal)">
+<!-- ══════════════════════════ CHAPTER 2 ══════════════════════════ -->
+<div class="chapter" id="ch2">
   <div class="wrap">
-    <span class="kicker">This is not a mockup</span>
-    <h2>How deep it actually goes</h2>
-    <p class="big">Those four tests run inside a real desktop app (C# + Python + MetaTrader 5). A single portfolio search evaluates numbers like these:</p>
-    <div class="stats">
-      <div class="stat"><div class="num" data-to="17">0</div><div class="cap">symbols scanned</div></div>
-      <div class="stat"><div class="num" data-to="5343">0</div><div class="cap">configs from one idea</div></div>
-      <div class="stat"><div class="num" data-to="86300">0</div><div class="cap">portfolio cases evaluated</div></div>
-      <div class="stat"><div class="num" data-to="269">0</div><div class="cap">portfolios on the frontier</div></div>
+    <span class="chapter__num">02</span>
+    <h2 class="chapter__title">Making time honest</h2>
+    <p class="chapter__sub">Journey stages 2 and 3. Before you can test anything you need two things: a number that means the same thing in 2019 and 2026, and a way to cut the timeline that doesn't cheat.</p>
+  </div>
+</div>
+
+<section class="act" id="act-rolling" style="--accent:var(--teal)">
+  <div class="wrap">
+    <span class="kicker">Act 2 · Rolling normalization</span>
+    <h3 class="act__q">Which half of this chart is "high volatility"?</h3>
+    <p class="act__lead">
+      Prices grow. A mean and standard deviation taken over the whole history describe today's large
+      numbers, not the past's — so early history gets painted permanently calm and every signal fires
+      in one era. The statistic has to roll. Tool 1 uses a <b>252-day rolling percentile rank</b>,
+      not a z-score: percentile is bounded and scale-free, so one fixed threshold works on gold and
+      on BTC alike. Drag the window down to nothing and watch it become the broken version.
+    </p>
+
+    <div class="lab">
+      <canvas id="cv-roll" height="330" aria-describedby="roll-alt"></canvas>
+      <p class="visually-hidden" id="roll-alt">A growing price series with two volatility ribbons beneath it: one computed over the full sample, one over a rolling window.</p>
+
+      <div class="lab__controls">
+        <div class="ctrl">
+          <label class="ctrl__label" for="roll-win">Rolling window <span class="ctrl__hint">percentile_window_days</span></label>
+          <input type="range" id="roll-win" min="20" max="756" value="252" step="1">
+          <div class="ctrl__val"><b id="roll-win-v">252</b> days</div>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl__label" for="roll-warm">Warmup floor <span class="ctrl__hint">min_percentile_observations</span></label>
+          <input type="range" id="roll-warm" min="0" max="200" value="60" step="1">
+          <div class="ctrl__val"><b id="roll-warm-v">60</b> obs</div>
+        </div>
+      </div>
+
+      <div class="lab__readout">
+        <div class="ro"><span class="ro__cap">Full-sample: high-vol weeks in first half</span><b class="ro__num" id="roll-fixed">—</b></div>
+        <div class="ro"><span class="ro__cap">Rolling: high-vol weeks in first half</span><b class="ro__num" id="roll-rollv">—</b></div>
+        <div class="ro"><span class="ro__cap">Weeks with no label (warmup)</span><b class="ro__num" id="roll-warmcount">—</b></div>
+      </div>
+      <div class="verdict show" id="roll-v" role="status"></div>
     </div>
-    <p class="lead" style="margin-top:26px;">The screenshots below are the real tool &mdash; <b style="color:var(--ink)">click any to see it full-size</b>.</p>
-    <div class="thumbs">
-      <div class="thumb" data-full="../assets/readme/01-market-regime-map.png" data-cap="Market Analysis — three years of gold cut into R1–R6 regime segments.">
-        <img src="../assets/readme/01-market-regime-map.png" alt="Regime map"><span class="zoom">&#128269; zoom</span><span class="cap">Regime map &middot; Test 1</span></div>
-      <div class="thumb" data-full="../assets/readme/05-optimize-seed.png" data-cap="Auto-Optimization — 5,343 configs generated from one strategy.">
-        <img src="../assets/readme/05-optimize-seed.png" alt="Optimization seed"><span class="zoom">&#128269; zoom</span><span class="cap">1 idea → thousands of configs &middot; Test 2</span></div>
-      <div class="thumb" data-full="../assets/readme/09-portfolio-frontier.png" data-cap="Portfolio — the efficient frontier, allocation pie, and ranked portfolios.">
-        <img src="../assets/readme/09-portfolio-frontier.png" alt="Efficient frontier"><span class="zoom">&#128269; zoom</span><span class="cap">Efficient frontier &middot; Test 3</span></div>
-      <div class="thumb" data-full="../assets/readme/06-backtest-overview.png" data-cap="Backtest — five pillars (Edge · Risk · Structure · Timing · Investment) into one verdict.">
-        <img src="../assets/readme/06-backtest-overview.png" alt="Backtest"><span class="zoom">&#128269; zoom</span><span class="cap">Five-pillar backtest</span></div>
+
+    <details class="cite">
+      <summary>How it's actually computed</summary>
+      <div class="cite__body">
+        <p class="cite__path">scripts/market_analysis/tool1_labeler/config.py:15</p>
+<pre><code>percentile_window_days:       int = 252
+min_percentile_observations:  int = 60
+vol_window_days:              int = 20
+vol_of_vol_window_days:       int = 60
+high_vol_threshold:         float = 0.55</code></pre>
+        <p class="cite__path">scripts/market_analysis/common/stats.py:58 — the tie convention</p>
+<pre><code>(less + 0.5 * equal) / len(values)</code></pre>
+        <p class="cite__note">
+          Mid-rank, not max-rank. A dead flat window returns <b>0.5</b> — "neutral" — instead of 1.0.
+          Without it, a market with no movement at all would be labelled record-high volatility.
+        </p>
+        <p class="cite__note">
+          Volatility is normalized <em>twice</em>: realized vol is a trailing 20-day standard deviation
+          annualised by √252, then vol-of-vol is a 60-day standard deviation <em>of that series</em>,
+          and both are percentile-ranked over 252 days before being blended 0.75 / 0.25. The second
+          layer separates "volatility is high" from "volatility is unstable" — different regimes.
+        </p>
+        <p class="cite__path">scripts/market_analysis/tool1_labeler/feature_extractor.py:159 — the warmup gate</p>
+<pre><code>if len(window) &lt; window_size:
+    return []          # never a partial window</code></pre>
+        <p class="cite__note">
+          Most code would compute a 12-day standard deviation and call it a 20-day one. This returns
+          nothing, and the resulting <code>None</code> propagates all the way to a forced R6 label at
+          confidence 0.10 — the system says "I don't know" rather than guessing.
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="act" id="act-regime" style="--accent:var(--blue)">
+  <div class="wrap">
+    <span class="kicker">Act 3 · Causal smoothing</span>
+    <h3 class="act__q">You can't split a price series at random. So where do you cut it?</h3>
+    <p class="act__lead">
+      Neighbouring days move together, so a random train/test split leaks the future into the past.
+      The alternative is to cut by <b>behaviour</b>: label every week by memory × volatility into six
+      regimes, then build in one occurrence and validate on a <em>different occurrence of the same
+      regime</em>. But a label that flips every week is worthless. So the labeler is causal and
+      stubborn — a new regime must survive four consecutive weeks before it may replace the old one.
+      Drag that number and watch the map shred, then go blind.
+    </p>
+
+    <div class="lab">
+      <canvas id="cv-reg" height="300" aria-describedby="reg-alt"></canvas>
+      <p class="visually-hidden" id="reg-alt">A price series above a ribbon of weekly regime labels, showing how smoothing changes segment structure.</p>
+
+      <div class="lab__controls">
+        <div class="ctrl">
+          <label class="ctrl__label" for="reg-confirm">Weeks to confirm a new regime <span class="ctrl__hint">confirm_weeks</span></label>
+          <input type="range" id="reg-confirm" min="1" max="8" value="4" step="1">
+          <div class="ctrl__val"><b id="reg-confirm-v">4</b> weeks</div>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl__label" for="reg-vol">Volatility split <span class="ctrl__hint">high_vol_threshold</span></label>
+          <input type="range" id="reg-vol" min="40" max="70" value="55" step="1">
+          <div class="ctrl__val"><b id="reg-vol-v">0.55</b></div>
+        </div>
+      </div>
+
+      <div class="lab__readout">
+        <div class="ro"><span class="ro__cap">Segments</span><b class="ro__num" id="reg-segs">—</b></div>
+        <div class="ro"><span class="ro__cap">Median duration</span><b class="ro__num" id="reg-median">—</b></div>
+        <div class="ro"><span class="ro__cap">One-week segments</span><b class="ro__num" id="reg-oneweek">—</b></div>
+        <div class="ro"><span class="ro__cap">Lag at the last real turn</span><b class="ro__num" id="reg-lag">—</b></div>
+      </div>
+      <div class="verdict show" id="reg-v" role="status"></div>
+
+      <div class="rgrid" id="reg-grid" aria-hidden="true"></div>
+    </div>
+
+    <details class="cite">
+      <summary>How it's actually computed</summary>
+      <div class="cite__body">
+        <p class="cite__path">scripts/market_analysis/tool1_labeler/smoother.py:66</p>
+<pre><code>def _candidate_is_confirmed(candidate_streak, candidate_confidences, config):
+    if candidate_streak &gt;= config.confirm_weeks:          # 4
+        return True
+    return (
+        candidate_streak &gt;= config.high_conf_confirm_weeks   # 3
+        and len(candidate_confidences) &gt;= config.high_conf_confirm_weeks
+        and all(c &gt;= config.high_confidence_threshold        # 0.75
+                for c in candidate_confidences)
+    )</code></pre>
+        <p class="cite__note">
+          Two doors, not one. Four ordinary weeks, <em>or</em> three consecutive weeks that were each
+          confident above 0.75. While a candidate is pending, the week keeps the <b>old</b> label,
+          is flagged <code>transition_flag=True</code>, and loses 0.15 of its confidence. Transition
+          weeks are then given a training weight of exactly <b>0.0</b> — they are never used as
+          learning targets.
+        </p>
+        <p class="cite__path">scripts/market_analysis/tool1_labeler/validator.py:233 — the map grades itself</p>
+<pre><code>FAIL if median segment duration &lt; 2 weeks
+FAIL if &gt;= 35% of segments are 1 week long
+FAIL if regime changes per year &gt; 12
+WARN at &lt; 4 weeks / &gt;= 20% / &gt; 8</code></pre>
+        <p class="cite__note">
+          The still-running final segment is dropped before grading
+          (<code>service.py:246</code>) — the current, unfinished regime never counts toward
+          validation. It is the most interesting segment on the chart and it is deliberately excluded,
+          because its duration is unknowable until it ends.
+        </p>
+        <p class="cite__note">
+          The volatility slider matters more than it looks: <code>high_vol_threshold</code> is a
+          single float that decides R1↔R2, R3↔R4 and R5↔R6 simultaneously. The app ships exactly
+          three presets — 0.48, 0.55, 0.62 — and the default sits above 0.50, biased toward calling
+          things calm.
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════ CHAPTER 3 ══════════════════════════ -->
+<div class="chapter" id="ch3">
+  <div class="wrap">
+    <span class="chapter__num">03</span>
+    <h2 class="chapter__title">One idea, thousands of configs</h2>
+    <p class="chapter__sub">Journey stage 4. A single alpha isn't a strategy — it's a parameter space. Picking the highest peak in that space is the textbook definition of overfitting, so the pipeline is built to refuse.</p>
+  </div>
+</div>
+
+<section class="act" id="act-coverage" style="--accent:var(--amber)">
+  <div class="kicker-bleed"></div>
+  <div class="wrap">
+    <span class="kicker">Act 4 · Coverage</span>
+    <h3 class="act__q">How do you know the search actually explored anything?</h3>
+    <p class="act__lead">
+      The obvious check is coverage: did the search visit every region of every parameter? With
+      16,000 genetic-algorithm rows the answer is always <em>yes</em> — every value gets visited
+      eventually, coverage reads 100%, and the gap-finder never fires once. So coverage was
+      redefined to ask a harder question: did the search find a <b>near-best score</b> in every
+      region? Drag the bar from the broken metric to the real one.
+    </p>
+
+    <div class="lab">
+      <canvas id="cv-cov" height="300" aria-describedby="cov-alt"></canvas>
+      <p class="visually-hidden" id="cov-alt">A scatter of optimizer passes across one parameter's domain, with uncovered gap bands highlighted.</p>
+
+      <div class="lab__controls">
+        <div class="ctrl ctrl--wide">
+          <label class="ctrl__label" for="cov-q">Quality bar <span class="ctrl__hint">quality_ratio — a bin counts as covered only if some pass there scored this fraction of the global best</span></label>
+          <input type="range" id="cov-q" min="0" max="999" value="700" step="1">
+          <div class="ctrl__val"><b id="cov-q-v">0.700</b></div>
+        </div>
+      </div>
+
+      <div class="lab__readout">
+        <div class="ro"><span class="ro__cap">Coverage</span><b class="ro__num" id="cov-pct">—</b></div>
+        <div class="ro"><span class="ro__cap">Gaps found</span><b class="ro__num" id="cov-gaps">—</b></div>
+        <div class="ro"><span class="ro__cap">Widest gap</span><b class="ro__num" id="cov-widest">—</b></div>
+      </div>
+      <div class="verdict show" id="cov-v" role="status"></div>
+    </div>
+
+    <details class="cite">
+      <summary>How it's actually computed</summary>
+      <div class="cite__body">
+        <p class="cite__path">scripts/optimizer/auto/coverage.py:16 — the docstring <em>is</em> the argument</p>
+<pre><code>"""Coverage now requires QUALITY, not just visitation.
+
+A bin is "covered" only if its best score is at least
+``quality_ratio * global_best_score``. With raw GA output any param
+value gets visited eventually (16k+ rows), so visit-based coverage
+is always 1.0 and Step 2 never fires. Quality-based coverage instead
+asks "did GA find a near-best score for every region?"."""</code></pre>
+        <p class="cite__path">scripts/optimizer/auto/coverage.py:34</p>
+<pre><code>quality_ratio     = max(0.0, min(0.999, float(quality_ratio)))   # default 0.7
+quality_threshold = best_score * quality_ratio if best_score &gt; 0 else -inf
+covered_mask      = point_best_scores &gt;= np.float32(quality_threshold)</code></pre>
+        <p class="cite__note">
+          Gaps are then maximal runs of consecutive uncovered bins, filtered by
+          <code>min_gap_ratio = 0.05</code>, and ranked by
+          <code>gap_ratio × 0.5 + distance_to_best × 0.5</code>. The second term exists to fix a real
+          bug: ranking by gap size alone always pointed the next search back at the widest band
+          <em>next to the current best</em>, which is exactly the basin it had already explored.
+          Half the weight goes to "how far is this from where we already are".
+        </p>
+        <div class="honest">
+          <b>Honest note.</b> This ranking no longer drives a search. The Analyze phase used to feed
+          its gaps into a second genetic run; that path was removed because the diversity-aware seed
+          loop already explored the joint space at least as well
+          (<code>pipeline.py:484</code>). <code>build_unified_challenge_set</code> is still imported
+          at <code>pipeline.py:16</code> and never called, and the
+          <code>exploration_mode</code> dropdown in the UI now changes no output at all. Coverage is
+          diagnostics — real, computed on every run, written to <code>coverage_summary.json</code>,
+          and read by a human rather than a machine.
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="act" id="act-cluster" style="--accent:var(--green)">
+  <div class="wrap">
+    <span class="kicker">Act 5 · Filter</span>
+    <h3 class="act__q">Out of five thousand configurations, which do you keep?</h3>
+    <p class="act__lead">
+      Keeping the top scorers guarantees near-clones of one lucky peak. So the filter clusters every
+      row — nothing truncated — and keeps one representative per cluster. The detail that carries
+      the whole idea: the feature matrix is built from <b>parameters only</b>. Score is never a
+      feature. Toggle it on and watch every "diverse" survivor collapse into the same basin.
+    </p>
+
+    <div class="lab">
+      <canvas id="cv-clus" height="340" aria-describedby="clus-alt"></canvas>
+      <p class="visually-hidden" id="clus-alt">A two-dimensional scatter of parameter configurations coloured by score, with cluster representatives marked.</p>
+
+      <div class="lab__controls lab__controls--toggles">
+        <button class="toggle" id="clus-score" type="button" aria-pressed="false">
+          <span class="toggle__box" aria-hidden="true"></span>
+          Include score as a clustering feature
+        </button>
+        <button class="toggle" id="clus-trunc" type="button" aria-pressed="false">
+          <span class="toggle__box" aria-hidden="true"></span>
+          Cluster only the top 500 rows
+        </button>
+      </div>
+
+      <div class="lab__readout">
+        <div class="ro"><span class="ro__cap">Representatives kept</span><b class="ro__num" id="clus-k">—</b></div>
+        <div class="ro"><span class="ro__cap">Widest cluster’s radius in parameter space</span><b class="ro__num" id="clus-spread">—</b></div>
+        <div class="ro"><span class="ro__cap">Distinct basins reached</span><b class="ro__num" id="clus-basins">—</b></div>
+      </div>
+      <div class="verdict show" id="clus-v" role="status"></div>
+    </div>
+
+    <details class="cite">
+      <summary>How it's actually computed</summary>
+      <div class="cite__body">
+        <p class="cite__path">scripts/optimizer/auto/representatives.py:201</p>
+<pre><code>def _build_feature_matrix(dataset):
+    blocks = []
+    if dataset.numeric_matrix.shape[1] &gt; 0:
+        ...
+        scaled = (numeric - col_min) / spans      # min-max on the DECLARED span
+        blocks.append(np.clip(scaled, 0.0, 1.0))
+    for name in dataset.discrete_param_names:
+        blocks.append(one_hot)                    # one column per enum value
+    return np.concatenate(blocks, axis=1)</code></pre>
+        <p class="cite__note">
+          <code>dataset.score_vector</code> exists, is loaded, and is never appended to
+          <code>blocks</code>. Clusters are shapes in parameter space. Score enters exactly once,
+          later, when choosing which member of a cluster to keep.
+        </p>
+        <p class="cite__note">
+          <b>k</b> is auto-tuned by silhouette over a grid that widens with search depth —
+          <code>quick (5,10,15,20)</code>, <code>standard (…30,40)</code>,
+          <code>thorough (…60,80)</code> — with k-means++ init and a fixed seed of 0, so the same
+          dataset always yields the same representatives.
+        </p>
+        <div class="honest">
+          <b>Honest note.</b> My journal claims I picked the config with the best average
+          return/risk. Half true. The <em>set</em> of survivors is genuinely chosen without reference
+          to score, which is the real anti-overfitting mechanism. But the pick <em>inside</em> each
+          cluster is still a maximum on one metric
+          (<code>representatives.py:384</code>): <code>conservative</code> takes max Sharpe,
+          <code>aggressive</code> takes max Profit, and the default <code>balance</code> takes max of
+          the optimization criterion — which, at the default setting, resolves to Profit.
+          <b>No preset optimizes return/risk.</b> "I stopped selecting by max profit alone" is
+          defensible. "I select by return/risk" is not what the code does.
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="act" id="act-validate" style="--accent:var(--purple)">
+  <div class="wrap">
+    <span class="kicker">Act 6 · Train / Validate</span>
+    <h3 class="act__q">Three out-of-sample windows disagree. Now what?</h3>
+    <p class="act__lead">
+      The intuitive answer — and the one my own README still describes — is to take the worst
+      window: minimum profit factor, maximum drawdown, fail on any sign flip. That is not what runs.
+      Each window carries a <b>role weight</b>, metrics combine as a role-weighted mean, and
+      candidates are ranked by <b>Stability = 100·(1 − CV)</b>: consistency, not severity. Push one
+      window into a loss and compare the two readings.
+    </p>
+
+    <div class="lab">
+      <div class="wins" id="val-wins"></div>
+
+      <div class="lab__controls lab__controls--preset">
+        <label class="ctrl__label" for="val-preset">Role preset</label>
+        <select id="val-preset" class="select">
+          <option value="balanced" selected>Balanced (default)</option>
+          <option value="validatefirst">Validate-first</option>
+          <option value="insample">In-sample friendly</option>
+          <option value="oosonly">Out-of-sample only</option>
+        </select>
+      </div>
+
+      <div class="compare">
+        <div class="compare__col compare__col--ghost">
+          <span class="compare__cap">What the docs describe</span>
+          <div class="compare__metric"><span>Aggregate PF</span><b id="val-minpf">—</b></div>
+          <div class="compare__metric"><span>Rule</span><b class="mono">min across windows</b></div>
+          <div class="compare__verdict" id="val-minverdict">—</div>
+          <p class="compare__note">No such thresholds exist anywhere in the source.</p>
+        </div>
+        <div class="compare__col compare__col--real">
+          <span class="compare__cap">What actually runs</span>
+          <div class="compare__metric"><span>Weighted mean PF</span><b id="val-meanpf">—</b></div>
+          <div class="compare__metric"><span>Stability</span><b id="val-stab">—</b></div>
+          <div class="compare__metric"><span>Regime Fit</span><b id="val-fit">—</b></div>
+          <div class="compare__verdict" id="val-realverdict">—</div>
+          <p class="compare__note" id="val-note">—</p>
+        </div>
+      </div>
+    </div>
+
+    <details class="cite">
+      <summary>How it's actually computed</summary>
+      <div class="cite__body">
+        <p class="cite__path">ui/Optimization/Stage0TrainValidateModel.cs:130</p>
+<pre><code>double mean    = WeightedMean(samples);
+double sd      = WeightedStdev(samples);
+double scale   = Math.Max(Math.Abs(mean), Math.Max(meanFloor, 1e-9));
+double cv      = sd / scale;
+return 100d * (1d - Math.Min(cv, 1d));      // Stability</code></pre>
+        <p class="cite__note">
+          Mean floors — PF 0.5, Sharpe 0.5, Recovery 0.5, Profit 100.0 — stop a near-zero mean from
+          producing an infinite coefficient of variation. Fewer than two contributing windows returns
+          <b>0</b> rather than a flattering number: no sample, no score.
+        </p>
+        <p class="cite__path">ui/Optimization/Stage0TrainValidateModel.cs:152 — Regime Fit</p>
+<pre><code>double w    = Math.Max(q, 0d) * Math.Max(rw, 0d);   // regime quality × role weight
+double perf = Math.Clamp(pf - 1d, -1d, 1d);         // PF=1 -> 0, PF>=2 -> +1
+RegimeFit   = sum(perf * w) / sum(w);               // in [-1, +1]</code></pre>
+        <p class="cite__path">ui/Optimization/Stage0TrainValidateModel.cs:42 — the role weights</p>
+<pre><code>                      Build   Primary   Can    Reference
+Validate-first         0.30     1.00     0.70     0.20
+Balanced (default)     0.50     1.00     0.70     0.20
+In-sample friendly     1.00     1.00     0.70     0.20
+Out-of-sample only     0.00     1.00     0.70     0.00</code></pre>
+        <div class="honest">
+          <b>Honest note — and the reason this act exists.</b> The
+          <code>PASS / DEGRADE / FAIL</code> verdict with thresholds
+          <code>PF &lt; 0.85×Build</code>, <code>DD &gt; 1.5×Build</code>,
+          <code>Sharpe &lt; 0.5×Build</code> is described in my README, in four documents under
+          <code>docs/</code>, and in the previous version of this very page. Searching the repository
+          for those constants returns <b>no</b> <code>.py</code> or <code>.cs</code> file — the single
+          hit in code is a comment at <code>AutoOptimizationControlWindow.Stage0.cs:377</code> noting
+          that the verdict was removed.
+          Two consequences follow that I did not notice until I read the source for this page: under
+          the default Balanced preset the in-sample Build window carries weight 0.50 and sits
+          <em>inside</em> the Stability sample, so the ranking metric is a blend of in-sample and
+          out-of-sample — and "In-sample friendly" is a dropdown that takes it to 1.00. The barrier
+          became a ranking, and the ranking has a knob that turns it all the way back.
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════ CHAPTER 4 ══════════════════════════ -->
+<div class="chapter" id="ch4">
+  <div class="wrap">
+    <span class="chapter__num">04</span>
+    <h2 class="chapter__title">Capital, and where it broke</h2>
+    <p class="chapter__sub">Journey stages 5 and 6. An edge is not automatically worth money. And the number I trusted most turned out to be the one I should have read first.</p>
+  </div>
+</div>
+
+<section class="act" id="act-veto" style="--accent:var(--teal)">
+  <div class="wrap">
+    <span class="kicker">Act 7 · The five pillars</span>
+    <h3 class="act__q">Can a strategy score 100 on four pillars and still be rejected?</h3>
+    <p class="act__lead">
+      Edge, Risk, Structure, Timing, Investment. Investment carries 18% of the weighted score, which
+      makes it look like the least important of the five. It isn't. If Investment returns
+      <b>NOT WORTH CAPITAL</b>, Overall is capped at 39 and the verdict is forced to REJECT no matter
+      what the other four say. Max out the first four, then drag Investment down: the number falls
+      off a cliff, not a slope.
+    </p>
+
+    <div class="lab">
+      <div class="pillars" id="veto-pillars"></div>
+      <div class="overall">
+        <div class="overall__gauge">
+          <canvas id="cv-veto" height="150" aria-describedby="veto-alt"></canvas>
+          <p class="visually-hidden" id="veto-alt">A gauge showing the combined overall score across five pillars.</p>
+        </div>
+        <div class="overall__side">
+          <div class="ro"><span class="ro__cap">Weighted operating core</span><b class="ro__num" id="veto-core">—</b></div>
+          <div class="ro"><span class="ro__cap">Overall</span><b class="ro__num ro__num--big" id="veto-score">—</b></div>
+          <div class="decision" id="veto-decision">—</div>
+        </div>
+      </div>
+      <div class="verdict show" id="veto-v" role="status"></div>
+    </div>
+
+    <details class="cite">
+      <summary>How it's actually computed</summary>
+      <div class="cite__body">
+        <p class="cite__path">scripts/backtest/investor_summary.py:499</p>
+<pre><code>operating = (edge*0.28 + risk*0.28 + structure*0.22 + time*0.22)
+score     = round(clamp(operating*0.82 + investment*0.18, 0, 100))
+
+hard_bad = (edge       == "REJECT"
+         or risk       == "RISK BAD"
+         or investment == "NOT WORTH CAPITAL")
+if hard_bad:
+    score = min(score, 39)
+
+decision = "USE" if score &gt;= 74 else "WATCH" if score &gt;= 56 \
+      else "WEAK" if score &gt;= 40 else "REJECT"
+if hard_bad:
+    decision = "REJECT"</code></pre>
+        <p class="cite__note">
+          Investment's own score is what trips the veto, and its cliff edges are explicit:
+          <code>month_rr &lt; 0.45</code> caps it at 49, <code>&lt; 0.65</code> caps it at 66. That
+          0.65 is the "fair allocation" line. Under 8 weekly observations the pillar caps itself at
+          55 regardless of how good it looks — a sample-size honesty cap.
+        </p>
+        <p class="cite__note">
+          The "risk" in that ratio is not a standard deviation. <code>expected_month_risk</code> is
+          the <b>mean of the worst 35% of losing months</b> — a conditional tail expectation. It is
+          the closest thing in the repository to the return/risk my journal talks about, it is
+          computed per config in the Backtest report, and it is never used to select anything.
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="act" id="act-lattice" style="--accent:var(--purple)">
+  <div class="wrap">
+    <span class="kicker">Act 8 · Portfolio construction</span>
+    <h3 class="act__q">How many lots of each?</h3>
+    <p class="act__lead">
+      With a handful of proven strategies and a dollar drawdown budget, the manager enumerates every
+      feasible integer-lot combination. Generation prunes with an <b>additive</b> bound — the sum of
+      each strategy's own drawdown — which assumes zero diversification. Admission to the frontier
+      then prices each survivor on the <b>actual merged daily path</b>, which captures correlation
+      exactly. Two contradictory assumptions about the same portfolio, four hundred lines apart.
+    </p>
+
+    <div class="lab">
+      <canvas id="cv-lat" height="330" aria-describedby="lat-alt"></canvas>
+      <p class="visually-hidden" id="lat-alt">A lattice of integer lot combinations with the feasible region shaded, alongside the resulting efficient frontier staircase.</p>
+
+      <div class="lab__controls">
+        <div class="ctrl ctrl--wide">
+          <label class="ctrl__label" for="lat-budget">Risk budget <span class="ctrl__hint">max_dd_dollar</span></label>
+          <input type="range" id="lat-budget" min="200" max="4000" value="1800" step="50">
+          <div class="ctrl__val">$<b id="lat-budget-v">1,800</b></div>
+        </div>
+      </div>
+
+      <div class="lab__readout">
+        <div class="ro"><span class="ro__cap">Raw lot vectors</span><b class="ro__num" id="lat-raw">—</b></div>
+        <div class="ro"><span class="ro__cap">Survive the additive bound</span><b class="ro__num" id="lat-feasible">—</b></div>
+        <div class="ro"><span class="ro__cap">On the frontier</span><b class="ro__num" id="lat-front">—</b></div>
+      </div>
+      <div class="verdict show" id="lat-v" role="status"></div>
+    </div>
+
+    <details class="cite">
+      <summary>How it's actually computed</summary>
+      <div class="cite__body">
+        <p class="cite__path">scripts/portfolio/service.py:1295 — generation assumes no diversification</p>
+<pre><code>next_risk = risk_used + lot_risk        # lot_risk = risk_per_lot * lot
+if risk_budget &gt; 0 and next_risk &gt; risk_budget + 1e-9:
+    break                              # additive: sum of per-EA drawdowns</code></pre>
+        <p class="cite__path">scripts/portfolio/service.py:2102 — pricing captures correlation exactly</p>
+<pre><code>merged_daily_array = daily_matrix @ scale_vector    # (days × EAs) @ (lots per EA)</code></pre>
+        <p class="cite__note">
+          There is no covariance matrix anywhere in this pipeline and no <code>sqrt(wᵀΣw)</code>.
+          Every candidate portfolio is one matrix-vector product against a pre-built time-aligned
+          daily matrix, so historical correlation is captured implicitly and perfectly — twenty
+          thousand portfolios priced by a single BLAS loop. It is genuinely better than a covariance
+          approximation. It is also not Markowitz, and the frontier is a Pareto staircase over
+          (monthly σ, monthly mean), not a smooth hull.
+        </p>
+        <p class="cite__note">
+          Monthly risk is <code>statistics.pstdev</code> of calendar-month totals, and the estimation
+          window is the <b>intersection</b> of every strategy's backtest
+          (<code>common_start = max(starts)</code>). Add one alpha with nine months of history to six
+          with five years, and the entire risk model is estimated on nine monthly observations.
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════ CLIMAX ══════════════════════════ -->
+<section class="act act--climax" id="act-075" style="--accent:var(--red)">
+  <div class="wrap">
+    <span class="kicker">Act 9 · The constant</span>
+    <h3 class="act__q">Why was the real drawdown 30% worse than the model?</h3>
+    <p class="act__lead">
+      I wrote in my journal that the market surprised me — that the portfolio was stable but the
+      drawdown came in about thirty percent worse than modelled, and that I ran out of capital before
+      I could tell skill from luck. Reading my own source to build this page, I found the line that
+      gates every portfolio admitted to the frontier.
+    </p>
+
+    <div class="bigcode">
+      <span class="bigcode__path">scripts/portfolio/service.py:899</span>
+<pre><code>historical_dd = max_drawdown_dollar(0.0, daily_values) if daily_values else 0.0
+recent_dd     = float(edge_metrics.get("recent_max_dd_dollar", 0.0) or 0.0)
+expected_max_dd = max(
+    <mark>historical_dd * 0.75</mark>,
+    recent_dd * 1.15,
+    expected_tail_loss * 2.0,
+)</code></pre>
+    </div>
+
+    <p class="act__lead act__lead--tight">
+      When the first term wins — which it does for any portfolio whose worst stretch was one
+      sustained event rather than a recent one — a portfolio is admitted to the frontier when
+      <b>0.75 × its own already-observed drawdown</b> fits inside the budget. Which means the
+      drawdown it had <em>already had</em>, in the backtest, on my screen, could be
+      <b>1 ÷ 0.75 = 1.333×</b> the budget I set. Drag the multiplier back to 1.00 and watch the gap
+      close.
+    </p>
+
+    <div class="lab lab--climax">
+      <canvas id="cv-dd" height="320" aria-describedby="dd-alt"></canvas>
+      <p class="visually-hidden" id="dd-alt">A portfolio equity curve showing its true drawdown trough, the discounted value used as the admission gate, and the user's stated budget line.</p>
+
+      <div class="lab__controls">
+        <div class="ctrl ctrl--wide">
+          <label class="ctrl__label" for="dd-mult">Drawdown multiplier <span class="ctrl__hint">the constant on line 902</span></label>
+          <input type="range" id="dd-mult" min="60" max="100" value="75" step="1">
+          <div class="ctrl__val"><b id="dd-mult-v">0.75</b></div>
+        </div>
+      </div>
+
+      <div class="lab__readout">
+        <div class="ro"><span class="ro__cap">Budget I set</span><b class="ro__num" id="dd-budget">—</b></div>
+        <div class="ro"><span class="ro__cap">Gate says</span><b class="ro__num" id="dd-gate">—</b></div>
+        <div class="ro"><span class="ro__cap">Drawdown already in the data</span><b class="ro__num ro__num--bad" id="dd-real">—</b></div>
+        <div class="ro"><span class="ro__cap">Understated by</span><b class="ro__num ro__num--bad" id="dd-over">—</b></div>
+      </div>
+      <div class="verdict show" id="dd-v" role="status"></div>
+    </div>
+
+    <div class="reveal">
+      <h4 class="reveal__h">The honest number was right there</h4>
+      <p>
+        The true peak-to-trough drawdown of the merged portfolio path is computed — at
+        <code>service.py:2113</code> — stored on the row as <code>max_dd_dollar</code>, and emitted
+        in the payload the UI reads. It is simply never the value compared against the budget. Only
+        <code>expected_max_dd_dollar</code> gates the frontier. The truth was calculated, carried,
+        displayed, and not used.
+      </p>
+    </div>
+
+    <div class="reveal">
+      <h4 class="reveal__h">And the drawdown it measures isn't the drawdown you feel</h4>
+      <p>
+        Every drawdown in the system — per-strategy, per-portfolio, expected, recent — traces back to
+        one map built at <code>service.py:481</code>, which sums <b>closed-trade profit into daily
+        buckets</b>. An open position's unrealized loss contributes exactly zero until the day it
+        closes. A −$500 morning that recovers to −$50 by the close is recorded as −$50.
+      </p>
+      <div class="lab lab--sub">
+        <canvas id="cv-basis" height="240" aria-describedby="basis-alt"></canvas>
+        <p class="visually-hidden" id="basis-alt">Two stacked panels comparing a true intraday equity path against the same period compressed into daily closed-trade buckets.</p>
+        <div class="lab__readout">
+          <div class="ro"><span class="ro__cap">True equity trough</span><b class="ro__num ro__num--bad" id="basis-true">—</b></div>
+          <div class="ro"><span class="ro__cap">What the model records</span><b class="ro__num" id="basis-seen">—</b></div>
+          <div class="ro"><span class="ro__cap">Invisible</span><b class="ro__num ro__num--bad" id="basis-hidden">—</b></div>
+        </div>
+      </div>
+      <p class="reveal__after">
+        Margin and stop-outs are driven by equity. This model never sees equity. Stack that on top of
+        the 0.75 and the two errors point the same direction.
+      </p>
+    </div>
+
+    <div class="reveal">
+      <h4 class="reveal__h">The instruments existed. They were never wired in.</h4>
+      <p>
+        <code>scripts/portfolio/metrics.py</code> contains working implementations of exactly the
+        measurements that would have caught this. A repository-wide search for callers returns the
+        function definitions and nothing else.
+      </p>
+      <div class="deadmap" id="deadmap"></div>
+      <p class="reveal__after">
+        <code>co_drawdown_jaccard</code> measures the fraction of time two strategies are underwater
+        <em>simultaneously</em>. <code>tail_dependence</code> measures how much more often they crash
+        together than independence would predict. <code>bootstrap_drawdown_p95</code> resamples
+        blocks of the equity path — preserving autocorrelation — to ask how bad the drawdown gets in
+        the 5% of futures that go worst. The two failure modes I actually hit had a detector each,
+        written, tested against nothing, and left unreferenced.
+      </p>
     </div>
   </div>
 </section>
 
-<!-- ENDING -->
-<section id="ending" class="ending" style="--accent:var(--clean)">
+<!-- ══════════════════════════ CODA ══════════════════════════ -->
+<section class="act coda" id="coda" style="--accent:var(--clean)">
   <div class="wrap">
-    <span class="kicker">The honest ending</span>
-    <h2>As a startup, it failed.</h2>
-    <p class="big" style="margin:0 auto;">The portfolio was stable &mdash; but the real drawdown ran ~30% worse than the model, and the strategy I ranked second quietly made the money. I ran out of capital and time to keep proving skill from luck.</p>
-    <div class="punch">A clean model isn't the one that makes the most money.<br>It's the one you can <b>prove is right in the shortest time.</b></div>
+    <span class="kicker">Coda</span>
+    <h3 class="act__q">What "clean" actually means</h3>
+    <p class="act__lead">
+      As a startup this failed. The final portfolio really was stable; the alpha I trusted really was
+      steady, and never produced a breakout; the one I ranked second quietly made the money. I ran
+      out of capital and time before I could prove whether any of it was skill.
+    </p>
+
+    <ol class="lessons">
+      <li><b>A clean model isn't the one that makes the most money.</b> It's the one you can prove is right in the shortest time.</li>
+      <li><b>My mistake wasn't the math.</b> It was never budgeting the time-to-proof.</li>
+      <li><b>Clean models look simple</b> not because nobody could make them complex, but because simple is what clean looks like.</li>
+      <li class="lessons__new"><b>And a model you can't audit isn't clean, however simple it looks.</b> The 0.75 sat on line 902 for the entire life of this project. It cost me a third of a risk budget I thought I had set. I did not find it by losing money — losing money only told me something was wrong. I found it by reading my own source, line by line, to write this page.</li>
+    </ol>
+
     <div class="links">
-      <a href="../../Journey.md">Read the full journey &#8594;</a>
-      <a href="../../README.md">See the README &#8594;</a>
+      <a href="../../Journey.md">The original journey <span aria-hidden="true">&rarr;</span></a>
+      <a href="../../README.md">The README <span aria-hidden="true">&rarr;</span></a>
     </div>
+
+    <p class="foot">
+      Quant Trading Studio · a research and portfolio-construction workbench, not an auto-trader and
+      not financial advice. Every chart on this page is generated in your browser from seeded
+      synthetic data chosen to make a mechanism legible — the <em>formulas, constants and file
+      references</em> are the real ones. Past backtest performance promises nothing. That is rather
+      the point.
+    </p>
   </div>
-  <p class="foot">Quant Trading Studio &middot; C# WinForms &middot; Python &middot; MetaTrader 5</p>
 </section>
 
-<!-- lightbox -->
-<div class="lb" id="lb"><span class="x">&times;</span><figure><img id="lb-img" alt=""><figcaption id="lb-cap"></figcaption></figure></div>
-
-<script>
-"use strict";
-var C = { teal:'#35c9bd', blue:'#4b9fe0', green:'#5bd07a', amber:'#e0aa53', purple:'#9a82d8', red:'#e0645d', ink:'#eaf0f7', mut:'#93a1b4', grid:'#1b2436' };
-
-function rng(seed){ var s=seed>>>0||1; return function(){ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
-function fit(cv, h){
-  var dpr=window.devicePixelRatio||1, w=cv.parentElement.clientWidth-0;
-  cv.style.height=h+'px'; cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
-  var ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
-  return {ctx:ctx, w:w, h:h};
-}
-function line(ctx, pts, color, wdt){ ctx.beginPath(); for(var i=0;i<pts.length;i++){ i?ctx.lineTo(pts[i][0],pts[i][1]):ctx.moveTo(pts[i][0],pts[i][1]); } ctx.strokeStyle=color; ctx.lineWidth=wdt||2; ctx.lineJoin='round'; ctx.stroke(); }
-function mapPts(vals, w, h, pad){ var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), r=(mx-mn)||1, out=[]; for(var i=0;i<vals.length;i++){ out.push([pad+ i/(vals.length-1)*(w-2*pad), h-pad-(vals[i]-mn)/r*(h-2*pad)]); } return out; }
-
-/* ---------- progress bar ---------- */
-window.addEventListener('scroll', function(){
-  var st=document.documentElement.scrollTop||document.body.scrollTop;
-  var sh=(document.documentElement.scrollHeight||document.body.scrollHeight)-document.documentElement.clientHeight;
-  document.getElementById('pbar').style.width=(sh>0?(st/sh*100):0)+'%';
-}, {passive:true});
-
-/* ---------- HOOK: luck vs skill ---------- */
-(function(){
-  try{
-    var cv=document.getElementById('cv-hook'); if(!cv) return;
-    var skillLeft = (rng(7)()>0.5);   // is skill on side A (left)?
-    var jumpIdx;
-    function build(){
-      var d=fit(cv,300), ctx=d.ctx, w=d.w, h=d.h; ctx.clearRect(0,0,w,h);
-      // two panels
-      var pw=(w-16)/2;
-      var r1=rng(21), r2=rng(88);
-      // skill: steady up
-      var sk=[0]; for(var i=1;i<64;i++){ sk.push(sk[i-1]+0.55+(r1()*2-1)*0.7); }
-      // luck: flat, one jump
-      var lk=[0]; jumpIdx=42; for(var j=1;j<64;j++){ var v=lk[j-1]+(r2()*2-1)*0.35; if(j>=jumpIdx&&j<jumpIdx+3)v+=9; lk.push(v); }
-      // normalise both to end near same value
-      var target=sk[sk.length-1]; var lf=target/lk[lk.length-1]; for(var k=0;k<lk.length;k++)lk[k]*=lf;
-      var A = skillLeft?sk:lk, B = skillLeft?lk:sk;
-      drawPanel(ctx,0,pw,h,A,'A',skillLeft, false);
-      drawPanel(ctx,pw+16,pw,h,B,'B',!skillLeft, false);
-      window.__hook={ctx:ctx,w:w,h:h,pw:pw,sk:sk,lk:lk,A:A,B:B,skillLeft:skillLeft};
-    }
-    function drawPanel(ctx,x0,pw,h,vals,name,isSkill,reveal){
-      ctx.save(); ctx.translate(x0,0);
-      ctx.fillStyle='#0a0e15'; roundRect(ctx,0,0,pw,h,10); ctx.fill();
-      ctx.strokeStyle='#1c2537'; ctx.lineWidth=1; roundRect(ctx,0,0,pw,h,10); ctx.stroke();
-      var pad=26, pts=mapPts(vals,pw,h,pad);
-      // zero baseline
-      var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),r=(mx-mn)||1,zy=h-pad-(0-mn)/r*(h-2*pad);
-      ctx.strokeStyle='#1a2233'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(pad,zy); ctx.lineTo(pw-pad,zy); ctx.stroke(); ctx.setLineDash([]);
-      line(ctx,pts,isSkill?C.green:(reveal?C.red:'#7fb0d8'),2.4);
-      if(reveal && !isSkill){
-        // highlight the single jump
-        var jp=pts.slice(jumpIdx-1,jumpIdx+3);
-        line(ctx,jp,C.red,4);
-        ctx.fillStyle=C.red; ctx.font='12px Segoe UI'; ctx.textAlign='center';
-        ctx.fillText('92% of profit', jp[1][0], jp[0][1]-14);
-        ctx.fillText('from one move', jp[1][0], jp[0][1]-1);
-      }
-      ctx.fillStyle=C.mut; ctx.font='700 13px Segoe UI'; ctx.textAlign='left';
-      ctx.fillText('Trader '+name, pad, 20);
-      if(reveal){ ctx.fillStyle=isSkill?C.green:C.red; ctx.textAlign='right'; ctx.fillText(isSkill?'REAL EDGE':'LUCK', pw-pad, 20); }
-      ctx.restore();
-    }
-    function reveal(){
-      var s=window.__hook; s.ctx.clearRect(0,0,s.w,s.h);
-      drawPanel(s.ctx,0,s.pw,s.h,s.A,'A',s.skillLeft,true);
-      drawPanel(s.ctx,s.pw+16,s.pw,s.h,s.B,'B',!s.skillLeft,true);
-    }
-    function pick(side){
-      var correct=(side==='A')===skillLeft;
-      reveal();
-      var v=document.getElementById('hook-v');
-      v.className='verdict show '+(correct?'good':'bad');
-      v.innerHTML=(correct?'<b class="k">Right.</b> ':'<b class="k">Not quite.</b> ')+
-        'The real edge is the <b class="k">steady climb</b>. The other trader was flat all year, then caught <b class="k">one</b> big move &mdash; on a scorecard both look identical, but only one is repeatable.';
-      document.getElementById('hook-a').disabled=true; document.getElementById('hook-b').disabled=true;
-      document.getElementById('hook-reset').style.display='inline-block';
-    }
-    document.getElementById('hook-a').onclick=function(){pick('A');};
-    document.getElementById('hook-b').onclick=function(){pick('B');};
-    document.getElementById('hook-reset').onclick=function(){
-      document.getElementById('hook-v').className='verdict';
-      document.getElementById('hook-a').disabled=false; document.getElementById('hook-b').disabled=false;
-      this.style.display='none'; build();
-    };
-    var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){ build(); io.disconnect(); }},{threshold:.2});
-    io.observe(cv);
-    window.addEventListener('resize', function(){ if(window.__hook) build(); });
-  }catch(err){}
-})();
-
-/* ---------- TEST 1: regime classifier ---------- */
-(function(){
-  try{
-    var cv=document.getElementById('cv-reg'); if(!cv) return;
-    var kinds=['trend','revert','random'], vols=['low','high'];
-    var names={ 'trend|low':['R1','Slow Trend',C.teal],'trend|high':['R2','Crisis Trend',C.blue],
-      'revert|low':['R3','Tight Range',C.green],'revert|high':['R4','Volatile Chop',C.amber],
-      'random|low':['R5','Drift',C.purple],'random|high':['R6','Noise',C.red] };
-    var order=['trend|low','trend|high','revert|low','revert|high','random|low','random|high'];
-    var cur={}, selMem=null, selVol=null, score=0, rounds=0, seedN=3, found={};
-    var gridEl=document.getElementById('reg-grid');
-    order.forEach(function(k){ var n=names[k]; var d=document.createElement('div'); d.className='cell'; d.id='rgc-'+n[0];
-      d.style.setProperty('--c',n[2]); d.innerHTML='<b>'+n[0]+' '+n[1]+'</b><br><span>'+labelOf(k)+'</span>'; gridEl.appendChild(d); });
-    function labelOf(k){ var p=k.split('|'); var m={trend:'Trending',revert:'Mean-reverting',random:'Random'}[p[0]]; var v=p[1]==='low'?'calm':'wild'; return m+' &middot; '+v; }
-    function gen(){
-      seedN+=7; var r=rng(seedN*13+1);
-      cur.kind=kinds[Math.floor(r()*3)]; cur.vol=vols[Math.floor(r()*2)];
-      var n=90, p=100, arr=[p], mean=100, drift=(r()>.5?1:-1)*0.7, sig=cur.vol==='high'?3.4:1.0;
-      for(var i=1;i<n;i++){ var sh=(r()*2-1)*sig;
-        if(cur.kind==='trend')p+=drift+sh*0.4;
-        else if(cur.kind==='revert')p+=(mean-p)*0.09+sh;
-        else p+=sh;
-        arr.push(p); }
-      cur.vals=arr; draw();
-      selMem=selVol=null; syncSel('reg-mem',null); syncSel('reg-vol',null);
-      document.getElementById('reg-check').disabled=true;
-      document.getElementById('reg-next').style.display='none';
-      document.getElementById('reg-v').className='verdict';
-    }
-    function draw(){ var d=fit(cv,260),ctx=d.ctx,w=d.w,h=d.h; ctx.clearRect(0,0,w,h);
-      ctx.fillStyle='#080b11'; ctx.fillRect(0,0,w,h);
-      var pts=mapPts(cur.vals,w,h,24); line(ctx,pts,'#e6edf3',2); }
-    function syncSel(group,val){ var g=document.getElementById(group); var b=g.getElementsByTagName('button');
-      for(var i=0;i<b.length;i++){ b[i].classList.toggle('sel', b[i].getAttribute('data-v')===val); } }
-    document.getElementById('reg-mem').onclick=function(e){ if(e.target.tagName!=='BUTTON')return; selMem=e.target.getAttribute('data-v'); syncSel('reg-mem',selMem); ready(); };
-    document.getElementById('reg-vol').onclick=function(e){ if(e.target.tagName!=='BUTTON')return; selVol=e.target.getAttribute('data-v'); syncSel('reg-vol',selVol); ready(); };
-    function ready(){ document.getElementById('reg-check').disabled=!(selMem&&selVol); }
-    document.getElementById('reg-check').onclick=function(){
-      rounds++; var ok=(selMem===cur.kind && selVol===cur.vol);
-      var truth=names[cur.kind+'|'+cur.vol]; var guess=names[(selMem||'random')+'|'+(selVol||'low')];
-      if(ok){ score++; }
-      // light the true regime
-      found[cur.kind+'|'+cur.vol]=1; document.getElementById('rgc-'+truth[0]).classList.add('lit');
-      var v=document.getElementById('reg-v'); v.className='verdict show '+(ok?'good':'bad');
-      v.innerHTML=(ok?'<b class="k">Correct &mdash; '+truth[0]+' '+truth[1]+'.</b> ':'<b class="k">It was '+truth[0]+' '+truth[1]+'</b> (you said '+guess[0]+'). ')
-        +tip(cur.kind,cur.vol);
-      document.getElementById('reg-score').textContent='Score '+score+' / '+rounds;
-      document.getElementById('reg-check').disabled=true;
-      document.getElementById('reg-next').style.display='inline-block';
-    };
-    function tip(k,vv){ var m={trend:'clear direction',revert:'keeps returning to the middle',random:'no memory, just drift'}[k];
-      var v=vv==='high'?'big, violent swings':'small, calm swings'; return 'Memory = <b class="k">'+m+'</b>; volatility = <b class="k">'+v+'</b>.'; }
-    document.getElementById('reg-next').onclick=gen;
-    var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){ gen(); io.disconnect(); }},{threshold:.2});
-    io.observe(cv);
-    window.addEventListener('resize', function(){ if(cur.vals) draw(); });
-  }catch(err){}
-})();
-
-/* ---------- TEST 2: overfit scatter ---------- */
-(function(){
-  try{
-    var cv=document.getElementById('cv-of'); if(!cv) return;
-    var dots=[], sel=-1, validated=false, dim;
-    function build(){
-      dim=fit(cv,330); var r=rng(99); dots=[];
-      var pad=34, w=dim.w, h=dim.h;
-      for(var i=0;i<160;i++){
-        var trueEdge=r(), luck=r();
-        var inS=8+trueEdge*34+luck*46;             // luck inflates in-sample
-        var outS=6+trueEdge*36-luck*30+(r()-0.5)*8; // luck destroys out-of-sample
-        var x=pad+ (0.06+0.9*r())*(w-2*pad);
-        dots.push({x:x,inS:inS,outS:outS,y:0,cur:inS});
-      }
-      valScale(); sel=-1; validated=false;
-      document.getElementById('of-validate').disabled=true;
-      document.getElementById('of-reset').style.display='none';
-      document.getElementById('of-hint').textContent='Pick a dot ↑';
-      document.getElementById('of-v').className='verdict';
-      render();
-    }
-    function valScale(){ // compute y from cur value
-      var vals=dots.map(function(d){return d.cur;}); window.__ofmn=0; window.__ofmx=Math.max.apply(null,vals)*1.05; }
-    function ytop(v,h){ var pad=34; return h-pad-(v-window.__ofmn)/(window.__ofmx-window.__ofmn)*(h-2*pad-14); }
-    function render(){
-      var ctx=dim.ctx,w=dim.w,h=dim.h,pad=34; ctx.clearRect(0,0,w,h); ctx.fillStyle='#080b11'; ctx.fillRect(0,0,w,h);
-      // axis labels
-      ctx.fillStyle=C.mut; ctx.font='12px Segoe UI'; ctx.textAlign='left';
-      ctx.fillText(validated?'profit on UNSEEN data':'profit on the data we optimized on', pad, 18);
-      // threshold line when validated
-      if(validated){ var ty=ytop(14,h); ctx.strokeStyle='#33405a'; ctx.setLineDash([5,5]); ctx.beginPath(); ctx.moveTo(pad,ty); ctx.lineTo(w-pad,ty); ctx.stroke(); ctx.setLineDash([]);
-        ctx.fillStyle='#5a6a82'; ctx.textAlign='right'; ctx.fillText('break-even', w-pad, ty-5); }
-      for(var i=0;i<dots.length;i++){ var d=dots[i]; d.y=ytop(d.cur,h);
-        var col;
-        if(!validated){ col='rgba(120,150,190,.55)'; }
-        else { col = d.outS<14 ? 'rgba(224,100,93,.75)' : 'rgba(91,208,122,.8)'; }
-        ctx.beginPath(); ctx.arc(d.x,d.y,4.2,0,6.283); ctx.fillStyle=col; ctx.fill();
-      }
-      if(sel>=0){ var s=dots[sel]; ctx.beginPath(); ctx.arc(s.x,s.y,8,0,6.283); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
-        ctx.fillStyle='#fff'; ctx.font='700 12px Segoe UI'; ctx.textAlign='center'; ctx.fillText('your pick', s.x, s.y-13); }
-    }
-    cv.addEventListener('click', function(ev){
-      if(validated) return;
-      var rct=cv.getBoundingClientRect(), mx=ev.clientX-rct.left, my=ev.clientY-rct.top, best=-1, bd=1e9;
-      for(var i=0;i<dots.length;i++){ var dx=dots[i].x-mx, dy=dots[i].y-my, dd=dx*dx+dy*dy; if(dd<bd){bd=dd;best=i;} }
-      if(best>=0 && bd<400){ sel=best; document.getElementById('of-validate').disabled=false;
-        document.getElementById('of-hint').textContent='Now validate →'; render(); }
-    });
-    document.getElementById('of-validate').onclick=function(){
-      if(sel<0) return; validated=true; this.disabled=true;
-      var start=performance.now(), from=dots.map(function(d){return d.cur;});
-      valScaleTo();
-      function anim(t){ var k=Math.min(1,(t-start)/750); k=1-Math.pow(1-k,3);
-        for(var i=0;i<dots.length;i++){ dots[i].cur=from[i]+(dots[i].outS-from[i])*k; }
-        window.__ofmx=Math.max(window.__ofmxTarget, 10); render();
-        if(k<1) requestAnimationFrame(anim); else finish(); }
-      requestAnimationFrame(anim);
-    };
-    function valScaleTo(){ var vals=dots.map(function(d){return Math.max(d.inS,d.outS);}); window.__ofmxTarget=Math.max.apply(null,vals)*1.05; }
-    function finish(){
-      var s=dots[sel]; var survived=s.outS>=14;
-      // how many total survived
-      var surv=dots.filter(function(d){return d.outS>=14;}).length;
-      var v=document.getElementById('of-v'); v.className='verdict show '+(survived?'good':'bad');
-      if(survived){
-        v.innerHTML='<b class="k">Nice &mdash; your pick held up.</b> It kept a real edge on unseen data. But notice how many tall in-sample peaks <span style="color:'+C.red+'">collapsed below break-even</span>: '+(dots.length-surv)+' of '+dots.length+' configs were <b class="k">overfit</b>.';
-      } else {
-        v.innerHTML='<b class="k">That’s the trap.</b> Your pick looked great in-sample but <span style="color:'+C.red+'">fell apart</span> on unseen data &mdash; classic <b class="k">overfitting</b>. The green survivors weren’t the tallest peaks; they were the <b class="k">consistent</b> ones.';
-      }
-      document.getElementById('of-hint').textContent=surv+' / '+dots.length+' survived';
-      document.getElementById('of-reset').style.display='inline-block';
-    }
-    document.getElementById('of-reset').onclick=build;
-    var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){ build(); io.disconnect(); }},{threshold:.15});
-    io.observe(cv);
-    window.addEventListener('resize', function(){ if(dots.length){ dim=fit(cv,330); render(); }});
-  }catch(err){}
-})();
-
-/* ---------- TEST 3: efficient frontier ---------- */
-(function(){
-  try{
-    var cv=document.getElementById('cv-ef'); if(!cv) return;
-    // frontier: risk (x, $/mo) -> return (y, $/mo), concave
-    var F=[]; for(var i=0;i<=40;i++){ var risk=60+i*9; var ret=Math.pow(risk-40,0.62)*7.0; F.push({risk:risk,ret:ret}); }
-    var cloud=[]; var r=rng(55); for(var j=0;j<150;j++){ var idx=Math.floor(r()*F.length); var rk=F[idx].risk*(0.6+0.5*r()); var rt=F[idx].ret*(0.35+0.6*r()); cloud.push({risk:rk,ret:rt}); }
-    var dim, budget=1000;
-    function nearest(b){ var best=F[0]; for(var i=0;i<F.length;i++){ if(F[i].risk<=b) best=F[i]; } return best; }
-    function draw(){
-      dim=fit(cv,300); var ctx=dim.ctx,w=dim.w,h=dim.h,pad=44; ctx.clearRect(0,0,w,h); ctx.fillStyle='#080b11'; ctx.fillRect(0,0,w,h);
-      var maxR=420, maxRet=Math.pow(420-40,0.62)*7.0*1.05;
-      function X(v){ return pad+ v/maxR*(w-2*pad); }
-      function Y(v){ return h-pad-(v/maxRet)*(h-2*pad); }
-      // axes
-      ctx.strokeStyle='#1a2233'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(pad,h-pad); ctx.lineTo(w-pad,h-pad); ctx.moveTo(pad,h-pad); ctx.lineTo(pad,pad); ctx.stroke();
-      ctx.fillStyle=C.mut; ctx.font='12px Segoe UI'; ctx.textAlign='center'; ctx.fillText('risk  (expected drawdown / month, $)', w/2, h-10);
-      ctx.save(); ctx.translate(14,h/2); ctx.rotate(-Math.PI/2); ctx.fillText('return / month ($)',0,0); ctx.restore();
-      // cloud
-      for(var j=0;j<cloud.length;j++){ ctx.beginPath(); ctx.arc(X(cloud[j].risk),Y(cloud[j].ret),2.4,0,6.283); ctx.fillStyle='rgba(120,140,175,.35)'; ctx.fill(); }
-      // budget region (shaded beyond budget)
-      ctx.fillStyle='rgba(224,100,93,.06)'; ctx.fillRect(X(budget),pad,w-pad-X(budget),h-2*pad);
-      ctx.strokeStyle='rgba(224,100,93,.55)'; ctx.setLineDash([5,4]); ctx.beginPath(); ctx.moveTo(X(budget),pad); ctx.lineTo(X(budget),h-pad); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle=C.red; ctx.textAlign='left'; ctx.fillText('budget', X(budget)+6, pad+12);
-      // frontier line
-      var fp=F.map(function(p){return [X(p.risk),Y(p.ret)];}); line(ctx,fp,C.purple,2.6);
-      // selected point
-      var sel=nearest(budget); var sx=X(sel.risk), sy=Y(sel.ret);
-      ctx.beginPath(); ctx.arc(sx,sy,7,0,6.283); ctx.fillStyle=C.green; ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
-      // readouts
-      var rr=(sel.ret/sel.risk); var mix = budget<300?1:budget<620?2:3;
-      document.getElementById('ef-ret').textContent='$'+Math.round(sel.ret);
-      document.getElementById('ef-rr').textContent=rr.toFixed(2);
-      document.getElementById('ef-mix').textContent=mix+' of 3';
-      document.getElementById('ef-budget').textContent='$'+budget.toLocaleString();
-    }
-    document.getElementById('ef-range').addEventListener('input', function(){ budget=parseInt(this.value,10); draw(); });
-    var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){ draw(); io.disconnect(); }},{threshold:.15});
-    io.observe(cv);
-    window.addEventListener('resize', function(){ if(dim) draw(); });
-  }catch(err){}
-})();
-
-/* ---------- count-up stats ---------- */
-(function(){
-  try{
-    var els=[].slice.call(document.querySelectorAll('.stat .num'));
-    var io=new IntersectionObserver(function(entries){
-      entries.forEach(function(e){ if(!e.isIntersecting) return; var el=e.target; io.unobserve(el);
-        var to=parseInt(el.getAttribute('data-to'),10), st=performance.now();
-        function step(t){ var k=Math.min(1,(t-st)/1100); k=1-Math.pow(1-k,3); el.textContent=Math.round(to*k).toLocaleString(); if(k<1)requestAnimationFrame(step); }
-        requestAnimationFrame(step);
-      });
-    },{threshold:.5});
-    els.forEach(function(el){ io.observe(el); });
-  }catch(err){}
-})();
-
-/* ---------- lightbox ---------- */
-(function(){
-  try{
-    var lb=document.getElementById('lb'), img=document.getElementById('lb-img'), cap=document.getElementById('lb-cap');
-    [].slice.call(document.querySelectorAll('.thumb')).forEach(function(t){
-      t.addEventListener('click', function(){ img.src=t.getAttribute('data-full'); cap.textContent=t.getAttribute('data-cap'); lb.classList.add('open'); });
-    });
-    lb.addEventListener('click', function(){ lb.classList.remove('open'); });
-    document.addEventListener('keydown', function(e){ if(e.key==='Escape') lb.classList.remove('open'); });
-  }catch(err){}
-})();
-
-function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
-</script>
+<script src="story.js"></script>
 </body>
 </html>
