@@ -3,84 +3,345 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dac Vinh Nguyen — Quant &amp; Risk Portfolio</title>
-<meta name="description" content="Interactive walkthroughs of quantitative research, risk management and deep learning work.">
-<style>
-  :root{
-    --bg:#0a0e14; --bg2:#0d1219; --panel:#121826; --panel2:#161d2b; --border:#26324a; --line:#1c2537;
-    --ink:#eaf0f7; --muted:#93a1b4; --muted2:#6b7688;
-    --teal:#35c9bd; --blue:#4b9fe0; --green:#5bd07a; --amber:#e0aa53; --purple:#9a82d8;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{background:var(--bg); color:var(--ink);
-    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased; line-height:1.6;}
-  .wrap{max-width:920px; margin:0 auto; padding:0 22px;}
-  header{padding:96px 0 56px; text-align:center;}
-  .badge{display:inline-block; margin-bottom:20px; padding:6px 14px; border:1px solid var(--border);
-    border-radius:999px; font-size:12.5px; letter-spacing:1.5px; color:var(--teal); text-transform:uppercase; font-weight:700;}
-  h1{font-size:clamp(28px,5vw,44px); line-height:1.15; font-weight:800; letter-spacing:-.5px;}
-  header p{margin:18px auto 0; max-width:58ch; color:var(--muted); font-size:clamp(15px,1.6vw,18px);}
-  .links{margin-top:26px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
-  .links a{border:1px solid var(--border); background:var(--panel); padding:10px 18px; border-radius:10px;
-    color:var(--ink); font-weight:600; font-size:14.5px; text-decoration:none; transition:.15s;}
-  .links a:hover{border-color:var(--teal); color:#fff;}
-  main{padding:20px 0 90px;}
-  .grid{display:grid; grid-template-columns:1fr; gap:18px;}
-  .card{display:block; background:var(--panel); border:1px solid var(--border); border-radius:16px;
-    padding:26px 28px; text-decoration:none; color:var(--ink); transition:.15s;}
-  .card:hover{border-color:var(--c,var(--teal)); background:var(--panel2);}
-  .card .kicker{font-size:12px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:var(--c,var(--teal));}
-  .card h2{font-size:clamp(19px,2.4vw,24px); font-weight:800; margin:8px 0 8px; letter-spacing:-.2px;}
-  .card p{color:var(--muted); font-size:15px; max-width:62ch;}
-  .card .go{display:inline-block; margin-top:14px; font-size:13.5px; font-weight:700; color:var(--c,var(--teal));}
-  footer{color:var(--muted2); font-size:13px; text-align:center; padding:0 0 60px;}
-  @media (max-width:600px){ header{padding:64px 0 40px;} }
-</style>
+<title>Dac Vinh Nguyen · AI Engineer, London</title>
+<meta name="description" content="Dac Vinh Nguyen, AI engineer in London. Two shipped desktop apps, GoodLuck and Cat Studio, and seven projects in risk, pricing, machine learning and data engineering, each measured on real data and reported with its limits.">
+<link rel="canonical" href="https://vinhdac.github.io/">
+<meta name="author" content="Dac Vinh Nguyen">
+<meta name="theme-color" content="#07080c">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Dac Vinh Nguyen · AI Engineer">
+<meta property="og:description" content="Two shipped desktop apps and seven projects, each measured on real data and reported with its limits.">
+<meta property="og:url" content="https://vinhdac.github.io/">
+<meta property="og:image" content="https://vinhdac.github.io/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Dac Vinh Nguyen",
+  "jobTitle": "AI Engineer",
+  "url": "https://vinhdac.github.io/",
+  "email": "mailto:dacvinh268@gmail.com",
+  "address": {"@type": "PostalAddress", "addressLocality": "London", "addressCountry": "GB"},
+  "alumniOf": [
+    {"@type": "CollegeOrUniversity", "name": "Royal Holloway, University of London"},
+    {"@type": "CollegeOrUniversity", "name": "National Economics University"}
+  ],
+  "knowsAbout": ["Large language models", "Machine learning", "Quantitative finance", "Python", "C++"],
+  "sameAs": ["https://www.linkedin.com/in/vinhdac", "https://github.com/VinhDac"]
+}
+</script>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" crossorigin>
+<script>document.documentElement.className += ' js';</script>
 </head>
 <body>
+<div id="glwrap" aria-hidden="true"><canvas id="gl"></canvas></div>
 
-<div class="wrap">
-  <header>
-    <div class="badge">Quant &middot; Risk &middot; Machine Learning</div>
-    <h1>Dac Vinh Nguyen</h1>
-    <p>MSc Computational Finance (Royal Holloway) &middot; CFA Level I &middot; ex-WorldQuant. Three interactive walkthroughs below — play them, don't just read about them.</p>
-    <div class="links">
-      <a href="https://www.linkedin.com/in/vinhdac/">LinkedIn</a>
-      <a href="https://github.com/VinhDac">GitHub</a>
-      <a href="mailto:dacvinh268@gmail.com">Email</a>
+<nav class="nav" id="nav">
+  <a class="brand" href="#top" aria-label="Dac Vinh Nguyen, back to the top">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 15l3-3 2 2 3-6 2 2 3-4 3 3 3-5" fill="none" stroke="#9cc3ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="21" cy="4" r="2.2" fill="#f4b740"/></svg>
+    Dac Vinh Nguyen
+  </a>
+  <ul>
+    <li><a href="#work">Products</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#reads">Long reads</a></li>
+    <li><a href="#about">About</a></li>
+    <li class="keep"><a class="cv-link" href="cv/Dac-Vinh-Nguyen-CV.pdf" download>CV</a></li>
+  </ul>
+</nav>
+
+<div class="page" id="top">
+
+  <header class="hero">
+    <div class="stage" data-scene="hero" aria-label="The name Dac Vinh Nguyen, drawn by thousands of random walks that end on its letters"></div>
+    <div class="hero-copy">
+      <div>
+        <h1 class="sr-only">Dac Vinh Nguyen</h1>
+        <p class="eyebrow">London <span class="dot">·</span> AI Engineer <span class="dot">·</span> MSc Computational Finance</p>
+        <p class="lead">Measured on real data. Reported with <em>its limits.</em></p>
+        <p class="sub">AI engineer who built and shipped two desktop apps in Python: GoodLuck, with an LLM assistant (Claude API, Groq) and <span class="n">5,700+</span> tests, and Cat Studio. MSc Computational Finance, CFA Level I.</p>
+        <p class="right-to-work">Eligible for a UK Graduate visa (2 years); no sponsorship needed to start.</p>
+        <div class="actions">
+          <a class="btn primary" href="cv/Dac-Vinh-Nguyen-CV.pdf" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download CV</a>
+          <a class="btn" href="mailto:dacvinh268@gmail.com">Email</a>
+          <a class="btn" href="https://www.linkedin.com/in/vinhdac" rel="noopener">LinkedIn</a>
+          <a class="btn" href="https://github.com/VinhDac" rel="noopener">GitHub</a>
+        </div>
+      </div>
+      <p class="caption" id="hero-caption">Each point of the name is where a random walk ends: Brownian bridges, drawn live in your browser. Click to draw them again.</p>
     </div>
+    <div class="scroll-cue" aria-hidden="true"></div>
   </header>
 
-  <main>
-    <div class="grid">
-
-      <a class="card" style="--c:#35c9bd" href="quant-trading-studio.html">
-        <div class="kicker">Startup &middot; Research Pipeline &amp; Audit</div>
-        <h2>Quant Trading Studio — the mechanisms, and the one that broke</h2>
-        <p>Ten mechanisms from a live algo-trading research pipeline, nine of them playable: separating edge from luck, making time honest, refusing to pick the highest peak in a parameter space, and scoring capital across five pillars. The last one is the constant on line 902 that explains why it failed.</p>
-        <span class="go">Play it &rarr;</span>
-      </a>
-
-      <a class="card" style="--c:#4b9fe0" href="compress-ea.html">
-        <div class="kicker">MQL5 &middot; Volatility Strategy</div>
-        <h2>Compress EA — an interactive walkthrough</h2>
-        <p>How one volatility-squeeze strategy is normalised into the market's own language (ATR in basis points) so a single setting holds across gold, forex, crypto and indices — instead of silently overfitting to one symbol.</p>
-        <span class="go">Play it &rarr;</span>
-      </a>
-
-      <a class="card" style="--c:#9a82d8" href="data-snooping.html">
-        <div class="kicker">MSc Dissertation &middot; Royal Holloway</div>
-        <h2>The Number That Lied</h2>
-        <p>Data snooping in deep learning: a walked demonstration of how keeping the best of many models inflates performance — even on pure noise — and what it takes to trust a number honestly.</p>
-        <span class="go">Play it &rarr;</span>
-      </a>
-
+  <!-- ============================================================ PRODUCTS -->
+  <section class="section" id="work">
+    <div class="section-head rise">
+      <div>
+        <p class="kicker">Products</p>
+        <h2>Two apps, shipped.</h2>
+      </div>
+      <p>Built end to end, from the architecture to the installers, the tests and the reviews. Both show their working: what they measured, and where it stops.</p>
     </div>
-  </main>
 
-  <footer>Built to be played, not just read.</footer>
+    <article class="room">
+      <div class="room-copy rise">
+        <p class="kicker">Product · Python · LLM assistant</p>
+        <h3>GoodLuck</h3>
+        <p>A Windows and Mac desktop app that runs a job search end to end: it reads job boards, filters them by custom rules, scores each job against a CV <strong>sentence by sentence</strong>, tracks Gmail, and fills forms in Chrome.</p>
+        <p class="idea">The model never counts. The app does, and a guard drops any line with a figure the app did not compute.</p>
+        <p>Its LLM assistant (Groq, or Claude via the Anthropic API) picks one of <span class="n">14</span> data lookups and answers from the app's own numbers. Drafts go to the model with no name, contact details or links, and Claude falls back to Groq when it fails.</p>
+        <div class="stats">
+          <div class="stat"><b>13,262</b><span>postings read since 25 Sep 2026</span></div>
+          <div class="stat"><b>80</b><span>applications tracked</span></div>
+          <div class="stat"><b>54,000</b><span>lines of Python, on the standard library</span></div>
+          <div class="stat"><b>5,700+</b><span>automated checks</span></div>
+        </div>
+        <p>Ships as a Windows installer and a Mac app that update themselves from GitHub releases after a checksum check. I owned the architecture, the tests and the reviews; it was built with Claude Code.</p>
+        <div class="links">
+          <a href="https://vinhdac.github.io/GoodLuck/">See it work</a>
+          <a href="https://vinhdac.github.io/GoodLuck/download.html">Download</a>
+        </div>
+      </div>
+      <div class="stage" data-scene="goodluck" aria-label="Job postings stream in, a sieve lets some through, a score lifts them, and an assistant boxed in by rules answers with four choices">
+        <div class="labels"></div>
+      </div>
+    </article>
+
+    <article class="room flip">
+      <div class="room-copy rise">
+        <p class="kicker">Product · Python · .NET 10 · QuantConnect LEAN</p>
+        <h3>Cat Studio</h3>
+        <p>A Windows desktop app where you connect blocks to design a trading strategy. It generates the QuantConnect LEAN algorithm in Python and backtests it on historical data, across <span class="n">26</span> guided levels.</p>
+        <p class="idea">The highest peak is the one to distrust. The optimiser flags results that are likely luck.</p>
+        <p>A parameter optimiser with <span class="n">27</span> metrics and <span class="n">164</span> quantities mapped to LEAN, in Python with a web UI in a native window, .NET 10 and pythonnet. Results are shown as they are, losses included.</p>
+        <div class="stats">
+          <div class="stat"><b>26</b><span>guided levels</span></div>
+          <div class="stat"><b>27</b><span>optimiser metrics</span></div>
+          <div class="stat"><b>164</b><span>quantities mapped to LEAN</span></div>
+        </div>
+        <div class="links">
+          <a href="https://vinhdac.github.io/Cat-Studio/">See Cat Studio</a>
+        </div>
+      </div>
+      <div class="stage" data-scene="catstudio" aria-label="Strategy blocks stack up, and an optimiser searches a landscape where a lone spike is flagged as luck and a broad plateau is kept">
+        <div class="labels"></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============================================================ PROJECTS -->
+  <section class="section" id="projects">
+    <div class="section-head rise">
+      <div>
+        <p class="kicker">Projects</p>
+        <h2>Seven projects, measured.</h2>
+      </div>
+      <p>In risk, pricing, machine learning and data engineering, each one measured on real data and reported with its limits. Two of them run below; the others are a click away.</p>
+    </div>
+
+    <article class="room">
+      <div class="room-copy rise">
+        <p class="kicker">C++17 · Monte Carlo · Python via ctypes</p>
+        <h3>An option pricing engine in C++</h3>
+        <p>European, American and Asian options priced three ways in C++17: Black-Scholes with Greeks, a <span class="n">2,000</span>-step binomial tree, and a multithreaded Monte Carlo with antithetic variates, called from Python through ctypes.</p>
+        <div class="stats">
+          <div class="stat"><b>161M</b><span>paths a second</span></div>
+          <div class="stat"><b>8</b><span>threads, verified under ThreadSanitizer</span></div>
+          <div class="stat"><b>2.3&times;</b><span>vectorised NumPy</span></div>
+        </div>
+        <p class="idea">Antithetic variates: every random draw is used twice, once mirrored, so the noise cancels faster at no extra cost.</p>
+        <p>The panel beside runs a small JavaScript version of the Monte Carlo in your browser, against the Black-Scholes price. Change the volatility or the strike and watch the estimate settle.</p>
+        <div class="links">
+          <a href="https://github.com/VinhDac/Option-Pricer">Code on GitHub</a>
+        </div>
+      </div>
+      <div class="stage with-panel" data-scene="options" aria-label="Simulated price paths fan out over a year; at maturity a histogram of prices forms and the part above the strike pays">
+        <div class="labels"></div>
+        <div class="panel" id="mc-panel">
+          <div class="row">In your browser <b id="mc-paths">0 paths</b></div>
+          <div class="row">Monte Carlo <b class="am" id="mc-price">-</b></div>
+          <div class="row">Black-Scholes <b id="mc-bs">-</b></div>
+          <div class="row">Gap <b id="mc-gap">-</b></div>
+          <hr>
+          <label>Volatility <span id="mc-vol-v">25%</span><input type="range" id="mc-vol" min="10" max="60" value="25" step="1"></label>
+          <label>Strike <span id="mc-k-v">100</span><input type="range" id="mc-k" min="70" max="130" value="100" step="1"></label>
+          <label class="check"><input type="checkbox" id="mc-anti" checked> Antithetic variates</label>
+          <div class="row" style="margin-top:8px"><span>Spot 100 · rate 4% · one year · call</span></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="room flip">
+      <div class="room-copy rise">
+        <p class="kicker">Forecasting · gradient boosting · PyTorch</p>
+        <h3>Day-ahead forecasting of Britain's electricity demand</h3>
+        <p>Half-hourly national demand, forecast from <span class="n">309,550</span> half-hours of history with weather and holiday features.</p>
+        <div class="stats">
+          <div class="stat"><b>3.2%</b><span>typical miss over 971 test days, gradient boosting</span></div>
+          <div class="stat"><b>8.2%</b><span>for the seasonal naive</span></div>
+          <div class="stat"><b>794 MW</b><span>typical miss, on a system averaging 26 GW</span></div>
+          <div class="stat"><b>4.0%</b><span>once real weather-forecast error is fed in</span></div>
+        </div>
+        <p class="idea">Ahead of an LSTM in PyTorch, which fell behind as embedded solar grew.</p>
+        <div class="links">
+          <a href="https://github.com/VinhDac/UK-Electric-demand">Code on GitHub</a>
+        </div>
+      </div>
+      <div class="stage" data-scene="demand" aria-label="A landscape of half-hourly demand across a year, with a week of forecast laid against what happened">
+        <div class="labels"></div>
+        <p class="stage-note">The landscape is an illustration of the data's shape: half-hours across, days back, demand up. The figures beside it are the model's.</p>
+      </div>
+    </article>
+
+    <div class="cards" id="more" style="margin-top: clamp(30px, 6vh, 70px)">
+      <a class="card rise" href="https://github.com/VinhDac/Credit-Default" rel="noopener">
+        <span class="kick">Machine learning · SQL · fairness</span>
+        <h4>Credit default risk model</h4>
+        <p>Credit features in SQL over <span class="n">30,000</span> card holders, gradient boosting against a logistic-regression baseline, scored once on <span class="n">6,000</span> held-out clients: AUC <span class="n">0.78</span> against <span class="n">0.73</span>.</p>
+        <p class="honest" data-label="Fairness">Reviewing the riskiest fifth catches <span class="n">51%</span> of defaulters against <span class="n">48%</span> for the baseline; sex, marital status and age are kept out of the model and used only to test fairness.</p>
+        <span class="go">Code</span>
+      </a>
+      <a class="card rise" href="https://github.com/VinhDac/News-sentiment" rel="noopener">
+        <span class="kick">NLP · DistilBERT</span>
+        <h4>Financial news sentiment</h4>
+        <p>DistilBERT fine-tuned on <span class="n">4,836</span> annotated sentences, near-duplicates kept on one side of the split: <span class="n">86%</span> accurate against <span class="n">76%</span> for TF-IDF, and <span class="n">98%</span> where every annotator agreed.</p>
+        <p class="honest" data-label="Where it fails">Macro-F1 <span class="n">0.85</span> over three seeds; <span class="n">93%</span> of the errors are on sentences the annotators themselves split over.</p>
+        <span class="go">Code</span>
+      </a>
+      <a class="card rise" href="https://github.com/VinhDac/Var-Backtest" rel="noopener">
+        <span class="kick">Risk · GARCH · backtesting</span>
+        <h4>Value-at-Risk and Expected Shortfall, twenty years</h4>
+        <p>Five models on twenty years of FTSE 100 and S&amp;P 500 returns, judged from 2007 over <span class="n">4,979</span> trading days, every forecast using only the data available that evening.</p>
+        <p class="honest" data-label="The honest result">GARCH-t breaches least, <span class="n">1.5%</span> against a <span class="n">1%</span> target, and Kupiec rejects all five: that is what is reported, not the flattering one.</p>
+        <span class="go">Code</span>
+      </a>
+      <a class="card rise" href="https://github.com/VinhDac/ETF-momentum" rel="noopener">
+        <span class="kick">Portfolios · walk-forward</span>
+        <h4>ETF momentum and portfolio construction</h4>
+        <p>Six strategies over ten asset-class ETFs across <span class="n">233</span> months, walk-forward and net of <span class="n">5</span> basis points on every unit traded.</p>
+        <p class="honest" data-label="The honest result">None beats equal weighting with statistical confidence. In 2008 momentum fell <span class="n">7%</span> against <span class="n">18%</span> for 60/40, while minimum variance gained <span class="n">2%</span>.</p>
+        <span class="go">Code</span>
+      </a>
+      <a class="card rise" href="https://github.com/VinhDac/Market-Data-Pipeline" rel="noopener">
+        <span class="kick">Data engineering · DuckDB · SQL</span>
+        <h4>Market-data warehouse</h4>
+        <p><span class="n">221,287</span> daily prices for <span class="n">75</span> London and New York securities since 2015, loaded into DuckDB incrementally, with an audit trail, <span class="n">13</span> SQL quality checks and a one-page dashboard.</p>
+        <p class="honest" data-label="Caught">Yahoo applying the dividends of pence-quoted shares at a hundredth of their size; the bad-print check was rewritten after it flagged real COVID moves.</p>
+        <span class="go">Code</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============================================================ LONG READS -->
+  <section class="section" id="reads">
+    <div class="section-head rise">
+      <div>
+        <p class="kicker">Long reads</p>
+        <h2>Played, not just read.</h2>
+      </div>
+      <p>Three interactive walkthroughs: how to tell an edge from luck, how one setting can hold across markets, and how a number can lie.</p>
+    </div>
+    <div class="reads">
+      <a class="card read rise" href="quant-trading-studio.html" style="--glow: rgba(53, 201, 189, 0.16)">
+        <span class="kick">Startup · research pipeline audit</span>
+        <h4>Quant Trading Studio: the mechanisms, and the one that broke</h4>
+        <p>Ten mechanisms from a live algo-trading research pipeline, nine of them playable: separating edge from luck, making time honest, refusing to pick the highest peak in a parameter space, and scoring capital across five pillars. The last one is the constant on line 902 that explains why it failed.</p>
+        <span class="go">Play it</span>
+      </a>
+      <a class="card read rise" href="compress-ea.html" style="--glow: rgba(75, 159, 224, 0.16)">
+        <span class="kick">MQL5 · volatility strategy</span>
+        <h4>Compress EA, walked through</h4>
+        <p>How one volatility-squeeze strategy is put into the market's own language, ATR in basis points, so a single setting holds across gold, forex, crypto and indices instead of silently overfitting to one symbol.</p>
+        <span class="go">Play it</span>
+      </a>
+      <a class="card read rise" href="data-snooping.html" style="--glow: rgba(154, 130, 216, 0.18)">
+        <span class="kick">MSc dissertation · Royal Holloway</span>
+        <h4>The Number That Lied</h4>
+        <p>Data snooping in deep learning: a walked demonstration of how keeping the best of many models inflates performance, even on pure noise, and what it takes to trust a number honestly.</p>
+        <span class="go">Play it</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============================================================ ABOUT -->
+  <section class="section" id="about">
+    <div class="section-head rise">
+      <div>
+        <p class="kicker">About</p>
+        <h2>Finance first, then code.</h2>
+      </div>
+      <p>Trained in finance and quantitative methods; now building AI systems that have to be right about their numbers.</p>
+    </div>
+    <div class="about">
+      <div>
+        <div class="block rise">
+          <h5>Experience</h5>
+          <div class="entry">
+            <div class="when">Jan 2025 – Sep 2025</div>
+            <h6>Research Consultant, WorldQuant (BRAIN platform)</h6>
+            <p>Generated systematic alpha signals in Python on WorldQuant's BRAIN platform.</p>
+            <p>Scored every signal on Sharpe ratio, maximum drawdown, expected payoff and monthly risk and return rather than on profit, which on its own proves nothing: an edge can be faked.</p>
+          </div>
+        </div>
+        <div class="block rise">
+          <h5>Education</h5>
+          <div class="entry">
+            <div class="when">2025 – 2026</div>
+            <h6>MSc Computational Finance, Royal Holloway, University of London</h6>
+            <p>Investment and Portfolio Management <span class="n">86</span> · Data Analysis <span class="n">83</span> · Deep Learning <span class="n">83</span> · Principles of Computation and Programming <span class="n">75</span></p>
+          </div>
+          <div class="entry">
+            <div class="when">Awarded Sep 2025</div>
+            <h6>BA (Hons) Advanced Finance, National Economics University, Vietnam</h6>
+            <p>GPA <span class="n">3.59 / 4.0</span></p>
+          </div>
+          <div class="entry">
+            <div class="when">October 2024</div>
+            <h6>CFA Level I, top 10% of global candidates</h6>
+            <p>IBM Data Science Professional Certificate · IBM Machine Learning</p>
+          </div>
+        </div>
+      </div>
+      <div class="block rise">
+        <h5>Skills</h5>
+        <div class="skills">
+          <div><b>LLMs</b><span>Claude (Anthropic API) and Groq over plain HTTPS, prompt design with structured JSON replies, tool selection from a fixed set of lookups, guardrails on figures, fallback between models</span></div>
+          <div><b>Machine learning</b><span>gradient boosting, logistic regression, LSTM, transformer fine-tuning (DistilBERT), cross-validation, walk-forward validation, fairness checks</span></div>
+          <div><b>Programming</b><span>Python (pandas, NumPy, scikit-learn, SciPy, PyTorch), C++17 (std::thread, ctypes bindings, ThreadSanitizer), SQL (DuckDB), Git</span></div>
+          <div><b>Quantitative finance</b><span>Value-at-Risk and Expected Shortfall, GARCH and GJR-GARCH, Kupiec and Christoffersen backtests, Black-Scholes, binomial trees, Monte Carlo, portfolio optimisation</span></div>
+          <div><b>Data</b><span>incremental loading into DuckDB, audit trails, SQL data-quality checks, dashboards in Plotly, time series, statistical inference</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ CONTACT -->
+  <section class="section contact" id="contact">
+    <p class="kicker rise">Contact</p>
+    <p class="big rise"><a href="mailto:dacvinh268@gmail.com">dacvinh268@gmail.com</a></p>
+    <p class="right-to-work rise">London. Eligible for a UK Graduate visa (2 years); no sponsorship needed to start.</p>
+    <div class="actions rise">
+      <a class="btn primary" href="cv/Dac-Vinh-Nguyen-CV.pdf" download>Download CV</a>
+      <a class="btn" href="https://www.linkedin.com/in/vinhdac" rel="noopener">LinkedIn</a>
+      <a class="btn" href="https://github.com/VinhDac" rel="noopener">GitHub</a>
+    </div>
+    <div class="foot">
+      <span>© 2026 Dac Vinh Nguyen</span>
+      <span>Drawn live with three.js. No cookies, no tracking.</span>
+    </div>
+  </section>
+
 </div>
 
+<script type="module" src="assets/main.js"></script>
 </body>
 </html>

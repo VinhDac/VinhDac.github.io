@@ -1,0 +1,273 @@
+/* Dac Vinh Nguyen: the page. Dark, one accent: amber marks what was measured. */
+:root {
+  --bg: #07080c;
+  --bg2: #0b0d13;
+  --panel: rgba(255, 255, 255, 0.025);
+  --line: rgba(255, 255, 255, 0.08);
+  --line2: rgba(255, 255, 255, 0.14);
+  --ink: #ecebe6;
+  --muted: #a3a8b2;
+  --dim: #6b717c;
+  --amber: #f4b740;
+  --amber-dim: rgba(244, 183, 64, 0.14);
+  --cool: #9cc3ff;
+  --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --gutter: clamp(20px, 5vw, 64px);
+  --max: 1240px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  position: relative;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16.5px/1.65 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+::selection { background: var(--amber); color: #120d02; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* THE ONE CANVAS: every 3D room is drawn into it, in its own stage's place.
+   It scrolls with the page and is moved back to the top of the window each
+   frame, so a room never lags behind its frame; the wrapper keeps it from
+   making the page any longer. */
+#glwrap { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+#gl { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; display: block; }
+.page { position: relative; z-index: 1; }
+
+/* What was measured glows amber. */
+.n {
+  color: var(--amber);
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.94em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ nav */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px var(--gutter);
+  transition: background 0.35s, border-color 0.35s, padding 0.35s;
+  border-bottom: 1px solid transparent;
+}
+.nav.solid {
+  background: rgba(7, 8, 12, 0.72);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border-color: var(--line);
+  padding-top: 12px; padding-bottom: 12px;
+}
+.brand {
+  font: 600 13px/1 var(--sans); letter-spacing: 0.22em; text-transform: uppercase;
+  text-decoration: none; display: flex; align-items: center; gap: 10px;
+}
+.brand svg { width: 22px; height: 22px; }
+.nav ul { list-style: none; display: flex; gap: clamp(14px, 2.4vw, 34px); margin: 0; padding: 0; align-items: center; }
+.nav ul a { font-size: 14px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.nav ul a:hover { color: var(--ink); }
+.nav .cv-link {
+  color: var(--ink); border: 1px solid var(--line2); border-radius: 999px; padding: 7px 14px;
+}
+.nav .cv-link:hover { border-color: var(--amber); }
+
+/* ------------------------------------------------------------------ hero */
+.hero { position: relative; height: 100vh; min-height: 640px; }
+.hero .stage { position: absolute; inset: 0; }
+.hero-copy {
+  position: absolute; left: var(--gutter); right: var(--gutter); bottom: clamp(36px, 7vh, 80px);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: end;
+  pointer-events: none;
+}
+.hero-copy a, .hero-copy button { pointer-events: auto; }
+.eyebrow {
+  font: 500 12.5px/1.4 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+  margin: 0 0 14px;
+}
+.eyebrow .dot { color: var(--amber); }
+.lead {
+  font: 400 clamp(30px, 4.1vw, 58px)/1.06 var(--serif);
+  letter-spacing: -0.01em; margin: 0 0 18px; max-width: 18ch;
+}
+.lead em { color: var(--amber); font-style: italic; }
+.sub { color: var(--muted); max-width: 60ch; margin: 0 0 8px; font-size: clamp(15px, 1.25vw, 17px); }
+.right-to-work { color: var(--ink); font-size: 14.5px; margin: 0 0 22px; display: flex; gap: 8px; align-items: baseline; }
+.right-to-work::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #5ad48a; flex: none; transform: translateY(-1px); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+  font: 500 14.5px/1 var(--sans); padding: 13px 18px; border-radius: 999px;
+  border: 1px solid var(--line2); background: rgba(12, 14, 20, 0.55);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.btn:hover { border-color: var(--ink); transform: translateY(-1px); }
+.btn.primary { background: var(--amber); color: #140f03; border-color: var(--amber); font-weight: 600; }
+.btn.primary:hover { background: #ffc85c; }
+.btn svg { width: 16px; height: 16px; }
+.caption {
+  font: 400 12px/1.5 var(--mono); color: var(--dim); max-width: 34ch; text-align: right; margin: 0;
+}
+.scroll-cue {
+  position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+  width: 1px; height: 46px; background: linear-gradient(var(--line2), transparent); overflow: hidden;
+}
+.scroll-cue::after {
+  content: ""; position: absolute; left: 0; top: -46px; width: 1px; height: 46px;
+  background: linear-gradient(transparent, var(--ink)); animation: cue 2.4s ease-in-out infinite;
+}
+@keyframes cue { to { top: 46px; } }
+
+/* --------------------------------------------------------------- sections */
+.section { padding: clamp(80px, 13vh, 160px) var(--gutter) 0; max-width: calc(var(--max) + 2 * var(--gutter)); margin: 0 auto; }
+.section-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 32px; margin-bottom: clamp(36px, 6vh, 70px); align-items: end; }
+.kicker { font: 500 12px/1.4 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); margin: 0 0 14px; }
+h2 { font: 400 clamp(38px, 5vw, 72px)/1 var(--serif); letter-spacing: -0.015em; margin: 0; }
+.section-head p { color: var(--muted); margin: 0; max-width: 56ch; }
+
+/* A ROOM: a 3D stage beside what it shows. */
+.room {
+  display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.25fr); gap: clamp(24px, 4vw, 64px);
+  align-items: center; padding: clamp(30px, 7vh, 90px) 0; border-top: 1px solid var(--line);
+}
+.room.flip { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.92fr); }
+.room.flip .room-copy { order: 2; }
+.room .stage {
+  position: relative; height: clamp(380px, 62vh, 640px); border-radius: 18px;
+  background: radial-gradient(120% 90% at 50% 40%, rgba(156, 195, 255, 0.045), transparent 70%);
+  border: 1px solid var(--line); overflow: hidden;
+  box-shadow: 0 0 0 9px var(--bg);   /* hides the square corners of the drawing behind */
+}
+.room h3 { font: 400 clamp(30px, 3.2vw, 46px)/1.04 var(--serif); margin: 0 0 18px; letter-spacing: -0.01em; }
+.room-copy p { color: var(--muted); margin: 0 0 14px; }
+.room-copy p strong { color: var(--ink); font-weight: 500; }
+.idea {
+  border-left: 2px solid var(--amber); padding: 4px 0 4px 16px; margin: 22px 0;
+  color: var(--ink) !important; font: 400 clamp(19px, 1.6vw, 22px)/1.35 var(--serif);
+}
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin: 24px 0; }
+.stat { background: var(--bg); padding: 16px 18px; }
+.stat:last-child:nth-child(odd) { grid-column: span 2; }   /* three figures leave no empty cell */
+.stat b { display: block; font: 500 clamp(22px, 2.2vw, 30px)/1.1 var(--mono); color: var(--amber); font-variant-numeric: tabular-nums; }
+.stat span { display: block; font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+.links { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 8px; }
+.links a { font: 500 14px/1 var(--sans); text-decoration: none; color: var(--ink); border-bottom: 1px solid var(--line2); padding-bottom: 5px; transition: border-color 0.2s; }
+.links a:hover { border-color: var(--amber); }
+.links a::after { content: " \2197"; color: var(--amber); }
+
+/* Labels a 3D room pins to its own points. */
+.labels { position: absolute; inset: 0; pointer-events: none; }
+.tag {
+  position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); white-space: nowrap;
+  font: 500 11.5px/1.3 var(--mono); color: var(--ink); background: rgba(7, 8, 12, 0.78);
+  border: 1px solid var(--line2); border-radius: 8px; padding: 6px 9px; opacity: 0;
+  transition: opacity 0.4s;
+}
+.tag.on { opacity: 1; }
+.tag b { color: var(--amber); font-weight: 500; }
+.stage-note { position: absolute; left: 16px; bottom: 14px; right: 16px; font: 400 11.5px/1.5 var(--mono); color: var(--dim); pointer-events: none; }
+
+/* The option pricer's own controls. */
+.panel {
+  position: absolute; left: 14px; top: 14px; width: min(290px, calc(100% - 28px));
+  background: rgba(7, 8, 12, 0.82); border: 1px solid var(--line2); border-radius: 14px; padding: 14px 16px;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 13px;
+}
+.panel .row { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin: 4px 0; color: var(--muted); }
+.panel .row b { color: var(--ink); font: 500 13px/1.3 var(--mono); }
+.panel .row b.am { color: var(--amber); }
+.panel label { display: block; margin-top: 10px; color: var(--muted); }
+.panel label span { float: right; color: var(--ink); font-family: var(--mono); }
+.panel input[type=range] { width: 100%; accent-color: var(--amber); margin-top: 6px; }
+.panel .check { display: flex; gap: 8px; align-items: center; margin-top: 10px; cursor: pointer; }
+.panel .check input { accent-color: var(--amber); }
+.panel hr { border: 0; border-top: 1px solid var(--line); margin: 10px 0; }
+
+/* ----------------------------------------------------------- more work */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 16px; }
+.card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px 24px 22px;
+  display: flex; flex-direction: column; gap: 10px; text-decoration: none; transition: border-color 0.25s, transform 0.25s, background 0.25s;
+}
+a.card:hover { border-color: var(--line2); transform: translateY(-2px); background: rgba(255, 255, 255, 0.04); }
+.card .kick { font: 500 11.5px/1.4 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+.card h4 { font: 400 25px/1.12 var(--serif); margin: 0; }
+.card p { margin: 0; color: var(--muted); font-size: 15px; }
+.card .honest { color: var(--ink); font-size: 14.5px; border-top: 1px dashed var(--line2); padding-top: 12px; margin-top: auto; }
+.card .honest::before { content: attr(data-label) ": "; color: var(--amber); font: 500 11.5px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+.card .go { font: 500 13.5px/1 var(--sans); color: var(--ink); }
+.card .go::after { content: " \2197"; color: var(--amber); }
+.spark { width: 100%; height: 46px; display: block; }
+
+/* ------------------------------------------------------------- long reads */
+.reads { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.read { position: relative; overflow: hidden; }
+.read::before {
+  content: ""; position: absolute; inset: -40% -40% auto auto; width: 70%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(var(--glow, rgba(244, 183, 64, 0.16)), transparent 70%); pointer-events: none;
+}
+
+/* ------------------------------------------------------------- about */
+.about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); }
+.block { border-top: 1px solid var(--line); padding-top: 22px; }
+.block h5 { font: 500 12px/1.4 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin: 0 0 16px; }
+.entry { margin-bottom: 22px; }
+.entry .when { font: 400 12.5px/1.4 var(--mono); color: var(--dim); }
+.entry h6 { font: 500 17px/1.35 var(--sans); margin: 4px 0 6px; }
+.entry p { margin: 0 0 6px; color: var(--muted); font-size: 15px; }
+.skills { display: grid; gap: 14px; }
+.skills div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; font-size: 14.5px; color: var(--muted); }
+.skills b { color: var(--ink); font-weight: 500; }
+
+/* ------------------------------------------------------------- contact */
+.contact { padding-bottom: clamp(60px, 10vh, 120px); }
+.contact .big {
+  font: 400 clamp(40px, 7.5vw, 112px)/1 var(--serif); letter-spacing: -0.02em; margin: 0 0 28px;
+}
+.contact .big a { text-decoration: none; border-bottom: 1px solid var(--line2); transition: border-color 0.25s, color 0.25s; }
+.contact .big a:hover { color: var(--amber); border-color: var(--amber); }
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px; border-top: 1px solid var(--line); padding: 26px 0 0; margin-top: 60px; color: var(--dim); font-size: 13px; }
+
+/* What scrolls in rises a little (only when the script runs to raise it). */
+.js .rise { opacity: 0; transform: translateY(22px); transition: opacity 0.9s cubic-bezier(.2, .7, .2, 1), transform 0.9s cubic-bezier(.2, .7, .2, 1); }
+.js .rise.in { opacity: 1; transform: none; }
+
+/* No WebGL: every stage keeps its place, quiet. */
+.no-webgl .caption, .no-webgl #glwrap { display: none; }
+.no-webgl .stage { background: radial-gradient(80% 70% at 50% 40%, rgba(156, 195, 255, 0.08), transparent 70%); }
+.no-webgl .hero .stage::after {
+  content: "DAC VINH NGUYEN"; position: absolute; left: var(--gutter); top: 22vh;
+  font: 800 clamp(48px, 9vw, 150px)/0.95 var(--sans); letter-spacing: -0.02em; color: var(--ink);
+}
+
+/* --------------------------------------------------------------- narrow */
+@media (max-width: 980px) {
+  .section-head { grid-template-columns: 1fr; }
+  .room, .room.flip { grid-template-columns: 1fr; }
+  .room.flip .room-copy { order: 0; }
+  .room .stage { height: 58vh; min-height: 340px; }
+  .reads { grid-template-columns: 1fr; }
+  .about { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .nav ul li:not(.keep) { display: none; }
+  .hero-copy { grid-template-columns: 1fr; bottom: 28px; }
+  .caption { text-align: left; }
+  .skills div { grid-template-columns: 1fr; gap: 2px; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  /* The pricer's panel goes under its paths on a phone. */
+  .room .stage.with-panel { height: auto; min-height: 640px; }
+  .with-panel .panel { top: auto; bottom: 12px; left: 12px; width: calc(100% - 24px); }
+}
