@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Still surface: the vega penalty and the half day</title>
+<meta name="description" content="A validation note on Lucic and Tse's option market-making model: the example's vega penalty protects the close, not the half day. By Dac Vinh Nguyen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6f4ef; --paper2:#efece4; --ink:#1b2430; --soft:#3f4a58; --dim:#717b88; --rule:#d8d2c5;
+  --terminal:#b5541c; --running:#1f6fb2; --light:#8db3d9; --still:#8a94a3;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:19px;line-height:1.58;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:var(--running);text-decoration:none;border-bottom:1px solid rgba(31,111,178,.3)}
+a:hover{border-bottom-color:var(--running)}
+.num{font-family:var(--mono);font-size:.86em;letter-spacing:-.01em;white-space:nowrap}
+.wrap{max-width:780px;margin:0 auto;padding:0 20px}
+.wide{max-width:1000px;margin:0 auto;padding:0 20px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+/* hero: the surface, still or moving */
+.hero{position:relative;padding:56px 0 18px;border-bottom:1px solid var(--rule)}
+h1{font-weight:600;font-size:clamp(34px,5.6vw,62px);line-height:1.04;letter-spacing:-.01em;margin:14px 0 12px;max-width:15em}
+h1 em{font-style:italic;font-weight:500;color:var(--terminal)}
+.sub{font-size:20px;color:var(--soft);max-width:36em;margin:0 0 22px}
+.by{font-family:var(--mono);font-size:12.5px;color:var(--dim)}
+.by a{color:var(--dim);border-bottom-color:var(--rule)}
+.surface{margin:26px 0 6px;position:relative}
+#smiles{width:100%;height:300px;display:block}
+.modes{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.modes button,.picks button{font:500 13px var(--mono);color:var(--soft);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:6px 12px;cursor:pointer}
+.modes button[aria-pressed="true"],.picks button[aria-pressed="true"]{color:var(--paper);background:var(--ink);border-color:var(--ink)}
+.legend{font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:8px}
+
+/* findings */
+ol.findings{counter-reset:f;list-style:none;padding:0;margin:30px 0 8px}
+ol.findings li{counter-increment:f;position:relative;padding:0 0 16px 46px}
+ol.findings li::before{content:counter(f);position:absolute;left:0;top:2px;font:500 13px var(--mono);width:28px;height:28px;border:1px solid var(--rule);border-radius:50%;display:grid;place-items:center;color:var(--soft)}
+ol.findings b{font-weight:600}
+
+h2{font-weight:600;font-size:30px;line-height:1.15;margin:58px 0 10px;letter-spacing:-.005em}
+h2 .eyebrow{display:block;margin-bottom:6px}
+p{margin:0 0 14px}
+.muted{color:var(--soft)}
+figure{margin:24px 0}
+figcaption{font-size:15.5px;color:var(--soft);margin-top:8px;line-height:1.45}
+
+/* the ribbon: the book's vega through the session */
+.picks{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px}
+.picks button[data-kind="terminal"][aria-pressed="true"]{background:var(--terminal);border-color:var(--terminal)}
+.picks button[data-kind="running"][aria-pressed="true"]{background:var(--running);border-color:var(--running)}
+#ribbon,#frontier{width:100%;display:block;background:var(--paper2);border-radius:4px}
+.readout{font-family:var(--mono);font-size:13px;color:var(--soft);margin-top:8px;min-height:2.6em}
+
+table{border-collapse:collapse;width:100%;font-size:16px;margin:16px 0}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--rule);vertical-align:baseline}
+th:first-child,td:first-child{text-align:left}
+thead th{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);border-bottom:1.5px solid var(--ink)}
+td.num,td .num{font-size:14.5px}
+.scroll{overflow-x:auto}
+
+.note{border-left:2px solid var(--rule);padding:2px 0 2px 16px;color:var(--soft);font-size:17px}
+ul.next{padding-left:20px}
+ul.next li{margin-bottom:8px}
+footer{margin:70px 0 0;padding:26px 0 60px;border-top:1px solid var(--rule);font-size:15px;color:var(--soft)}
+footer .by{display:block;margin-top:10px}
+@media (max-width:640px){
+  body{font-size:17.5px}
+  .hero{padding-top:34px}
+  #smiles{height:220px}
+  h2{font-size:25px}
+  table{font-size:14.5px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">A validation note &middot; option market-making</div>
+    <h1>The vega penalty protects the close, <em>not the half day</em></h1>
+    <p class="sub">Lucic and Tse's model for an options book (Risk.net, 2025) says its risk controls make the strategy resilient to moves of the implied volatility surface. Its own example holds the surface still. Here it moves.</p>
+    <div class="by">Dac Vinh Nguyen &middot; 20 November 2026 &middot; <a href="https://github.com/VinhDac/still-surface">code and checks</a> &middot; <a href="https://vinhdac.github.io/notes/still-surface/Dac-Vinh-Nguyen-Still-Surface.pdf">the note as a PDF</a></div>
+  </div>
+  <div class="wide surface">
+    <canvas id="smiles" aria-label="The implied volatility smiles of the example at four maturities, still or moving"></canvas>
+    <div class="modes" role="group" aria-label="How the surface moves">
+      <button type="button" data-mode="still" aria-pressed="true">still, as the example</button>
+      <button type="button" data-mode="term" aria-pressed="false">moving, each maturity by its loading</button>
+      <button type="button" data-mode="parallel" aria-pressed="false">moving, every maturity alike</button>
+    </div>
+    <div class="legend" id="smiles-legend">implied vol against strike, 90% to 110% of spot, at 3 months, 6 months, 1 year and 3 years</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <ol class="findings">
+    <li><b>The example reproduces.</b> The baseline's mean half-day value is <span class="num">166.6</span> against about <span class="num">167</span> read off the paper's Figure 1(b), and all <span class="num">12</span> shapes the figure shows hold.</li>
+    <li><b>The surface's moves add risk the example does not show.</b> With each maturity moving by its own loading on the VIX, the standard deviation of the half day's value goes from <span class="num">4.80</span> to <span class="num">5.45</span>; if every maturity moved as far as the VIX, to <span class="num">9.34</span>.</li>
+    <li><b>The example's penalty works at the close.</b> Ten times the terminal penalty cuts the risk the closing book carries into the next half day by <span class="num">21%</span> (<span class="num">60%</span> if every maturity moved alike), and the risk the move brings during the session by <span class="num">4%</span>. A hundred times cuts the latter by <span class="num">4%</span>.</li>
+    <li><b>The running penalty does the in-session work.</b> The paper defines it; the example sets it to zero. On the vega the move loads on, it cuts the in-session risk by <span class="num">51%</span> for <span class="num">0.14</span> of mean value, where ten times the terminal penalty costs <span class="num">0.79</span>.</li>
+    <li><b>The closed form's approximation holds at the half day.</b> Against the exact HJB (6), solved for one option at a time, the closed form's quotes give up at most 0.007% of the value over the half day and 0.014% over five days.</li>
+  </ol>
+
+  <h2><span class="eyebrow">1 &middot; the half day, drawn</span>Where the book holds its vega</h2>
+  <p>The ribbon is the book's percentage-vega through the session, its root mean square over 8,000 paths on a still surface, drawn above and below a line. The paper's penalty, <span class="num">&alpha;</span>, is charged on the book at the close; a running penalty, <span class="num">&beta;</span>, is charged all session. Pick one and compare it with the paper's, the grey outline.</p>
+  <div class="picks" role="group" aria-label="Which penalty"><button type="button" data-key="optimal baseline" data-kind="still" aria-pressed="false">the paper&#x27;s penalty</button><button type="button" data-key="optimal high (x10)" data-kind="terminal" aria-pressed="true">terminal ×10</button><button type="button" data-key="terminal x100" data-kind="terminal" aria-pressed="false">terminal ×100</button><button type="button" data-key="running term 0.05/T" data-kind="running" aria-pressed="false">running 0.05/T, loaded vega</button><button type="button" data-key="running term 0.2/T" data-kind="running" aria-pressed="false">running 0.2/T, loaded vega</button><button type="button" data-key="running total 0.2/T" data-kind="running" aria-pressed="false">running 0.2/T, whole vega</button></div>
+  <svg id="ribbon" viewBox="0 0 900 300" role="img" aria-label="The book's vega through the half day"></svg>
+  <div class="readout" id="ribbon-readout"></div>
+  <p>Ten times the terminal penalty keeps the book's vega within <span class="num">4%</span> of the baseline's for the first seven tenths of the session, then pulls it to <span class="num">1.1</span> at the close, where the baseline holds <span class="num">3.5</span>: the inventory term of the quotes, <span class="num">&Theta;<sub>2</sub></span>, is <span class="num">&minus;A</span> at the close and fades as the close recedes. A running penalty holds <span class="num">&Theta;<sub>2</sub></span> near a level of its own however far the close is, so it leans on the book all day. Its price is written <span class="num">r/T</span>: at <span class="num">r = &alpha;</span> it charges a session of holding a vega what <span class="num">&alpha;</span> charges for holding it past the close.</p>
+
+  <h2><span class="eyebrow">2 &middot; cost against risk</span>What each penalty buys</h2>
+  <p>The cost of a penalty is the mean value it gives up on a still surface, path by path against the baseline; the fills and the spot are the same for every penalty. What it buys is the in-session risk it takes away: the spread of what the surface's move did to its own trades. Each line is one kind of penalty at growing strength.</p>
+  <svg id="frontier" viewBox="0 0 900 440" role="img" aria-label="Cost against in-session risk for each penalty"></svg>
+  <div class="readout" id="frontier-readout">Point at a dot for its numbers.</div>
+  <div class="scroll"><table>
+    <thead><tr><th>penalty (the paper's &alpha; unless named)</th><th>cost</th><th>in-session risk cut, by maturity</th><th>parallel</th><th>carried risk cut, by maturity</th><th>parallel</th></tr></thead>
+    <tbody><tr><td>terminal, &alpha;&times;10</td><td class="num">0.79</td><td class="num">4%</td><td class="num">4%</td><td class="num">21%</td><td class="num">60%</td></tr>
+<tr><td>terminal, &alpha;&times;100</td><td class="num">2.32</td><td class="num">4%</td><td class="num">4%</td><td class="num">22%</td><td class="num">68%</td></tr>
+<tr><td>running, the paper's buckets, &alpha;<sub>k</sub>/T</td><td class="num">0.73</td><td class="num">28%</td><td class="num">35%</td><td class="num">4%</td><td class="num">9%</td></tr>
+<tr><td>running, the book's whole vega, 0.2/T</td><td class="num">0.74</td><td class="num">44%</td><td class="num">68%</td><td class="num">8%</td><td class="num">31%</td></tr>
+<tr><td>running, the vega the move loads on, 0.2/T</td><td class="num">0.14</td><td class="num">51%</td><td class="num">32%</td><td class="num">18%</td><td class="num">12%</td></tr>
+<tr><td>terminal &times;10 and running on the whole vega</td><td class="num">1.48</td><td class="num">45%</td><td class="num">69%</td><td class="num">20%</td><td class="num">61%</td></tr></tbody>
+  </table></div>
+  <p>The factor matters as much as the strength. The paper's buckets penalise the at-the-money buckets lightly, where most of the vega sits. On the vega the move loads on, each option's percentage-vega times its maturity's loading, <span class="num">0.2/T</span> costs <span class="num">0.14</span>; on the book's whole vega the same price costs <span class="num">0.74</span>, because it also leans on long-dated vega the move barely touches.</p>
+
+  <h2><span class="eyebrow">3 &middot; how the surface moves</span>Short maturities move most</h2>
+  <p>Through the half day the surface shifts along a Brownian bridge to a day's change of the VIX scaled to half a day: <span class="num">9,319</span> daily changes from 2 January 1990 to 18 November 2026, a half-day standard deviation of <span class="num">1.18</span> vol points. On the same <span class="num">4,769</span> days, the VIX3M moved <span class="num">0.63</span> of a point for each point of the VIX (correlation <span class="num">0.95</span>), between <span class="num">0.60</span> and <span class="num">0.66</span> in three separate stretches of those years. A power law through 30 and 93 days gives the book's maturities these loadings; past 93 days it is an assumption.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>maturity</th><th>3 months</th><th>6 months</th><th>1 year</th><th>3 years</th></tr></thead>
+    <tbody><tr><td>vol points moved for one point of the VIX</td><td class="num">0.63</td><td class="num">0.47</td><td class="num">0.35</td><td class="num">0.22</td></tr></tbody>
+  </table></div>
+  <p>The quotes depend on time and inventory only, so a run with a moving surface trades exactly as the still run on the same paths, and the difference is what the move did to that book. The skew is held still in these numbers; a labelled scenario moving it adds little.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>half-day value, 8,000 paths</th><th>mean</th><th>std</th><th>1% quantile</th><th>worst 1%</th></tr></thead>
+    <tbody><tr><td>optimal, the paper's &alpha;, still surface</td><td class="num">166.6</td><td class="num">4.80</td><td class="num">155.7</td><td class="num">154.3</td></tr>
+<tr><td>optimal, the paper's &alpha;, moving, by maturity</td><td class="num">166.6</td><td class="num">5.45</td><td class="num">154.0</td><td class="num">152.1</td></tr>
+<tr><td>optimal, the paper's &alpha;, moving, parallel</td><td class="num">166.6</td><td class="num">9.34</td><td class="num">143.3</td><td class="num">136.4</td></tr>
+<tr><td>zero-intelligence, 0.1% vega, still surface</td><td class="num">111.3</td><td class="num">2.27</td><td class="num">106.2</td><td class="num">105.4</td></tr>
+<tr><td>zero-intelligence, 0.1% vega, moving, by maturity</td><td class="num">111.5</td><td class="num">18.95</td><td class="num">66.0</td><td class="num">48.5</td></tr>
+<tr><td>zero-intelligence, 0.1% vega, moving, parallel</td><td class="num">112.1</td><td class="num">55.26</td><td class="num">−17.4</td><td class="num">−70.5</td></tr></tbody>
+  </table></div>
+
+  <h2><span class="eyebrow">4 &middot; the example, rebuilt</span>Against the paper's Figure 1</h2>
+  <p>Everything is the paper's except the implied vol surface, shown only as Figure 1(a) (its numbers are in the authors' SSRN paper 4729290, which I did not use). I read <span class="num">28</span> points off the figure and fitted a four-parameter form, within <span class="num">0.41</span> vol points of every point read. The quotes are the paper's (18) with (19) and (20).</p>
+  <div class="scroll"><table>
+    <thead><tr><th>strategy</th><th>Figure 1(b), by eye</th><th>mean</th><th>std</th><th>trades</th></tr></thead>
+    <tbody><tr><td>optimal, the paper's &alpha;</td><td class="num">167</td><td class="num">166.6</td><td class="num">4.80</td><td class="num">1,633</td></tr>
+<tr><td>optimal, &alpha;&times;10</td><td class="num">167</td><td class="num">165.8</td><td class="num">4.81</td><td class="num">1,634</td></tr>
+<tr><td>optimal, &alpha;&times;0.1</td><td class="num">167</td><td class="num">167.4</td><td class="num">4.77</td><td class="num">1,633</td></tr>
+<tr><td>zero-intelligence, 0.1% vega</td><td class="num">110</td><td class="num">111.4</td><td class="num">2.31</td><td class="num">3,091</td></tr>
+<tr><td>zero-intelligence, 0.5% vega</td><td class="num">137</td><td class="num">136.5</td><td class="num">5.58</td><td class="num">773</td></tr>
+<tr><td>zero-intelligence, 1% vega</td><td class="num">52</td><td class="num">53.3</td><td class="num">5.01</td><td class="num">155</td></tr></tbody>
+  </table></div>
+
+  <h2><span class="eyebrow">5 &middot; the closed form</span>Its approximation, checked</h2>
+  <p>The quotes (12) rest on a second-order expansion of the exponentials in the HJB equation (6); the paper's footnote calls them very satisfactory over a short horizon. For one option at a time, with gamma frozen as (20) freezes it, I solved (6) exactly on an inventory grid wide enough that doubling it changes nothing, valued the closed form's quotes by the same equation's linear twin, and set the two side by side at the paper's parameters. Where the book actually is at the close, the first to ninety-ninth percentile of its inventory, the quotes differ by at most <span class="num">1.3%</span> of 1/&kappa;, the spread's own scale.</p>
+<div class="scroll"><table><thead><tr><th>option</th><th>value given up, ppm: half day</th><th>one day</th><th>five days</th><th>quote gap at the close, share of 1/&kappa;</th><th>inventory, 1st to 99th percentile</th></tr></thead><tbody><tr><td>3 months, at the money</td><td class="num">0.011</td><td class="num">0.026</td><td class="num">0.035</td><td class="num">less than 0.0001%</td><td class="num">−10 to 12</td></tr>
+<tr><td>3 months, 90% strike</td><td class="num">2.2</td><td class="num">1.9</td><td class="num">144</td><td class="num">0.012%</td><td class="num">−6 to 6</td></tr>
+<tr><td>1 year, at the money</td><td class="num">0.11</td><td class="num">0.15</td><td class="num">0.11</td><td class="num">0.00025%</td><td class="num">−8 to 10</td></tr>
+<tr><td>3 years, 110% strike</td><td class="num">70</td><td class="num">40</td><td class="num">9.2</td><td class="num">1.3%</td><td class="num">−3 to 3</td></tr></tbody></table></div>
+
+  <h2><span class="eyebrow">6 &middot; before production</span>What I would test next</h2>
+  <ul class="next">
+    <li>Order flow that reacts to the surface's moves, and spot and vol that move together; here both are independent of the move.</li>
+    <li>The surface the paper used and loadings past three months read from longer indices, in place of a figure read by eye and a power law.</li>
+    <li>The running penalty's factor and price chosen from the desk's own P&amp;L attribution: the factor the surface actually moves on, priced so that the in-session risk it leaves is the risk the desk means to run.</li>
+  </ul>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>The paper: <a href="https://discovery.ucl.ac.uk/id/eprint/10207338/">author manuscript at UCL Discovery</a>. Data: FRED, series VIXCLS and VXVCLS (Cboe). 40 checks of the code hold, and all 69 faults planted in it on purpose, one at a time, are caught.</p>
+    <span class="by">Dac Vinh Nguyen &middot; <a href="https://github.com/VinhDac/still-surface">github.com/VinhDac/still-surface</a> &middot; <a href="https://vinhdac.github.io/notes/still-surface/Dac-Vinh-Nguyen-Still-Surface.pdf">PDF</a></span>
+  </div>
+</footer>
+
+<script>
+const DATA = {"surface":[0.175821,-0.341331,0.411425,1.491212],"loading":[0.63,0.4724,0.3543,0.2245],"half_std":0.01178,"fraction":[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0],"vega":{"optimal baseline":[5.017,6.632,7.614,8.174,8.365,8.337,8.031,7.213,5.933,3.544],"optimal high (x10)":[5.01,6.616,7.57,8.091,8.231,8.132,7.712,6.712,5.101,1.095],"terminal x100":[5.01,6.615,7.565,8.081,8.214,8.107,7.677,6.67,5.027,0.691],"running term 0.05/T":[4.387,5.287,5.708,5.924,6.035,6.076,6.022,5.613,4.93,3.253],"running term 0.2/T":[3.846,4.401,4.704,4.904,5.04,5.089,5.091,4.807,4.385,3.053],"running total 0.2/T":[2.187,2.152,2.145,2.153,2.177,2.179,2.175,2.14,2.164,2.271]},"picks":[{"key":"optimal baseline","label":"the paper's penalty","kind":"still"},{"key":"optimal high (x10)","label":"terminal \u00d710","kind":"terminal"},{"key":"terminal x100","label":"terminal \u00d7100","kind":"terminal"},{"key":"running term 0.05/T","label":"running 0.05/T, loaded vega","kind":"running"},{"key":"running term 0.2/T","label":"running 0.2/T, loaded vega","kind":"running"},{"key":"running total 0.2/T","label":"running 0.2/T, whole vega","kind":"running"}],"families":[{"key":"terminal","label":"terminal \u03b1, \u00d70.1 to \u00d7100"},{"key":"total","label":"running, whole vega"},{"key":"term","label":"running, loaded vega"},{"key":"buckets","label":"running, the paper's buckets"}],"frontier":[{"key":"optimal low (x0.1)","label":"terminal \u00d70.1","cost":-0.7769,"risk":3.7219,"cut":-0.4933,"carried":-1.6501,"families":["terminal"],"order":{"terminal":0}},{"key":"optimal baseline","label":"the paper's example","cost":0.0,"risk":2.4924,"cut":0.0,"carried":0.0,"families":["terminal","total","term","buckets"],"order":{"terminal":1,"total":0,"term":0,"buckets":0}},{"key":"terminal x3","label":"terminal \u00d73","cost":0.3665,"risk":2.419,"cut":0.0295,"carried":0.1628,"families":["terminal"],"order":{"terminal":2}},{"key":"optimal high (x10)","label":"terminal \u00d710","cost":0.7871,"risk":2.396,"cut":0.0387,"carried":0.2068,"families":["terminal"],"order":{"terminal":3}},{"key":"terminal x30","label":"terminal \u00d730","cost":1.4022,"risk":2.3892,"cut":0.0414,"carried":0.215,"families":["terminal"],"order":{"terminal":4}},{"key":"terminal x100","label":"terminal \u00d7100","cost":2.3232,"risk":2.386,"cut":0.0427,"carried":0.2168,"families":["terminal"],"order":{"terminal":5}},{"key":"running total 0.01/T","label":"running, whole vega, 0.01/T","cost":0.0933,"risk":1.7517,"cut":0.2972,"carried":0.0188,"families":["total"],"order":{"total":1}},{"key":"running total 0.05/T","label":"running, whole vega, 0.05/T","cost":0.3144,"risk":1.5105,"cut":0.3939,"carried":0.0502,"families":["total"],"order":{"total":2}},{"key":"running total 0.2/T","label":"running, whole vega, 0.2/T","cost":0.7442,"risk":1.3885,"cut":0.4429,"carried":0.0791,"families":["total"],"order":{"total":3}},{"key":"running total 0.8/T","label":"running, whole vega, 0.8/T","cost":1.6684,"risk":1.3269,"cut":0.4676,"carried":0.1295,"families":["total"],"order":{"total":4}},{"key":"running term 0.05/T","label":"running, loaded vega, 0.05/T","cost":0.0451,"risk":1.6541,"cut":0.3364,"carried":0.0921,"families":["term"],"order":{"term":1}},{"key":"running term 0.2/T","label":"running, loaded vega, 0.2/T","cost":0.1394,"risk":1.2323,"cut":0.5056,"carried":0.1782,"families":["term"],"order":{"term":2}},{"key":"running term 0.8/T","label":"running, loaded vega, 0.8/T","cost":0.3611,"risk":0.8914,"cut":0.6424,"carried":0.2703,"families":["term"],"order":{"term":3}},{"key":"running buckets 0.1 alpha/T","label":"running, the paper's buckets, 0.1 \u03b1/T","cost":0.0741,"risk":2.2742,"cut":0.0876,"carried":0.0044,"families":["buckets"],"order":{"buckets":1}},{"key":"running buckets 1 alpha/T","label":"running, the paper's buckets, 1 \u03b1/T","cost":0.7299,"risk":1.8058,"cut":0.2755,"carried":0.0427,"families":["buckets"],"order":{"buckets":2}},{"key":"running buckets 10 alpha/T","label":"running, the paper's buckets, 10 \u03b1/T","cost":3.4911,"risk":1.3096,"cut":0.4746,"carried":0.1012,"families":["buckets"],"order":{"buckets":3}}]};
+/* Still surface: the page's three drawings. DATA is written by build_page.py from results.json. */
+(function () {
+  "use strict";
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const css = getComputedStyle(document.documentElement);
+  const col = (n) => css.getPropertyValue(n).trim();
+  const fmt = (x, d) => (x < 0 ? "−" : "") + Math.abs(x).toFixed(d);
+  const pct = (x) => Math.round(100 * x) + "%";
+  const NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  /* 1. The smiles: the fitted surface of the example, still, or shifting by each maturity's loading
+        on a VIX-sized move (an Ornstein-Uhlenbeck path whose spread is the half day's), or alike. */
+  const canvas = document.getElementById("smiles");
+  const ctx = canvas.getContext("2d");
+  const [a, b, c, d] = DATA.surface;
+  const taus = [0.25, 0.5, 1, 3];
+  const names = ["3m", "6m", "1y", "3y"];
+  const vol = (m, tau) => { const z = Math.log(m) / Math.sqrt(tau); return a + b * z + c * z * z + d * z * z * z; };
+  let mode = "still", shift = 0, last = 0;
+  const LO = 0.9, HI = 1.1;
+  function draw() {
+    const w = canvas.clientWidth, h = canvas.clientHeight, dpr = window.devicePixelRatio || 1;
+    if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const padL = 44, padR = 40, padT = 12, padB = 26;
+    const vmin = 0.12, vmax = 0.27;
+    const X = (m) => padL + (m - LO) / (HI - LO) * (w - padL - padR);
+    const Y = (v) => padT + (vmax - v) / (vmax - vmin) * (h - padT - padB);
+    ctx.font = "11px " + col("--mono");
+    ctx.fillStyle = col("--dim");
+    ctx.strokeStyle = col("--rule");
+    ctx.lineWidth = 1;
+    for (const v of [0.15, 0.2, 0.25]) {
+      ctx.beginPath(); ctx.moveTo(padL, Y(v)); ctx.lineTo(w - padR, Y(v)); ctx.stroke();
+      ctx.fillText(Math.round(100 * v) + "%", 4, Y(v) + 4);
+    }
+    for (const m of [0.9, 1, 1.1]) ctx.fillText(Math.round(100 * m) + "%", X(m) - 12, h - 8);
+    taus.forEach((tau, i) => {
+      const load = mode === "term" ? DATA.loading[i] : mode === "parallel" ? 1 : 0;
+      const tone = 0.95 - 0.18 * i;
+      if (load) {
+        ctx.strokeStyle = col("--rule"); ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let k = 0; k <= 60; k++) { const m = LO + (HI - LO) * k / 60; const p = [X(m), Y(vol(m, tau))]; k ? ctx.lineTo(...p) : ctx.moveTo(...p); }
+        ctx.stroke();
+      }
+      ctx.strokeStyle = `rgba(27,36,48,${tone})`; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      for (let k = 0; k <= 60; k++) { const m = LO + (HI - LO) * k / 60; const p = [X(m), Y(vol(m, tau) + load * shift)]; k ? ctx.lineTo(...p) : ctx.moveTo(...p); }
+      ctx.stroke();
+      ctx.fillStyle = `rgba(27,36,48,${tone})`;
+      ctx.fillText(names[i], X(LO) + 4, Y(vol(LO, tau) + load * shift) - 5);  // at 90%, where the smiles stand apart
+    });
+  }
+  function tick(t) {
+    const dt = Math.min(0.05, (t - last) / 1000 || 0); last = t;
+    const theta = 0.8, sd = DATA.half_std;  // the path's spread is the half day's, in vol
+    shift += -theta * shift * dt + sd * Math.sqrt(2 * theta * dt) * gauss();
+    draw();
+    if (mode !== "still" && !reduce) requestAnimationFrame(tick);
+  }
+  function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  document.querySelectorAll(".modes button").forEach((btn) => btn.addEventListener("click", () => {
+    document.querySelectorAll(".modes button").forEach((x) => x.setAttribute("aria-pressed", String(x === btn)));
+    const was = mode; mode = btn.dataset.mode;
+    if (mode === "still") { shift = 0; draw(); }
+    else if (reduce) { shift = DATA.half_std; draw(); }
+    else if (was === "still") { last = performance.now(); requestAnimationFrame(tick); }
+  }));
+  window.addEventListener("resize", draw);
+  draw();
+
+  /* 2. The ribbon: the book's vega through the session, the picked penalty against the paper's. */
+  const rib = document.getElementById("ribbon");
+  const RW = 900, RH = 300, rx0 = 50, rx1 = 880, mid = 150;
+  const frac = [0].concat(DATA.fraction);
+  const vmaxR = Math.max(...Object.values(DATA.vega).flat()) * 1.08;
+  const rx = (f) => rx0 + f * (rx1 - rx0);
+  const ry = (v) => v / vmaxR * 128;
+  function smooth(pts) {
+    let dd = `M${pts[0][0]},${pts[0][1]}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+      dd += ` C${p1[0] + (p2[0] - p0[0]) / 6},${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6},${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]},${p2[1]}`;
+    }
+    return dd;
+  }
+  function band(values) {
+    const v = [0].concat(values);
+    const top = frac.map((f, i) => [rx(f), mid - ry(v[i])]);
+    const bot = frac.map((f, i) => [rx(f), mid + ry(v[i])]).reverse();
+    return smooth(top) + " L" + bot[0][0] + "," + bot[0][1] + smooth(bot).slice(smooth(bot).indexOf(" C")) + " Z";
+  }
+  function drawRibbon(key) {
+    rib.innerHTML = "";
+    el("line", { x1: rx0, x2: rx1, y1: mid, y2: mid, stroke: col("--rule") }, rib);
+    [["open", 0], ["mid-session", 0.5], ["close", 1]].forEach(([t, f]) => {
+      const tx = el("text", { x: rx(f), y: RH - 10, "text-anchor": f === 0 ? "start" : f === 1 ? "end" : "middle",
+        "font-family": col("--mono"), "font-size": 15, fill: col("--dim") }, rib);
+      tx.textContent = t;
+    });
+    const pick = DATA.picks.find((p) => p.key === key);
+    const color = pick.kind === "terminal" ? col("--terminal") : pick.kind === "running" ? col("--running") : col("--still");
+    el("path", { d: band(DATA.vega[key]), fill: color, "fill-opacity": key === "optimal baseline" ? 0.35 : 0.55, stroke: "none" }, rib);
+    el("path", { d: band(DATA.vega["optimal baseline"]), fill: "none", stroke: col("--ink"), "stroke-opacity": 0.45, "stroke-width": 1.2, "stroke-dasharray": "4 3" }, rib);
+    const v = DATA.vega[key], v0 = DATA.vega["optimal baseline"];
+    const m = Math.round(v.length / 2) - 1;
+    document.getElementById("ribbon-readout").textContent =
+      `${pick.label}: ${fmt(v[m], 1)} of percentage-vega at mid-session, ${fmt(v[v.length - 1], 1)} at the close` +
+      (key === "optimal baseline" ? "." : ` (the paper's: ${fmt(v0[m], 1)} and ${fmt(v0[v0.length - 1], 1)}).`);
+  }
+  const picks = document.querySelectorAll(".picks button");
+  picks.forEach((btn) => btn.addEventListener("click", () => {
+    picks.forEach((x) => x.setAttribute("aria-pressed", String(x === btn)));
+    drawRibbon(btn.dataset.key);
+  }));
+  drawRibbon(DATA.picks[1].key);
+
+  /* 3. Cost against in-session risk, one line a kind of penalty. */
+  const fr = document.getElementById("frontier");
+  const FW = 900, FH = 440, fx0 = 78, fx1 = 870, fy0 = 380, fy1 = 20;
+  const pts = DATA.frontier;
+  const xmin = Math.min(0, ...pts.map((p) => p.cost)) - 0.2, xmax = Math.max(...pts.map((p) => p.cost)) * 1.06;
+  const ymax = Math.max(...pts.map((p) => p.risk)) * 1.1;
+  const fxs = (x) => fx0 + (x - xmin) / (xmax - xmin) * (fx1 - fx0);
+  const fys = (y) => fy0 - y / ymax * (fy0 - fy1);
+  el("line", { x1: fx0, x2: fx1, y1: fy0, y2: fy0, stroke: col("--dim") }, fr);
+  el("line", { x1: fx0, x2: fx0, y1: fy0, y2: fy1, stroke: col("--dim") }, fr);
+  const step = (xmax - xmin) > 4 ? 1 : 0.5;
+  for (let x = Math.ceil(xmin / step) * step; x <= xmax; x += step) {
+    el("line", { x1: fxs(x), x2: fxs(x), y1: fy0, y2: fy0 + 5, stroke: col("--dim") }, fr);
+    const t = el("text", { x: fxs(x), y: fy0 + 24, "text-anchor": "middle", "font-family": col("--mono"), "font-size": 16, fill: col("--dim") }, fr);
+    t.textContent = fmt(x, step < 1 ? 1 : 0);
+  }
+  for (let y = 0; y <= ymax; y += ymax > 6 ? 2 : 1) {
+    el("line", { x1: fx0 - 5, x2: fx0, y1: fys(y), y2: fys(y), stroke: col("--dim") }, fr);
+    const t = el("text", { x: fx0 - 10, y: fys(y) + 5, "text-anchor": "end", "font-family": col("--mono"), "font-size": 16, fill: col("--dim") }, fr);
+    t.textContent = y.toFixed(0);
+  }
+  const xl = el("text", { x: (fx0 + fx1) / 2, y: FH - 6, "text-anchor": "middle", "font-size": 18, fill: col("--soft") }, fr);
+  xl.textContent = "cost: mean value given up on a still surface";
+  const yl = el("text", { x: 18, y: (fy0 + fy1) / 2, "text-anchor": "middle", "font-size": 18, fill: col("--soft"), transform: `rotate(-90 18 ${(fy0 + fy1) / 2})` }, fr);
+  yl.textContent = "in-session risk left (std)";
+  const famColor = { terminal: col("--terminal"), total: col("--light"), term: col("--running"), buckets: col("--still") };
+  for (const fam of DATA.families) {
+    const line = pts.filter((p) => p.families.includes(fam.key)).sort((p, q) => p.order[fam.key] - q.order[fam.key]);
+    el("path", { d: "M" + line.map((p) => `${fxs(p.cost)},${fys(p.risk)}`).join(" L"), fill: "none", stroke: famColor[fam.key], "stroke-width": 2 }, fr);
+    const lastp = line[line.length - 1];
+    const right = fxs(lastp.cost) > fx0 + 0.6 * (fx1 - fx0);  // near the right edge: end the label at the point
+    const below = fam.key === "total" || fam.key === "term";
+    const t = el("text", { x: fxs(lastp.cost) + (right ? 0 : 10), y: fys(lastp.risk) + (below ? 24 : -14),
+      "text-anchor": right ? "end" : "start", "font-size": 17, fill: famColor[fam.key] }, fr);
+    t.textContent = fam.label;
+  }
+  const readout = document.getElementById("frontier-readout");
+  for (const p of pts) {
+    const dot = el("circle", { cx: fxs(p.cost), cy: fys(p.risk), r: p.key === "optimal baseline" ? 6 : 4.5,
+      fill: p.key === "optimal baseline" ? col("--ink") : famColor[p.families[0]], stroke: col("--paper2"), "stroke-width": 1.5, tabindex: 0 }, fr);
+    const say = () => { readout.textContent = `${p.label}: costs ${fmt(p.cost, 2)}, leaves ${fmt(p.risk, 2)} of in-session risk (${pct(p.cut)} less than the paper's), carried risk ${pct(p.carried)} less.`; };
+    dot.addEventListener("mouseenter", say); dot.addEventListener("focus", say); dot.addEventListener("click", say);
+  }
+  const base = pts.find((p) => p.key === "optimal baseline");
+  const bt = el("text", { x: fxs(base.cost) + 12, y: fys(base.risk) - 12, "font-size": 17, fill: col("--ink") }, fr);
+  bt.textContent = "the paper's example";
+})();
+
+</script>
+</body>
+</html>
